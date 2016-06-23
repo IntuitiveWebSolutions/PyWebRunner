@@ -23,16 +23,16 @@ if os.path.exists('README.rst'):
     long_description = open('README.rst').read()
 
 setup(
-    name='WebRunner',
+    name='PyWebRunner',
     version='1.0.0',
-    url='http://github.com/IntuitiveWebSolutions/WebRunner',
+    url='http://github.com/IntuitiveWebSolutions/PyWebRunner',
     license='MIT',
     author='Scott Blevins',
     author_email='scott@britecore.com',
     description='A library that extends and improves the Selenium python library.',
     long_description= long_description+'\n'+read('CHANGES'),
     platforms='OS Independent',
-    packages=['WebRunner'],
+    packages=['PyWebRunner'],
     include_package_data=True,
     install_requires=['xvfbwrapper', 'selenium'],
     keywords=['Selenium', 'Testing'],
