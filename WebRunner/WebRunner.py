@@ -69,12 +69,15 @@ class WebRunner(object):
 
         """
         if self.xvfb:
-            print("Starting XVFB display...")
-            self.display = Xvfb(width=self.width, height=self.height, colordepth=16)
             try:
-                self.display.start()
-            except OSError:
-                print("Unable to start XVFB. Try running `./build/selenium.sh`")
+                print("Starting XVFB display...")
+                self.display = Xvfb(width=self.width, height=self.height, colordepth=16)
+                try:
+                    self.display.start()
+                except OSError:
+                    print("Unable to start XVFB. Try running `./build/selenium.sh`")
+            except EnvironmentError:
+                print("Skipping XVFB run since it is not present.")
 
         print("Starting browser ({})...".format(self.driver))
 
