@@ -22,10 +22,6 @@ class WebRunner(object):
     Generally this class aims to make the experience of using Selenium
     better overall.
 
-    The overarching goal in the JS test suites would be that a person
-    would never have to access the browser object directly to do most
-    things required for testing.
-
     Many functions take a "selector" argument.
     These can be any valid CSS selector..
     See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Getting_started/Selectors
@@ -37,7 +33,7 @@ class WebRunner(object):
     bcrunner = None
 
     def __init__(self, xvfb=True, driver='Firefox', mootools=False,
-                 timeout=90, width=1440, height=1200):
+                 timeout=90, width=1440, height=1200, firefox_version=46):
         self.driver = driver  # Firefox, PhantomJS (Must be installed...)
         self.xvfb = xvfb  # This is for headless running.
         self.mootools = mootools  # Use MooTools instead of jQuery
@@ -75,14 +71,18 @@ class WebRunner(object):
                 try:
                     self.display.start()
                 except OSError:
+                    self.xvfb = False
                     print("Unable to start XVFB. Try running `./build/selenium.sh`")
             except EnvironmentError:
                 print("Skipping XVFB run since it is not present.")
+                self.xvfb = False
 
         print("Starting browser ({})...".format(self.driver))
 
         if self.driver == "PhantomJS":
             self.browser = webdriver.PhantomJS()
+        elif self.driver == "Chrome":
+            self.browser = webdriver.Chrome()
         else:  # Otherwise, always use Firefox -- if you want another, add it
             # Get rid of the annoying start page by setting preferences
             fp = webdriver.FirefoxProfile()
