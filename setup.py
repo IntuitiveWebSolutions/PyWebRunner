@@ -24,7 +24,7 @@ if os.path.exists('README.rst'):
 
 setup(
     name='PyWebRunner',
-    version='1.3.0',
+    version='1.3.1',
     url='http://github.com/IntuitiveWebSolutions/PyWebRunner',
     license='MIT',
     author='Scott Blevins',

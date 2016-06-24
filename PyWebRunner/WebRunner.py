@@ -873,17 +873,9 @@ class WebRunner(object):
         '''
         self.wait_for_presence(selector)
 
-        js_check_bound = '''function __isEmptyObject( obj ) {
-    		var name;
-
-    		for ( name in obj ) {
-    			return false;
-    		}
-    		return true;
-    	}
-        return !__isEmptyObject(ko.dataFor(document.querySelectorAll('{0}')[0]));
-        '''
-        self.wait_for_js(js_check_bound.format(selector), **kwargs)
+        ieo_func = 'function __isEmptyObject(obj){var name;for(name in obj){return false;}return true;}'
+        js_check_bound = "return !__isEmptyObject(ko.dataFor(document.querySelectorAll('{0}')[0]));"
+        self.wait_for_js(js_check_bound.format(ieo_func, selector), **kwargs)
 
     def wait_for_url(self, url='', **kwargs):
         '''
