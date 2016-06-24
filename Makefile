@@ -7,7 +7,8 @@ test:
 	@echo "TODO: Hook up tests."
 
 doc:
-	cd docs; make html
+	cd docs
+	make html
 
 source:
 	$(PYTHON) setup.py sdist
@@ -16,7 +17,9 @@ upload:
 	$(PYTHON) setup.py register sdist upload
 
 pypi:
-	make source; make upload
+	pandoc --from=markdown --to=rst --output=README.rst README.md
+	make source
+	make upload
 
 install:
 	@echo "Installing for Python 2..."
@@ -27,6 +30,9 @@ install:
 clean:
 	$(PYTHON) setup.py clean
 	rm -rf build/ MANIFEST
+	make delpyc
+
+delpyc:
 	find . -name '*.pyc' -delete
 
 install-libs:
