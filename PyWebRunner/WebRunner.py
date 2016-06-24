@@ -30,7 +30,6 @@ class WebRunner(object):
     browser = None
     extra_verbose = False
     silence = open(os.devnull, 'w')
-    bcrunner = None
 
     def __init__(self, xvfb=True, driver='Firefox', mootools=False,
                  timeout=90, width=1440, height=1200, firefox_version=46):
@@ -172,25 +171,6 @@ class WebRunner(object):
         for element in elements:
             if element.is_displayed:
                 element.click()
-
-    def check_toast(self, text):
-        '''
-        Helper for checking toast alerts
-        Parameters
-        ==========
-        text: str
-            The text to look for inside the toast popup.
-        '''
-        toast_container = '#toast-container'
-        self.wait_for_text(toast_container, text)
-        self.click(toast_container)  # click to dismiss
-        try:
-            self.wait_for_invisible(toast_container)
-        except:
-            # Rare case when we clicked too quickly the first time,
-            # and hovering over the toast has kept it from dismissing.
-            self.click(toast_container)
-            self.wait_for_invisible(toast_container)
 
     def get_page_source(self):
         '''
@@ -665,18 +645,6 @@ class WebRunner(object):
         elif refresh_method == "js":
             self.js('window.location.reload(true);')
 
-    def clear_ajax_history(self):
-        '''
-        Clears out ajaxHistory so you can be sure the url you want to wait
-        for hasn't already been hit once.
-        '''
-        history_js = 'ajaxHistory'
-
-        if not self.mootools:
-            history_js = 'bc.' + history_js
-
-        self.js('{0}.urls = []; {0}.response = [];'.format(history_js))
-
     def js(self, js_str, *args):
         '''
         Run some JavaScript and return the result.
@@ -861,20 +829,6 @@ class WebRunner(object):
         wait = WebDriverWait(self.browser, kwargs.get('timeout') or self.timeout)
         wait.until(wait_function)
 
-    def wait_for_ajax(self, url='', **kwargs):
-        '''
-        Wait for an ajax call to have been made from the current page.
-
-        Parameters
-        ----------
-        url: str
-            The url to check for in ajax history (only for legacy pages)
-        kwargs:
-            Passed on to _wait_for
-
-        '''
-        self._wait_for(expect_url_in_ajax_history(url, self.mootools), **kwargs)
-
     def wait_for_presence(self, selector='', **kwargs):
         '''
         Wait for an element to be present. (Does not need to be visible.)
@@ -919,7 +873,16 @@ class WebRunner(object):
         '''
         self.wait_for_presence(selector)
 
-        js_check_bound = "return !$j.isEmptyObject(ko.dataFor($j('{0}')[0]));"
+        js_check_bound = '''function __isEmptyObject( obj ) {
+    		var name;
+
+    		for ( name in obj ) {
+    			return false;
+    		}
+    		return true;
+    	}
+        return !__isEmptyObject(ko.dataFor(document.querySelectorAll('{0}')[0]));
+        '''
         self.wait_for_js(js_check_bound.format(selector), **kwargs)
 
     def wait_for_url(self, url='', **kwargs):
@@ -995,22 +958,6 @@ class WebRunner(object):
 
         for match in all_matches:
             self._wait_for(invisibility_of(match), **kwargs)
-
-    def wait_for_unblockui(self, **kwargs):
-        '''
-        Wait for $.unblockUI() to take effect and clear the screen.
-        BlockUI does three layers of blocking, which is hard to detect with
-        wait_for_invisible, so we'll check the data attr it uses
-
-        Parameters
-        ----------
-        kwargs:
-            Passed on to _wait_for
-
-        '''
-        unblock_check = "return !($j(window).data('blockUI.isBlocked'));"
-        self.wait_for_js(unblock_check, **kwargs)
-        self.wait_for_all_invisible('.blockUI', **kwargs)
 
     def wait_for_js(self, js_script, **kwargs):
         '''
@@ -1129,27 +1076,6 @@ class expect_url_match(object):
 
     def __call__(self, driver):
         return re.search(self.url_check, driver.current_url)
-
-
-class expect_url_in_ajax_history(object):
-    '''Checks whether or not an ajax request has been made to the provided url. '''
-    def __init__(self, url, mootools):
-        self.url = url
-
-        if mootools:
-            self.js_to_get_history = "return ajaxHistory;"
-        else:
-            self.js_to_get_history = "return bc.ajaxHistory;"
-
-    def __call__(self, driver):
-        ajax_data = driver.execute_script(self.js_to_get_history) or {}
-        urls = ajax_data.get('urls', [])
-        responses = ajax_data.get('response', [])
-        if self.url in urls:
-            request_idx = urls.index(self.url)
-            if len(responses) > request_idx:
-                return bool(responses[request_idx])
-        return False
 
 
 class invisibility_of(object):

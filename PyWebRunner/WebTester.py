@@ -282,18 +282,6 @@ class WebTester(WebRunner, TestCase):
         elem = self.find_element(selector)
         self.assertIsNotNone(elem, '{} was not found on the page'.format(selector))
 
-    def data_id_selector(self, data_test_id):
-        '''
-        Builds a selector for getting elements tagged with data-test-id
-
-        Parameters
-        ----------
-        data_test_id: str
-            the string in the element's data-test-id attribute
-
-        '''
-        return '[data-test-id="{0}"]'.format(data_test_id)
-
     def assert_alert_present(self):
         '''
         Asserts that an alert exists.
