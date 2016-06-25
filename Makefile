@@ -7,8 +7,7 @@ test:
 	@echo "TODO: Hook up tests."
 
 doc:
-	cd docs
-	make html
+	cd docs; make html
 
 source:
 	$(PYTHON) setup.py sdist
