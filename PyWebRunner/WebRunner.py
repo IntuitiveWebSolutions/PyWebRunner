@@ -5,9 +5,12 @@ import re
 from xvfbwrapper import Xvfb
 
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import (NoSuchElementException, NoSuchWindowException,
+                                        NoAlertPresentException)
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.remote_connection import LOGGER as s_logger
 from selenium.webdriver.support.ui import Select, WebDriverWait
@@ -32,13 +35,18 @@ class WebRunner(object):
     silence = open(os.devnull, 'w')
 
     def __init__(self, xvfb=True, driver='Firefox', mootools=False,
-                 timeout=90, width=1440, height=1200, firefox_version=46):
+                 timeout=90, width=1440, height=1200, firefox_version=46,
+                 remote_capabilities='FIREFOX',
+                 command_executor='http://127.0.0.1:4444/wd/hub'):
         self.driver = driver  # Firefox, PhantomJS (Must be installed...)
         self.xvfb = xvfb  # This is for headless running.
         self.mootools = mootools  # Use MooTools instead of jQuery
         self.timeout = timeout  # Global timeout option for all wait_* functions
         self.width = width  # XVFB virtual monitor width
         self.height = height  # XVFB virtual monitor width
+
+        self.remote_capabilities = remote_capabilities
+        self.command_executor = command_executor
 
         if os.environ.get('skip_xvfb'):
             # If you set this environment variable you can
@@ -82,12 +90,34 @@ class WebRunner(object):
             self.browser = webdriver.PhantomJS()
         elif self.driver == "Chrome":
             self.browser = webdriver.Chrome()
-        else:  # Otherwise, always use Firefox -- if you want another, add it
+        elif self.driver == "Opera":
+            self.browser = webdriver.Opera()
+        elif self.driver == "Ie":
+            self.browser = webdriver.Ie()
+        elif self.driver == "Remote":
+            if isinstance(self.desired_capabilities, dict):
+                dc = self.desired_capabilities
+            else:
+                dcu = self.desired_capabilities.upper()
+
+                if dcu == 'IE':
+                    dcu = 'INTERNETEXPLORER'
+
+                dc = getattr(DesiredCapabilities, dcu)
+
+            self.browser = webdriver.Remote(
+                command_executor='http://127.0.0.1:4444/wd/hub',
+                desired_capabilities=dc
+            )
+
+        elif self.driver == 'Firefox':
             # Get rid of the annoying start page by setting preferences
             fp = webdriver.FirefoxProfile()
             fp.set_preference("browser.startup.homepage_override.mstone", "ignore")
             fp.set_preference("startup.homepage_welcome_url.additional", "about:blank")
             self.browser = webdriver.Firefox(firefox_profile=fp)
+        else:
+            raise UserWarning('No valid driver detected.')
 
     def stop(self):
         '''
@@ -836,6 +866,13 @@ class WebRunner(object):
         wait = WebDriverWait(self.browser, kwargs.get('timeout') or self.timeout)
         wait.until(wait_function)
 
+    def wait_for_alert(self, **kwargs):
+        '''
+        Shortcut for waiting for alert. If it not ends with exception, it
+        returns that alert.
+        '''
+        self._wait_for(self.alert_present, **kwargs)
+
     def wait_for_presence(self, selector='', **kwargs):
         '''
         Wait for an element to be present. (Does not need to be visible.)
@@ -1067,6 +1104,109 @@ class WebRunner(object):
             return str(self.get_element(selector).value_of_css_property('opacity')) == str(opacity)
 
         self._wait_for(partial(_wait_for_opacity, self), **kwargs)
+
+    def switch_to_window(self, window_name=None, title=None, url=None):
+        '''
+        Switch to window by name, title, or url.
+
+        Parameters
+        ----------
+        window_name: str
+            The name of the window to switch to.
+
+        title: str
+            The title of the window you wish to switch to.
+
+        url: str
+            URL of the window you want to switch to.
+
+        '''
+        if window_name:
+            self.browser.switch_to_window(window_name)
+            return
+
+        else:
+            for window_handle in self.browser.window_handles:
+                self.browser.switch_to_window(window_handle)
+
+                if title and self.browser.title == title:
+                    return
+
+                if url and self.browser.current_url == url:
+                    return
+
+        raise NoSuchWindowException('Window not found: {}, {}, {}'.format(window_name, title, url))
+
+    def close_window(self, window_name=None, title=None, url=None):
+        """
+        Close window by name, title, or url.
+
+        Parameters
+        ----------
+        window_name: str
+            The name of the window to switch to.
+
+        title: str
+            The title of the window you wish to switch to.
+
+        url: str
+            URL of the window you want to switch to.
+
+        """
+        main_window_handle = self.browser.current_window_handle
+        self.switch_to_window(window_name, title, url)
+        self.browser.close()
+        self.switch_to_window(main_window_handle)
+
+    def close_all_other_windows(self):
+        '''
+        Closes all windows except for the currently active one.
+        '''
+        main_window_handle = self.browser.current_window_handle
+        for window_handle in self.browser.window_handles:
+            if window_handle == main_window_handle:
+                continue
+
+            self.switch_to_window(window_handle)
+            self.browser.close()
+
+        self.switch_to_window(main_window_handle)
+
+    def close_alert(self, ignore_exception=False):
+        '''
+        Closes any alert that is present. Raises an exception if no alert is found.
+
+        Parameters
+        ----------
+
+        ignore_exception: bool
+            Does not throw an exception if an alert is not present.
+
+        '''
+        try:
+            alert = self.get_alert()
+            alert.accept()
+        except NoAlertPresentException:
+            if not ignore_exception:
+                raise
+
+    def get_alert(self):
+        '''
+        Returns instance of :py:obj:`~selenium.webdriver.common.alert.Alert`.
+        '''
+        return Alert(self.browser)
+
+    def alert_present(self):
+        '''
+        Checks to see if an alert is present.
+        '''
+        alert = Alert(self.browser)
+        try:
+            alert.text
+            return True
+
+        except NoAlertPresentException:
+            return False
 
 
 class expect_url_match(object):
