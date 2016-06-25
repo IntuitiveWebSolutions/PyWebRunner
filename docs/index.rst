@@ -84,11 +84,14 @@ testing.
 Documentation
 *************
 
-Wrapper
-=======
+WebRunner
+=========
 
 .. autoclass:: PyWebRunner.WebRunner
     :members:
+
+WebTester
+=========
 
 .. autoclass:: PyWebRunner.WebTester
     :members:
