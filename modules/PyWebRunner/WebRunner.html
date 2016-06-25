@@ -1,0 +1,1417 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>PyWebRunner.WebRunner &mdash; PyWebRunner  documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="PyWebRunner  documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> PyWebRunner
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <!-- Local TOC -->
+                <div class="local-toc"></div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">PyWebRunner</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>PyWebRunner.WebRunner</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for PyWebRunner.WebRunner</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">xvfbwrapper</span> <span class="kn">import</span> <span class="n">Xvfb</span>
+
+<span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span>
+<span class="kn">from</span> <span class="nn">selenium.common.exceptions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">NoSuchElementException</span><span class="p">,</span> <span class="n">NoSuchWindowException</span><span class="p">,</span>
+                                        <span class="n">NoAlertPresentException</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.common.action_chains</span> <span class="kn">import</span> <span class="n">ActionChains</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.common.alert</span> <span class="kn">import</span> <span class="n">Alert</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.common.by</span> <span class="kn">import</span> <span class="n">By</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.common.desired_capabilities</span> <span class="kn">import</span> <span class="n">DesiredCapabilities</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.common.keys</span> <span class="kn">import</span> <span class="n">Keys</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.remote.remote_connection</span> <span class="kn">import</span> <span class="n">LOGGER</span> <span class="k">as</span> <span class="n">s_logger</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.support.ui</span> <span class="kn">import</span> <span class="n">Select</span><span class="p">,</span> <span class="n">WebDriverWait</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.support</span> <span class="kn">import</span> <span class="n">expected_conditions</span> <span class="k">as</span> <span class="n">EC</span>
+
+
+<div class="viewcode-block" id="WebRunner"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner">[docs]</a><span class="k">class</span> <span class="nc">WebRunner</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    WebRunner runs an instance of Selenium and adds a lot of helpful</span>
+<span class="sd">    browser methods.</span>
+
+<span class="sd">    Generally this class aims to make the experience of using Selenium</span>
+<span class="sd">    better overall.</span>
+
+<span class="sd">    Many functions take a &quot;selector&quot; argument.</span>
+<span class="sd">    These can be any valid CSS selector..</span>
+<span class="sd">    See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Getting_started/Selectors</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Variables for configuration</span>
+    <span class="n">browser</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">extra_verbose</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">silence</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xvfb</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s1">&#39;Firefox&#39;</span><span class="p">,</span> <span class="n">mootools</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">timeout</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1440</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">1200</span><span class="p">,</span> <span class="n">firefox_version</span><span class="o">=</span><span class="mi">46</span><span class="p">,</span>
+                 <span class="n">remote_capabilities</span><span class="o">=</span><span class="s1">&#39;FIREFOX&#39;</span><span class="p">,</span>
+                 <span class="n">command_executor</span><span class="o">=</span><span class="s1">&#39;http://127.0.0.1:4444/wd/hub&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">driver</span> <span class="o">=</span> <span class="n">driver</span>  <span class="c1"># Firefox, PhantomJS (Must be installed...)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xvfb</span> <span class="o">=</span> <span class="n">xvfb</span>  <span class="c1"># This is for headless running.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mootools</span> <span class="o">=</span> <span class="n">mootools</span>  <span class="c1"># Use MooTools instead of jQuery</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>  <span class="c1"># Global timeout option for all wait_* functions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>  <span class="c1"># XVFB virtual monitor width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span>  <span class="c1"># XVFB virtual monitor width</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">remote_capabilities</span> <span class="o">=</span> <span class="n">remote_capabilities</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">command_executor</span> <span class="o">=</span> <span class="n">command_executor</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;skip_xvfb&#39;</span><span class="p">):</span>
+            <span class="c1"># If you set this environment variable you can</span>
+            <span class="c1"># run tests from your Mac.</span>
+            <span class="c1"># (XVFB won&#39;t be installed.)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xvfb</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c1"># Turn off annoying selenium logs</span>
+        <span class="n">s_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WebRunner.start"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Starts Selenium and (optionally) starts XVFB first.</span>
+
+<span class="sd">        Note:</span>
+
+<span class="sd">            XVFB is typically used with headless runs. If you do not use XVFB</span>
+<span class="sd">            and the browser you have selected has a GUI (Firefox, Chrome...)</span>
+<span class="sd">            then your browser will launch and you will be able to view the</span>
+<span class="sd">            test as it is being ran.</span>
+
+<span class="sd">            This is particularly useful for problematic test runs or when building</span>
+<span class="sd">            new tests.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xvfb</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Starting XVFB display...&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">display</span> <span class="o">=</span> <span class="n">Xvfb</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="n">colordepth</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">xvfb</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Unable to start XVFB. Try running `./build/selenium.sh`&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">EnvironmentError</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Skipping XVFB run since it is not present.&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">xvfb</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Starting browser ({})...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span> <span class="o">==</span> <span class="s2">&quot;PhantomJS&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browser</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">PhantomJS</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span> <span class="o">==</span> <span class="s2">&quot;Chrome&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browser</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">Chrome</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span> <span class="o">==</span> <span class="s2">&quot;Opera&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browser</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">Opera</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span> <span class="o">==</span> <span class="s2">&quot;Ie&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browser</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">Ie</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span> <span class="o">==</span> <span class="s2">&quot;Remote&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_capabilities</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">dc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_capabilities</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dcu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_capabilities</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">dcu</span> <span class="o">==</span> <span class="s1">&#39;IE&#39;</span><span class="p">:</span>
+                    <span class="n">dcu</span> <span class="o">=</span> <span class="s1">&#39;INTERNETEXPLORER&#39;</span>
+
+                <span class="n">dc</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">DesiredCapabilities</span><span class="p">,</span> <span class="n">dcu</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">browser</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">Remote</span><span class="p">(</span>
+                <span class="n">command_executor</span><span class="o">=</span><span class="s1">&#39;http://127.0.0.1:4444/wd/hub&#39;</span><span class="p">,</span>
+                <span class="n">desired_capabilities</span><span class="o">=</span><span class="n">dc</span>
+            <span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span> <span class="o">==</span> <span class="s1">&#39;Firefox&#39;</span><span class="p">:</span>
+            <span class="c1"># Get rid of the annoying start page by setting preferences</span>
+            <span class="n">fp</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">FirefoxProfile</span><span class="p">()</span>
+            <span class="n">fp</span><span class="o">.</span><span class="n">set_preference</span><span class="p">(</span><span class="s2">&quot;browser.startup.homepage_override.mstone&quot;</span><span class="p">,</span> <span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+            <span class="n">fp</span><span class="o">.</span><span class="n">set_preference</span><span class="p">(</span><span class="s2">&quot;startup.homepage_welcome_url.additional&quot;</span><span class="p">,</span> <span class="s2">&quot;about:blank&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browser</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">Firefox</span><span class="p">(</span><span class="n">firefox_profile</span><span class="o">=</span><span class="n">fp</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span><span class="s1">&#39;No valid driver detected.&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.stop"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Stops Selenium. Also stops XVFB if it was launched as a part of this</span>
+<span class="sd">        class run.</span>
+
+<span class="sd">        Note:</span>
+
+<span class="sd">            Anything you don&#39;t stop here will need to be cleaned up with a kill</span>
+<span class="sd">            command if you launched it outside of nosetests.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Stopping the browser...&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xvfb</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Stopping the XVFB display...&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div>
+
+    <span class="c1"># Helper functions:</span>
+<div class="viewcode-block" id="WebRunner.wait_for"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.wait_for">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait for the supplied method to return True. A simple wrapper for _wait_for().</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        method: callable</span>
+<span class="sd">                The function that determines the conditions for the wait to finish</span>
+<span class="sd">        timeout: int</span>
+<span class="sd">                Number of seconds to wait for `method` to return True</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.back"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.back">[docs]</a>    <span class="k">def</span> <span class="nf">back</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Goes one step back in the browser&#39;s history.</span>
+<span class="sd">        Just a convenient wrapper around the browser&#39;s back command</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">back</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="WebRunner.forward"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Goes one step forward in the browser&#39;s history.</span>
+<span class="sd">        Just a convenient wrapper around the browser&#39;s forward command</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">forward</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="WebRunner.click"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.click">[docs]</a>    <span class="k">def</span> <span class="nf">click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">elem</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Clicks an element.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector..</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_presence</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">scroll_to_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_clickable</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">elem</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+
+        <span class="n">elem</span><span class="o">.</span><span class="n">click</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="WebRunner.click_all"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.click_all">[docs]</a>    <span class="k">def</span> <span class="nf">click_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Clicks all elements.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector..</span>
+<span class="sd">            All matching elements will be clicked.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_elements</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">is_displayed</span><span class="p">:</span>
+                <span class="n">element</span><span class="o">.</span><span class="n">click</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="WebRunner.get_page_source"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.get_page_source">[docs]</a>    <span class="k">def</span> <span class="nf">get_page_source</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Gets the source code of the page.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">src</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">page_source</span>
+        <span class="k">return</span> <span class="n">src</span></div>
+
+<div class="viewcode-block" id="WebRunner.is_text_on_page"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.is_text_on_page">[docs]</a>    <span class="k">def</span> <span class="nf">is_text_on_page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Finds text if it is present on the page.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        text: str</span>
+<span class="sd">            The text to search for.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">src</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_page_source</span><span class="p">()</span>
+        <span class="n">src</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">text</span> <span class="ow">in</span> <span class="n">src</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.scroll_browser"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.scroll_browser">[docs]</a>    <span class="k">def</span> <span class="nf">scroll_browser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;down&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Scrolls the browser by the given amount in the specified direction.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        amount: int</span>
+<span class="sd">            number of pixels to scroll</span>
+
+<span class="sd">        direction: str</span>
+<span class="sd">            (up, down, left, right) defaults to &#39;down&#39;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;up&#39;</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">):</span>
+            <span class="n">amount</span> <span class="o">=</span> <span class="n">amount</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;up&#39;</span><span class="p">,</span> <span class="s1">&#39;down&#39;</span><span class="p">):</span>
+            <span class="n">scroll_string</span> <span class="o">=</span> <span class="s2">&quot;window.scrollBy(0, {});&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="s1">&#39;left&#39;</span><span class="p">):</span>
+            <span class="n">scroll_string</span> <span class="o">=</span> <span class="s2">&quot;window.scrollBy({}, 0);&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">js</span><span class="p">(</span><span class="n">scroll_string</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.scroll_to_element"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.scroll_to_element">[docs]</a>    <span class="k">def</span> <span class="nf">scroll_to_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">elem</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Scrolls the given element into view.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            Any valid css selector</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">elem</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+
+        <span class="c1"># Before we do any scrolling, make sure BC isn&#39;t scrolling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_invisible</span><span class="p">(</span><span class="s1">&#39;.js-scrolling&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">js</span><span class="p">(</span><span class="s2">&quot;arguments[0].scrollIntoView();&quot;</span><span class="p">,</span> <span class="n">elem</span><span class="p">)</span>
+
+        <span class="c1"># Find out if we&#39;re right on the edge of the screen</span>
+        <span class="n">w_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">get_window_size</span><span class="p">()</span>
+        <span class="n">scrolled_location</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">location_once_scrolled_into_view</span>
+        <span class="n">edge_threshold</span> <span class="o">=</span> <span class="mi">50</span>
+        <span class="n">bottom_diff</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">w_size</span><span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">scrolled_location</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">])</span>
+
+        <span class="n">scroll_direction</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">bottom_diff</span> <span class="o">&lt;</span> <span class="n">edge_threshold</span><span class="p">:</span>
+            <span class="n">scroll_direction</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">elif</span> <span class="n">scrolled_location</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">edge_threshold</span><span class="p">:</span>
+            <span class="n">scroll_direction</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span>
+
+        <span class="k">if</span> <span class="n">scroll_direction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">scroll_width</span> <span class="o">=</span> <span class="n">w_size</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span>
+            <span class="n">scroll_height</span> <span class="o">=</span> <span class="n">w_size</span><span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">js</span><span class="p">(</span><span class="s2">&quot;window.scrollBy({0}{1}, {0}{2});&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">scroll_direction</span><span class="p">,</span>
+                                                              <span class="n">scroll_width</span><span class="p">,</span>
+                                                              <span class="n">scroll_height</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_visible</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.set_select_by_text"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.set_select_by_text">[docs]</a>    <span class="k">def</span> <span class="nf">set_select_by_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">select</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Set the selected value of a select element by the visible text.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        select: str or selenium.webdriver.remote.webelement.WebElement</span>
+<span class="sd">            Any valid CSS selector or a selenium element</span>
+<span class="sd">        text: str</span>
+<span class="sd">            The visible text in the select element option. (Not the value)</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">select</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">select</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">select</span>
+
+        <span class="n">sel</span> <span class="o">=</span> <span class="n">Select</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+        <span class="n">sel</span><span class="o">.</span><span class="n">select_by_visible_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.set_select_by_value"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.set_select_by_value">[docs]</a>    <span class="k">def</span> <span class="nf">set_select_by_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">select</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Set the selected value of a select element by the value.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        select: str or selenium.webdriver.remote.webelement.WebElement</span>
+<span class="sd">            Any valid CSS selector or a selenium element</span>
+<span class="sd">        value: str</span>
+<span class="sd">            The value on the select element option. (Not the visible text)</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">select</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">select</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">select</span>
+
+        <span class="n">sel</span> <span class="o">=</span> <span class="n">Select</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+        <span class="n">sel</span><span class="o">.</span><span class="n">select_by_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.hover"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.hover">[docs]</a>    <span class="k">def</span> <span class="nf">hover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">click</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Hover over the element matched by selector and optionally click it.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            Any valid CSS selector</span>
+<span class="sd">        click: bool</span>
+<span class="sd">            Whether or not to click the element after hovering</span>
+<span class="sd">            defaults to False</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+        <span class="n">hover_action</span> <span class="o">=</span> <span class="n">ActionChains</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="p">)</span><span class="o">.</span><span class="n">move_to_element</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">click</span><span class="p">:</span>
+            <span class="n">hover_action</span><span class="o">.</span><span class="n">click</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+
+        <span class="n">hover_action</span><span class="o">.</span><span class="n">perform</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="WebRunner.get_elements"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.get_elements">[docs]</a>    <span class="k">def</span> <span class="nf">get_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Gets elements by CSS selector.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of selenium.webdriver.remote.webelement.WebElement</span>
+<span class="sd">            A list of selenium element objects.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">elems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">find_elements_by_css_selector</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">elems</span></div>
+
+<div class="viewcode-block" id="WebRunner.get_element"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.get_element">[docs]</a>    <span class="k">def</span> <span class="nf">get_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Gets element by CSS selector.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        selenium.webdriver.remote.webelement.WebElement</span>
+<span class="sd">            A selenium element object.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">find_element_by_css_selector</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">elem</span></div>
+
+<div class="viewcode-block" id="WebRunner.get_text"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.get_text">[docs]</a>    <span class="k">def</span> <span class="nf">get_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Gets text from inside of an element by CSS selector.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            The text from inside of a selenium element object.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">text</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.get_texts"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.get_texts">[docs]</a>    <span class="k">def</span> <span class="nf">get_texts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Gets all the text from all elements found by CSS selector.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of str</span>
+<span class="sd">            A list of text strings from inside of all found selenium element objects.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">elems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_elements</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+        <span class="n">texts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">text</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">elems</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">texts</span></div>
+
+<div class="viewcode-block" id="WebRunner.get_value"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.get_value">[docs]</a>    <span class="k">def</span> <span class="nf">get_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Gets value of an element by CSS selector.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            The value of a selenium element object.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">elem</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.send_key"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.send_key">[docs]</a>    <span class="k">def</span> <span class="nf">send_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">wait_for</span><span class="o">=</span><span class="s1">&#39;presence&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Sets value of an element by CSS selector.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        key: str</span>
+<span class="sd">            A str representation of a special key to send.</span>
+
+<span class="sd">            Some available keys and their string representations:</span>
+<span class="sd">            ::</span>
+<span class="sd">                ADD = u&#39;\ue025&#39;</span>
+<span class="sd">                ALT = u&#39;\ue00a&#39;</span>
+<span class="sd">                ARROW_DOWN = u&#39;\ue015&#39;</span>
+<span class="sd">                ARROW_LEFT = u&#39;\ue012&#39;</span>
+<span class="sd">                ARROW_RIGHT = u&#39;\ue014&#39;</span>
+<span class="sd">                ARROW_UP = u&#39;\ue013&#39;</span>
+<span class="sd">                BACKSPACE = u&#39;\ue003&#39;</span>
+<span class="sd">                BACK_SPACE = u&#39;\ue003&#39;</span>
+<span class="sd">                CANCEL = u&#39;\ue001&#39;</span>
+<span class="sd">                CLEAR = u&#39;\ue005&#39;</span>
+<span class="sd">                COMMAND = u&#39;\ue03d&#39;</span>
+<span class="sd">                CONTROL = u&#39;\ue009&#39;</span>
+<span class="sd">                DECIMAL = u&#39;\ue028&#39;</span>
+<span class="sd">                DELETE = u&#39;\ue017&#39;</span>
+<span class="sd">                DIVIDE = u&#39;\ue029&#39;</span>
+<span class="sd">                DOWN = u&#39;\ue015&#39;</span>
+<span class="sd">                END = u&#39;\ue010&#39;</span>
+<span class="sd">                ENTER = u&#39;\ue007&#39;</span>
+<span class="sd">                EQUALS = u&#39;\ue019&#39;</span>
+<span class="sd">                ESCAPE = u&#39;\ue00c&#39;</span>
+<span class="sd">                F1 = u&#39;\ue031&#39;</span>
+<span class="sd">                F10 = u&#39;\ue03a&#39;</span>
+<span class="sd">                F11 = u&#39;\ue03b&#39;</span>
+<span class="sd">                F12 = u&#39;\ue03c&#39;</span>
+<span class="sd">                F2 = u&#39;\ue032&#39;</span>
+<span class="sd">                F3 = u&#39;\ue033&#39;</span>
+<span class="sd">                F4 = u&#39;\ue034&#39;</span>
+<span class="sd">                F5 = u&#39;\ue035&#39;</span>
+<span class="sd">                F6 = u&#39;\ue036&#39;</span>
+<span class="sd">                F7 = u&#39;\ue037&#39;</span>
+<span class="sd">                F8 = u&#39;\ue038&#39;</span>
+<span class="sd">                F9 = u&#39;\ue039&#39;</span>
+<span class="sd">                HELP = u&#39;\ue002&#39;</span>
+<span class="sd">                HOME = u&#39;\ue011&#39;</span>
+<span class="sd">                INSERT = u&#39;\ue016&#39;</span>
+<span class="sd">                LEFT = u&#39;\ue012&#39;</span>
+<span class="sd">                LEFT_ALT = u&#39;\ue00a&#39;</span>
+<span class="sd">                LEFT_CONTROL = u&#39;\ue009&#39;</span>
+<span class="sd">                LEFT_SHIFT = u&#39;\ue008&#39;</span>
+<span class="sd">                META = u&#39;\ue03d&#39;</span>
+<span class="sd">                MULTIPLY = u&#39;\ue024&#39;</span>
+<span class="sd">                NULL = u&#39;\ue000&#39;</span>
+<span class="sd">                NUMPAD0 = u&#39;\ue01a&#39;</span>
+<span class="sd">                NUMPAD1 = u&#39;\ue01b&#39;</span>
+<span class="sd">                NUMPAD2 = u&#39;\ue01c&#39;</span>
+<span class="sd">                NUMPAD3 = u&#39;\ue01d&#39;</span>
+<span class="sd">                NUMPAD4 = u&#39;\ue01e&#39;</span>
+<span class="sd">                NUMPAD5 = u&#39;\ue01f&#39;</span>
+<span class="sd">                NUMPAD6 = u&#39;\ue020&#39;</span>
+<span class="sd">                NUMPAD7 = u&#39;\ue021&#39;</span>
+<span class="sd">                NUMPAD8 = u&#39;\ue022&#39;</span>
+<span class="sd">                NUMPAD9 = u&#39;\ue023&#39;</span>
+<span class="sd">                PAGE_DOWN = u&#39;\ue00f&#39;</span>
+<span class="sd">                PAGE_UP = u&#39;\ue00e&#39;</span>
+<span class="sd">                PAUSE = u&#39;\ue00b&#39;</span>
+<span class="sd">                RETURN = u&#39;\ue006&#39;</span>
+<span class="sd">                RIGHT = u&#39;\ue014&#39;</span>
+<span class="sd">                SEMICOLON = u&#39;\ue018&#39;</span>
+<span class="sd">                SEPARATOR = u&#39;\ue026&#39;</span>
+<span class="sd">                SHIFT = u&#39;\ue008&#39;</span>
+<span class="sd">                SPACE = u&#39;\ue00d&#39;</span>
+<span class="sd">                SUBTRACT = u&#39;\ue027&#39;</span>
+<span class="sd">                TAB = u&#39;\ue004&#39;</span>
+<span class="sd">                UP = u&#39;\ue013&#39;</span>
+
+<span class="sd">        kwargs:</span>
+<span class="sd">            passed on to wait_for_*</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_presence_or_visible</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">wait_for</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">Keys</span><span class="p">,</span> <span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()):</span>
+            <span class="n">elem</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">Keys</span><span class="p">,</span> <span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()))</span></div>
+
+<div class="viewcode-block" id="WebRunner.set_value"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.set_value">[docs]</a>    <span class="k">def</span> <span class="nf">set_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">clear</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blur</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Sets value of an element by CSS selector.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        value: str</span>
+<span class="sd">            The value to set on the element matched by the selector.</span>
+
+<span class="sd">        clear: bool</span>
+<span class="sd">            Whether or not we should clear the element&#39;s value first.</span>
+<span class="sd">            If false, value will be appended to the current value of the element.</span>
+
+<span class="sd">        blur: bool</span>
+<span class="sd">            Whether or not we should blur the element after setting the value.</span>
+<span class="sd">            Defaults to True</span>
+
+<span class="sd">        kwargs:</span>
+<span class="sd">            passed on to wait_for_visible</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_visible</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">tag_name</span> <span class="o">==</span> <span class="s1">&#39;select&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_select_by_value</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">clear</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+            <span class="n">elem</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">blur</span><span class="p">:</span>
+            <span class="n">elem</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="n">Keys</span><span class="o">.</span><span class="n">TAB</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.set_selectize"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.set_selectize">[docs]</a>    <span class="k">def</span> <span class="nf">set_selectize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Sets visible value of a selectize control based on the &quot;selectized&quot; element.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        value: str</span>
+<span class="sd">            The value to fill the selectize input with.</span>
+<span class="sd">            (Visible value, not necessarily the same as the stored value.</span>
+<span class="sd">             This way, we mimick the user&#39;s interaction as closely as possible.)</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">keys_to_send</span> <span class="o">=</span> <span class="n">Keys</span><span class="o">.</span><span class="n">BACK_SPACE</span> <span class="o">+</span> <span class="n">value</span>
+        <span class="n">selectize_control</span> <span class="o">=</span> <span class="n">selector</span> <span class="o">+</span> <span class="s1">&#39; + .selectize-control&#39;</span>
+        <span class="n">selectize_input</span> <span class="o">=</span> <span class="n">selectize_control</span> <span class="o">+</span> <span class="s1">&#39; input&#39;</span>
+        <span class="c1"># Make sure the selectize control is active so the input is visible</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">click</span><span class="p">(</span><span class="n">selectize_control</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">selectize_input</span><span class="p">,</span> <span class="n">keys_to_send</span><span class="p">,</span> <span class="n">clear</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.clear"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Clears value of an element by CSS selector.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+        <span class="n">elem</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="WebRunner.current_url"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.current_url">[docs]</a>    <span class="k">def</span> <span class="nf">current_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Gets current URL of the browser object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            The curent URL.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">current_url</span></div>
+
+<div class="viewcode-block" id="WebRunner.go"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.go">[docs]</a>    <span class="k">def</span> <span class="nf">go</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Go to a web address. (self.browser should be available, but not needed.)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        address: str</span>
+<span class="sd">            The address (URL)</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">address</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.find_element"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.find_element">[docs]</a>    <span class="k">def</span> <span class="nf">find_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Finds an element by CSS selector.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        selenium.webdriver.remote.webelement.WebElement or None</span>
+<span class="sd">            Returns an element or nothing at all</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">find_element_by_css_selector</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">NoSuchElementException</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="n">elem</span></div>
+
+<div class="viewcode-block" id="WebRunner.find_elements"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.find_elements">[docs]</a>    <span class="k">def</span> <span class="nf">find_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Finds elements by CSS selector.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of selenium.webdriver.remote.webelement.WebElement or list</span>
+<span class="sd">            Returns a list of elements or empty list</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">elems</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">elems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">find_elements_by_css_selector</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">NoSuchElementException</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="n">elems</span></div>
+
+<div class="viewcode-block" id="WebRunner.refresh_page"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.refresh_page">[docs]</a>    <span class="k">def</span> <span class="nf">refresh_page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">refresh_method</span><span class="o">=</span><span class="s2">&quot;url&quot;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Refreshes the current page</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        method: str</span>
+<span class="sd">            The method used to refresh the page.</span>
+<span class="sd">            Defaults to &quot;url&quot; which navigates to the current_url</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">refresh_method</span> <span class="o">==</span> <span class="s2">&quot;url&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">current_url</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">refresh_method</span> <span class="o">==</span> <span class="s2">&quot;js&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">js</span><span class="p">(</span><span class="s1">&#39;window.location.reload(true);&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.js"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.js">[docs]</a>    <span class="k">def</span> <span class="nf">js</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">js_str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Run some JavaScript and return the result.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        js_str: str</span>
+<span class="sd">            A string containing some valid JavaScript to be ran on the page.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str or bool or list or dict</span>
+<span class="sd">            Returns the result of the JS evaluation.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">execute_script</span><span class="p">(</span><span class="n">js_str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_find_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Find elements using a name, css selector, class, xpath, or id.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        row: dict</span>
+<span class="sd">            A dict where the key is the search method</span>
+<span class="sd">            and the value is what is passed to Selenium</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list of selenium.webdriver.remote.webelement.WebElement</span>
+<span class="sd">            A list of selenium element objects.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">elems</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;name&#39;</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+                <span class="n">elems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">find_elements_by_name</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="s1">&#39;css&#39;</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+                <span class="n">elems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">find_elements_by_css_selector</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;css&#39;</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="s1">&#39;class&#39;</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+                <span class="n">elems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">find_elements_by_class_name</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="s1">&#39;xpath&#39;</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+                <span class="n">elems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">find_elements_by_xpath</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;xpath&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">elems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">find_elements_by_id</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="n">NoSuchElementException</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">elems</span>
+
+<div class="viewcode-block" id="WebRunner.save_page_source"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.save_page_source">[docs]</a>    <span class="k">def</span> <span class="nf">save_page_source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;/tmp/selenium-page-source.html&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Saves the raw page html in it&#39;s current state. Takes a path as a parameter.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path: str</span>
+<span class="sd">            Defaults to: /tmp/selenium-page-source.html</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">page_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">page_source</span>
+
+        <span class="n">out_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">page_source</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">))</span>
+        <span class="n">out_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="WebRunner.screenshot"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.screenshot">[docs]</a>    <span class="k">def</span> <span class="nf">screenshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Saves a screenshot. Takes a path as a parameter.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path: str</span>
+<span class="sd">            Defaults to: /tmp/selenium-screenshot.png</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/tmp/selenium-screenshot.png&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.fill"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.fill">[docs]</a>    <span class="k">def</span> <span class="nf">fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form_dict</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Fills a form using Selenium. This helper will save a lot of time</span>
+<span class="sd">        and effort because working with form data can be tricky and gross.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        form_dict: dict</span>
+<span class="sd">            Takes in a dict where the keys are CSS selectors</span>
+<span class="sd">            and the values are what will be applied to them.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">form_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">form_dict</span><span class="p">:</span>
+            <span class="n">form_list</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;css&#39;</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">form_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fill_form</span><span class="p">(</span><span class="n">form_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.fill_form"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.fill_form">[docs]</a>    <span class="k">def</span> <span class="nf">fill_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form_list</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        This helper can be used directly but it is much easier</span>
+<span class="sd">        to use the &quot;fill&quot; method instead.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        form_list: list of dict</span>
+<span class="sd">            A list of dictionaries where the key is the search method</span>
+<span class="sd">            and the value is what is passed to Selenium</span>
+<span class="sd">        clear: bool</span>
+<span class="sd">            True/False value indicating whether or not to clear out</span>
+<span class="sd">            the input currently in any text inputs.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">form_list</span><span class="p">:</span>
+            <span class="n">elems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_elements</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="c1"># If the length is greater than 1, it should be a checkbox or radio.</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elems</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># Get the element type we are dealing with.</span>
+                <span class="n">tag_name</span> <span class="o">=</span> <span class="n">elems</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tag_name</span>
+                <span class="n">tag_type</span> <span class="o">=</span> <span class="n">elems</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">tag_type</span> <span class="o">==</span> <span class="s1">&#39;radio&#39;</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">elems</span><span class="p">:</span>
+                        <span class="n">tag_value</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">tag_value</span> <span class="o">==</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]:</span>
+                            <span class="c1"># Select the right radio button</span>
+                            <span class="n">elem</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+
+                <span class="k">elif</span> <span class="n">tag_type</span> <span class="o">==</span> <span class="s1">&#39;checkbox&#39;</span><span class="p">:</span>
+                    <span class="c1"># We need to handle checkboxes differently than radio buttons.</span>
+                    <span class="c1"># (More than one can be checked so we must handle that.)</span>
+                    <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">elems</span><span class="p">:</span>
+                        <span class="n">tag_value</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+                            <span class="c1"># Put single items in a list so we can loop.</span>
+                            <span class="n">row</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]]</span>
+
+                        <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]:</span>
+                            <span class="c1"># Loop over all the values and check the ones we want.</span>
+                            <span class="c1"># Un-check the ones we don&#39;t want.</span>
+                            <span class="k">if</span> <span class="n">tag_value</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="ow">not</span> <span class="n">elem</span><span class="o">.</span><span class="n">is_selected</span><span class="p">():</span>
+                                    <span class="n">elem</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">is_selected</span><span class="p">():</span>
+                                    <span class="k">if</span> <span class="n">tag_value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]:</span>
+                                        <span class="n">elem</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">elems</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># Handle every other form element type since they are much</span>
+                <span class="c1"># more straightforward.</span>
+                <span class="n">elem</span> <span class="o">=</span> <span class="n">elems</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">tag_name</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">tag_name</span>
+
+                <span class="k">if</span> <span class="n">tag_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;input&#39;</span><span class="p">,</span> <span class="s1">&#39;textarea&#39;</span><span class="p">):</span>
+                    <span class="c1"># File upload needs a path to a file.</span>
+                    <span class="n">elem</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
+
+                <span class="k">elif</span> <span class="n">tag_name</span> <span class="o">==</span> <span class="s1">&#39;select&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">set_select_by_text</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;{} Element not found.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">row</span><span class="p">))</span></div>
+
+    <span class="c1"># Custom asynchronous wait helpers</span>
+    <span class="k">def</span> <span class="nf">_wait_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wait_function</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wrapper to handle the boilerplate involved with a custom wait.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        wait_function: func</span>
+<span class="sd">            This can be a builtin selenium wait_for class,</span>
+<span class="sd">            a special wait_for class that implements the __call__ method,</span>
+<span class="sd">            or a lambda function</span>
+<span class="sd">        timeout: int</span>
+<span class="sd">            The number of seconds to wait for the given condition</span>
+<span class="sd">            before throwing an error.</span>
+<span class="sd">            Overrides WebRunner.timeout</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">wait</span> <span class="o">=</span> <span class="n">WebDriverWait</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="n">wait</span><span class="o">.</span><span class="n">until</span><span class="p">(</span><span class="n">wait_function</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WebRunner.wait_for_alert"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.wait_for_alert">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_alert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Shortcut for waiting for alert. If it not ends with exception, it</span>
+<span class="sd">        returns that alert.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alert_present</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.wait_for_presence"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.wait_for_presence">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_presence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait for an element to be present. (Does not need to be visible.)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        kwargs:</span>
+<span class="sd">            Passed on to _wait_for</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for</span><span class="p">(</span><span class="n">EC</span><span class="o">.</span><span class="n">presence_of_element_located</span><span class="p">((</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="n">selector</span><span class="p">))</span> <span class="ow">or</span>
+                       <span class="n">EC</span><span class="o">.</span><span class="n">presence_of_elements_located</span><span class="p">((</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="n">selector</span><span class="p">)),</span>
+                       <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.wait_for_clickable"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.wait_for_clickable">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_clickable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait for an element to be clickable.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        kwargs:</span>
+<span class="sd">            Passed on to _wait_for</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for</span><span class="p">(</span><span class="n">EC</span><span class="o">.</span><span class="n">element_to_be_clickable</span><span class="p">((</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="n">selector</span><span class="p">)),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.wait_for_ko"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.wait_for_ko">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_ko</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait for an element to be bound by Knockout JS.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+<span class="sd">        kwargs:</span>
+<span class="sd">            Passed on to _wait_for</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_presence</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+
+        <span class="n">ieo_func</span> <span class="o">=</span> <span class="s1">&#39;function __isEmptyObject(obj){var name;for(name in obj){return false;}return true;}&#39;</span>
+        <span class="n">js_check_bound</span> <span class="o">=</span> <span class="s2">&quot;{0}return !__isEmptyObject(ko.dataFor(document.querySelectorAll(&#39;{1}&#39;)[0]));&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_js</span><span class="p">(</span><span class="n">js_check_bound</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ieo_func</span><span class="p">,</span> <span class="n">selector</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.wait_for_url"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.wait_for_url">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait for the current url to match the given url.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        url: str</span>
+<span class="sd">            A regular expression to match against the current url</span>
+<span class="sd">        kwargs:</span>
+<span class="sd">            Passed on to _wait_for</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for</span><span class="p">(</span><span class="n">expect_url_match</span><span class="p">(</span><span class="n">url</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.wait_for_visible"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.wait_for_visible">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_visible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait for an element to be visible.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        kwargs:</span>
+<span class="sd">            Passed on to _wait_for</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for</span><span class="p">(</span><span class="n">EC</span><span class="o">.</span><span class="n">visibility_of_element_located</span><span class="p">((</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="n">selector</span><span class="p">)),</span>
+                       <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_wait_for_presence_or_visible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">wait_for</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wrapper around wait_for_presence and wait_for_visible that takes a</span>
+<span class="sd">        string to decide which one to use.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">wait_for</span> <span class="o">==</span> <span class="s1">&#39;presence&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_presence</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">wait_for</span> <span class="o">==</span> <span class="s1">&#39;visible&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_visible</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WebRunner.wait_for_invisible"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.wait_for_invisible">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_invisible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait for an element to be invisible.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        kwargs:</span>
+<span class="sd">            Passed on to _wait_for</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for</span><span class="p">(</span><span class="n">EC</span><span class="o">.</span><span class="n">invisibility_of_element_located</span><span class="p">((</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="n">selector</span><span class="p">)),</span>
+                       <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.wait_for_all_invisible"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.wait_for_all_invisible">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_all_invisible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait for all elements that match selector to be invisible.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        kwargs:</span>
+<span class="sd">            Passed on to _wait_for</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">all_matches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_elements</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">all_matches</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for</span><span class="p">(</span><span class="n">invisibility_of</span><span class="p">(</span><span class="n">match</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.wait_for_js"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.wait_for_js">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_js</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">js_script</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait for the given JS to return true.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        js_script: str</span>
+<span class="sd">            valid JS that will run in the page dom</span>
+
+<span class="sd">        kwargs:</span>
+<span class="sd">            passed on to _wait_for</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for</span><span class="p">(</span><span class="k">lambda</span> <span class="n">browser</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">browser</span><span class="o">.</span><span class="n">execute_script</span><span class="p">(</span><span class="n">js_script</span><span class="p">)),</span>
+                       <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.wait_for_text"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.wait_for_text">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait for an element to contain a specific string.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        text: str</span>
+<span class="sd">            The string to look for. This must be precise.</span>
+<span class="sd">            (Case, punctuation, UTF characters... etc.)</span>
+<span class="sd">        kwargs:</span>
+<span class="sd">            Passed on to _wait_for</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for</span><span class="p">(</span><span class="n">EC</span><span class="o">.</span><span class="n">text_to_be_present_in_element</span><span class="p">((</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="n">selector</span><span class="p">),</span>
+                                                        <span class="n">text</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.wait_for_selected"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.wait_for_selected">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">selected</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait for an element (checkbox/radio) to be selected.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        selected: bool</span>
+<span class="sd">            Whether or not the element should be selected. Default True</span>
+
+<span class="sd">        kwargs:</span>
+<span class="sd">            Passed on to _wait_for</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for</span><span class="p">(</span><span class="n">EC</span><span class="o">.</span><span class="n">element_located_selection_state_to_be</span><span class="p">((</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="n">selector</span><span class="p">),</span>
+                                                                <span class="n">selected</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.wait_for_title"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.wait_for_title">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait for the page title to match given title.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        title: str</span>
+<span class="sd">            The page title to wait for</span>
+
+<span class="sd">        kwargs:</span>
+<span class="sd">            Passed on to _wait_for</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for</span><span class="p">(</span><span class="n">EC</span><span class="o">.</span><span class="n">title_is</span><span class="p">(</span><span class="n">title</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.wait_for_value"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.wait_for_value">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait for an element to contain a specific string.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        value: str</span>
+<span class="sd">            The string to look for. This must be precise.</span>
+<span class="sd">            (Case, punctuation, UTF characters... etc.)</span>
+<span class="sd">        kwargs:</span>
+<span class="sd">            Passed on to _wait_for</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for</span><span class="p">(</span><span class="n">EC</span><span class="o">.</span><span class="n">text_to_be_present_in_element_value</span><span class="p">((</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="n">selector</span><span class="p">),</span>
+                                                              <span class="n">value</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.wait_for_opacity"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.wait_for_opacity">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_opacity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">opacity</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait for an element to reach a specific opacity.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        opacity: float</span>
+<span class="sd">            The opacity to wait for.</span>
+
+<span class="sd">        kwargs:</span>
+<span class="sd">            Passed on to _wait_for</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">def</span> <span class="nf">_wait_for_opacity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">browser</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span><span class="o">.</span><span class="n">value_of_css_property</span><span class="p">(</span><span class="s1">&#39;opacity&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">opacity</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">_wait_for_opacity</span><span class="p">,</span> <span class="bp">self</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.switch_to_window"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.switch_to_window">[docs]</a>    <span class="k">def</span> <span class="nf">switch_to_window</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Switch to window by name, title, or url.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        window_name: str</span>
+<span class="sd">            The name of the window to switch to.</span>
+
+<span class="sd">        title: str</span>
+<span class="sd">            The title of the window you wish to switch to.</span>
+
+<span class="sd">        url: str</span>
+<span class="sd">            URL of the window you want to switch to.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">window_name</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">switch_to_window</span><span class="p">(</span><span class="n">window_name</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">window_handle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">window_handles</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">switch_to_window</span><span class="p">(</span><span class="n">window_handle</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">title</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">title</span> <span class="o">==</span> <span class="n">title</span><span class="p">:</span>
+                    <span class="k">return</span>
+
+                <span class="k">if</span> <span class="n">url</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">current_url</span> <span class="o">==</span> <span class="n">url</span><span class="p">:</span>
+                    <span class="k">return</span>
+
+        <span class="k">raise</span> <span class="n">NoSuchWindowException</span><span class="p">(</span><span class="s1">&#39;Window not found: {}, {}, {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">window_name</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">url</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="WebRunner.close_window"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.close_window">[docs]</a>    <span class="k">def</span> <span class="nf">close_window</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Close window by name, title, or url.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        window_name: str</span>
+<span class="sd">            The name of the window to switch to.</span>
+
+<span class="sd">        title: str</span>
+<span class="sd">            The title of the window you wish to switch to.</span>
+
+<span class="sd">        url: str</span>
+<span class="sd">            URL of the window you want to switch to.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">main_window_handle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">current_window_handle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">switch_to_window</span><span class="p">(</span><span class="n">window_name</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">switch_to_window</span><span class="p">(</span><span class="n">main_window_handle</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.close_all_other_windows"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.close_all_other_windows">[docs]</a>    <span class="k">def</span> <span class="nf">close_all_other_windows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Closes all windows except for the currently active one.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">main_window_handle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">current_window_handle</span>
+        <span class="k">for</span> <span class="n">window_handle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">window_handles</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">window_handle</span> <span class="o">==</span> <span class="n">main_window_handle</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">switch_to_window</span><span class="p">(</span><span class="n">window_handle</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">switch_to_window</span><span class="p">(</span><span class="n">main_window_handle</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.close_alert"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.close_alert">[docs]</a>    <span class="k">def</span> <span class="nf">close_alert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore_exception</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Closes any alert that is present. Raises an exception if no alert is found.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        ignore_exception: bool</span>
+<span class="sd">            Does not throw an exception if an alert is not present.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">alert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_alert</span><span class="p">()</span>
+            <span class="n">alert</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">NoAlertPresentException</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_exception</span><span class="p">:</span>
+                <span class="k">raise</span></div>
+
+<div class="viewcode-block" id="WebRunner.get_alert"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.get_alert">[docs]</a>    <span class="k">def</span> <span class="nf">get_alert</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns instance of :py:obj:`~selenium.webdriver.common.alert.Alert`.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">Alert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.alert_present"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.alert_present">[docs]</a>    <span class="k">def</span> <span class="nf">alert_present</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Checks to see if an alert is present.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">alert</span> <span class="o">=</span> <span class="n">Alert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">alert</span><span class="o">.</span><span class="n">text</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">except</span> <span class="n">NoAlertPresentException</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">expect_url_match</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Checks for the current url to match. &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url_check</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url_check</span> <span class="o">=</span> <span class="n">url_check</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">driver</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url_check</span><span class="p">,</span> <span class="n">driver</span><span class="o">.</span><span class="n">current_url</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">invisibility_of</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Checks for a known element to be invisible.</span>
+<span class="sd">        Much like the builtin visibility_of:</span>
+<span class="sd">        https://github.com/SeleniumHQ/selenium/search?utf8=%E2%9C%93&amp;q=visibility_of</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element</span> <span class="o">=</span> <span class="n">element</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">driver</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">is_displayed</span><span class="p">())</span>
+        <span class="k">except</span> <span class="n">EC</span><span class="o">.</span><span class="n">StaleElementReferenceException</span><span class="p">:</span>
+            <span class="c1"># If the element reference is no longer valid,</span>
+            <span class="c1"># it was likely removed from the dom and is no longer visible</span>
+            <span class="k">return</span> <span class="bp">True</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../static/jquery.js"></script>
+      <script type="text/javascript" src="../../static/underscore.js"></script>
+      <script type="text/javascript" src="../../static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
