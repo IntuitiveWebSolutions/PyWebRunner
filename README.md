@@ -1,6 +1,8 @@
 # WebRunner
 A helpful wrapper for Selenium
 
+[![Build Status](https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner.svg?branch=master)](https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner)
+
 Full documentation can be located here: [https://intuitivewebsolutions.github.io/PyWebRunner](https://intuitivewebsolutions.github.io/PyWebRunner)
 
 You could use WebRunner to scrape a website, automate web tasks, or anything else you could imagine. It is easy to initialize and use.
