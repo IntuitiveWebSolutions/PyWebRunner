@@ -1,4 +1,3 @@
-import os
 from time import sleep
 from unittest import TestCase
 from selenium.common.exceptions import NoSuchElementException, NoAlertPresentException
@@ -6,7 +5,7 @@ from selenium.common.exceptions import NoSuchElementException, NoAlertPresentExc
 from PyWebRunner import WebRunner
 
 
-class WebTester(WebRunner, TestCase):
+class WebTester(WebRunner):
     """
     A class that extends WebRunner and TestCase This class adds
     some additional testing capabilities and shortcuts to
@@ -80,7 +79,7 @@ class WebTester(WebRunner, TestCase):
         self._wait_for_presence_or_visible(selector, wait_for, **kwargs)
 
         el = self.get_element(selector)
-        self.assertIn(cls, el.get_attribute('class'))
+        assert cls in el.get_attribute('class')
 
     def assert_element_not_has_class(self, selector, cls, wait_for='presence', **kwargs):
         '''
@@ -100,7 +99,7 @@ class WebTester(WebRunner, TestCase):
         self._wait_for_presence_or_visible(selector, wait_for, **kwargs)
 
         el = self.get_element(selector)
-        self.assertNotIn(cls, el.get_attribute('class'))
+        assert cls not in el.get_attribute('class')
 
     def assert_exists(self, selector):
         '''
@@ -119,7 +118,7 @@ class WebTester(WebRunner, TestCase):
             exists = False
 
         msg = 'An element could not be found for the selector: {}'.format(selector)
-        self.assertTrue(exists, msg)
+        assert exists == True, msg
 
     def assert_url(self, url):
         '''
@@ -132,8 +131,7 @@ class WebTester(WebRunner, TestCase):
 
         '''
         current_url = self.browser.current_url
-        self.assertEqual(current_url, url,
-                         'The URL was: {} instead of {}'.format(current_url, url))
+        assert current_url == url, 'The URL was: {0} instead of {1}'.format(current_url, url)
 
     def assert_text_in_page(self, text):
         '''
@@ -145,8 +143,7 @@ class WebTester(WebRunner, TestCase):
             Text to search for.
 
         '''
-        self.assertTrue(self.is_text_on_page(text),
-                        '{} was not present in the source code.'.format(text))
+        assert self.is_text_on_page(text) == True, '{} was not present in the source code.'.format(text)
 
     def assert_text_not_in_page(self, text):
         '''
@@ -158,8 +155,7 @@ class WebTester(WebRunner, TestCase):
             Text to search for.
 
         '''
-        self.assertFalse(self.is_text_on_page(text),
-                         '{} was present in the source code.'.format(text))
+        assert self.is_text_on_page(text) == False, '{} was present in the source code.'.format(text)
 
     def assert_not_visible(self, selector):
         '''
@@ -175,8 +171,7 @@ class WebTester(WebRunner, TestCase):
         self.wait_for_presence(selector)
 
         elem = self.get_element(selector)
-        self.assertFalse(elem.is_displayed(),
-                         'The {} element was visible.'.format(selector))
+        assert elem.is_displayed() == False, 'The {} element was visible.'.format(selector)
 
     def assert_visible(self, selector, **kwargs):
         '''
@@ -193,8 +188,7 @@ class WebTester(WebRunner, TestCase):
         self.wait_for_presence(selector, **kwargs)
 
         elem = self.get_element(selector)
-        self.assertTrue(elem.is_displayed(),
-                        'The {} element was not visible.'.format(selector))
+        assert elem.is_displayed() == True, 'The {} element was not visible.'.format(selector)
 
     def assert_value_of_element(self, selector, value, wait_for='presence', **kwargs):
         '''
@@ -215,7 +209,7 @@ class WebTester(WebRunner, TestCase):
         self._wait_for_presence_or_visible(selector, wait_for, **kwargs)
 
         sval = self.get_value(selector)
-        self.assertEqual(value, sval)
+        assert value == sval
 
     def assert_text_in_elements(self, selector, text, wait_for='presence', **kwargs):
         '''
@@ -237,7 +231,7 @@ class WebTester(WebRunner, TestCase):
         self._wait_for_presence_or_visible(selector, wait_for, **kwargs)
 
         texts = self.get_texts(selector)
-        self.assertIn(text, texts, 'The string "{}" was not found in the selector: {}'.format(text, selector))
+        assert text in texts, 'The string "{}" was not found in the selector: {}'.format(text, selector)
 
     def assert_text_in_element(self, selector, text, wait_for='presence', **kwargs):
         '''
@@ -259,8 +253,7 @@ class WebTester(WebRunner, TestCase):
         self._wait_for_presence_or_visible(selector, wait_for, **kwargs)
 
         element_value = self.get_text(selector)
-        self.assertTrue(any([text in element_value, text == element_value]),
-                        "{} not in or equal to {}".format(text, element_value))
+        assert any([text in element_value, text == element_value]) == True, "{} not in or equal to {}".format(text, element_value)
 
     def assert_element_contains_text(self, selector, text, wait_for='presence', **kwargs):
         '''
@@ -281,7 +274,7 @@ class WebTester(WebRunner, TestCase):
         self._wait_for_presence_or_visible(selector, wait_for, **kwargs)
 
         text_value = self.get_text(selector)
-        self.assertTrue(text in text_value, "{} in in {}".format(text, text_value))
+        assert text in text_value, "{} in in {}".format(text, text_value)
 
     def assert_not_found(self, selector):
         '''
@@ -294,7 +287,7 @@ class WebTester(WebRunner, TestCase):
 
         '''
         elem = self.find_element(selector)
-        self.assertIsNone(elem, '{} was unexpectedly found on the page'.format(selector))
+        assert elem is None, '{} was unexpectedly found on the page'.format(selector)
 
     def assert_found(self, selector):
         '''
@@ -307,7 +300,7 @@ class WebTester(WebRunner, TestCase):
 
         '''
         elem = self.find_element(selector)
-        self.assertIsNotNone(elem, '{} was not found on the page'.format(selector))
+        assert elem is not None, '{} was not found on the page'.format(selector)
 
     def assert_alert_present(self):
         '''
@@ -318,11 +311,11 @@ class WebTester(WebRunner, TestCase):
         msg = 'An alert was not present but was expected.'
 
         try:
-            atext = alert.text
+            atext = bool(alert.text)
         except NoAlertPresentException:
             atext = False
 
-        self.assertTrue(atext, msg)
+        assert atext == True, msg
 
     def assert_alert_not_present(self):
         '''
@@ -330,7 +323,12 @@ class WebTester(WebRunner, TestCase):
 
         '''
         def check_text(alert):
-            alert.text
+            bool(alert.text)
 
         alert = self.browser.switch_to_alert()
-        self.assertRaises(NoAlertPresentException, check_text, alert)
+        present = False
+        try:
+            present = bool(alert.text)
+        except NoAlertPresentException:
+            pass
+        assert present == False

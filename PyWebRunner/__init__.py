@@ -1,2 +1,2 @@
-from WebRunner import WebRunner
-from WebTester import WebTester
+from PyWebRunner.WebRunner import WebRunner
+from PyWebRunner.WebTester import WebTester

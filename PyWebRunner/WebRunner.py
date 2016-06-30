@@ -1,4 +1,5 @@
 from functools import partial
+import base64
 import logging
 import os
 import re
@@ -49,9 +50,6 @@ class WebRunner(object):
         self.command_executor = command_executor
 
         if os.environ.get('skip_xvfb'):
-            # If you set this environment variable you can
-            # run tests from your Mac.
-            # (XVFB won't be installed.)
             self.xvfb = False
 
         # Turn off annoying selenium logs
@@ -276,8 +274,8 @@ class WebRunner(object):
             scroll_direction = '-'
 
         if scroll_direction is not None:
-            scroll_width = w_size['width']/2
-            scroll_height = w_size['height']/2
+            scroll_width = w_size['width'] / 2
+            scroll_height = w_size['height'] / 2
             self.js("window.scrollBy({0}{1}, {0}{2});".format(scroll_direction,
                                                               scroll_width,
                                                               scroll_height))
@@ -761,6 +759,14 @@ class WebRunner(object):
         if not path:
             path = '/tmp/selenium-screenshot.png'
 
+        # if isinstance(self.browser, webdriver.remote.webdriver.WebDriver):
+        #     # Get base64 screenshot from the remote.
+        #     base64_data = self.browser.get_screenshot_as_base64()
+        #     ss_data = base64.decodestring(base64_data)
+        #     with open(path, 'w') as f:
+        #         f.write(ss_data)
+        #         f.close()
+        # else:
         self.browser.save_screenshot(path)
 
     def fill(self, form_dict):
