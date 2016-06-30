@@ -121,15 +121,14 @@
            <div itemprop="articleBody">
             
   <h1>Source code for PyWebRunner.WebTester</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+<span></span><span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
 <span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TestCase</span>
 <span class="kn">from</span> <span class="nn">selenium.common.exceptions</span> <span class="kn">import</span> <span class="n">NoSuchElementException</span><span class="p">,</span> <span class="n">NoAlertPresentException</span>
 
 <span class="kn">from</span> <span class="nn">PyWebRunner</span> <span class="kn">import</span> <span class="n">WebRunner</span>
 
 
-<div class="viewcode-block" id="WebTester"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester">[docs]</a><span class="k">class</span> <span class="nc">WebTester</span><span class="p">(</span><span class="n">WebRunner</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="WebTester"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester">[docs]</a><span class="k">class</span> <span class="nc">WebTester</span><span class="p">(</span><span class="n">WebRunner</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class that extends WebRunner and TestCase This class adds</span>
 <span class="sd">    some additional testing capabilities and shortcuts to</span>
@@ -203,7 +202,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_presence_or_visible</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">wait_for</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="n">el</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertIn</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">el</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s1">&#39;class&#39;</span><span class="p">))</span></div>
+        <span class="k">assert</span> <span class="n">cls</span> <span class="ow">in</span> <span class="n">el</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s1">&#39;class&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="WebTester.assert_element_not_has_class"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_element_not_has_class">[docs]</a>    <span class="k">def</span> <span class="nf">assert_element_not_has_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="n">wait_for</span><span class="o">=</span><span class="s1">&#39;presence&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -223,7 +222,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_presence_or_visible</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">wait_for</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="n">el</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertNotIn</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">el</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s1">&#39;class&#39;</span><span class="p">))</span></div>
+        <span class="k">assert</span> <span class="n">cls</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">el</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s1">&#39;class&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="WebTester.assert_exists"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_exists">[docs]</a>    <span class="k">def</span> <span class="nf">assert_exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -242,7 +241,7 @@
             <span class="n">exists</span> <span class="o">=</span> <span class="bp">False</span>
 
         <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;An element could not be found for the selector: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span></div>
+        <span class="k">assert</span> <span class="n">exists</span> <span class="o">==</span> <span class="bp">True</span><span class="p">,</span> <span class="n">msg</span></div>
 
 <div class="viewcode-block" id="WebTester.assert_url"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_url">[docs]</a>    <span class="k">def</span> <span class="nf">assert_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -255,8 +254,7 @@
 
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">current_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">current_url</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">current_url</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span>
-                         <span class="s1">&#39;The URL was: {} instead of {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">current_url</span><span class="p">,</span> <span class="n">url</span><span class="p">))</span></div>
+        <span class="k">assert</span> <span class="n">current_url</span> <span class="o">==</span> <span class="n">url</span><span class="p">,</span> <span class="s1">&#39;The URL was: {0} instead of {1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">current_url</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="WebTester.assert_text_in_page"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_text_in_page">[docs]</a>    <span class="k">def</span> <span class="nf">assert_text_in_page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -268,8 +266,7 @@
 <span class="sd">            Text to search for.</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">is_text_on_page</span><span class="p">(</span><span class="n">text</span><span class="p">),</span>
-                        <span class="s1">&#39;{} was not present in the source code.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">text</span><span class="p">))</span></div>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_text_on_page</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">==</span> <span class="bp">True</span><span class="p">,</span> <span class="s1">&#39;{} was not present in the source code.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="WebTester.assert_text_not_in_page"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_text_not_in_page">[docs]</a>    <span class="k">def</span> <span class="nf">assert_text_not_in_page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -281,8 +278,7 @@
 <span class="sd">            Text to search for.</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">is_text_on_page</span><span class="p">(</span><span class="n">text</span><span class="p">),</span>
-                         <span class="s1">&#39;{} was present in the source code.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">text</span><span class="p">))</span></div>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_text_on_page</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">==</span> <span class="bp">False</span><span class="p">,</span> <span class="s1">&#39;{} was present in the source code.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="WebTester.assert_not_visible"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_not_visible">[docs]</a>    <span class="k">def</span> <span class="nf">assert_not_visible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -298,8 +294,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_presence</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
 
         <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">is_displayed</span><span class="p">(),</span>
-                         <span class="s1">&#39;The {} element was visible.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selector</span><span class="p">))</span></div>
+        <span class="k">assert</span> <span class="n">elem</span><span class="o">.</span><span class="n">is_displayed</span><span class="p">()</span> <span class="o">==</span> <span class="bp">False</span><span class="p">,</span> <span class="s1">&#39;The {} element was visible.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="WebTester.assert_visible"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_visible">[docs]</a>    <span class="k">def</span> <span class="nf">assert_visible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -316,8 +311,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_presence</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">is_displayed</span><span class="p">(),</span>
-                        <span class="s1">&#39;The {} element was not visible.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selector</span><span class="p">))</span></div>
+        <span class="k">assert</span> <span class="n">elem</span><span class="o">.</span><span class="n">is_displayed</span><span class="p">()</span> <span class="o">==</span> <span class="bp">True</span><span class="p">,</span> <span class="s1">&#39;The {} element was not visible.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="WebTester.assert_value_of_element"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_value_of_element">[docs]</a>    <span class="k">def</span> <span class="nf">assert_value_of_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">wait_for</span><span class="o">=</span><span class="s1">&#39;presence&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -338,7 +332,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_presence_or_visible</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">wait_for</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="n">sval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">sval</span><span class="p">)</span></div>
+        <span class="k">assert</span> <span class="n">value</span> <span class="o">==</span> <span class="n">sval</span></div>
 
 <div class="viewcode-block" id="WebTester.assert_text_in_elements"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_text_in_elements">[docs]</a>    <span class="k">def</span> <span class="nf">assert_text_in_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">wait_for</span><span class="o">=</span><span class="s1">&#39;presence&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -360,7 +354,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_presence_or_visible</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">wait_for</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="n">texts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_texts</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertIn</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">texts</span><span class="p">,</span> <span class="s1">&#39;The string &quot;{}&quot; was not found in the selector: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">selector</span><span class="p">))</span></div>
+        <span class="k">assert</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">,</span> <span class="s1">&#39;The string &quot;{}&quot; was not found in the selector: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">selector</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="WebTester.assert_text_in_element"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_text_in_element">[docs]</a>    <span class="k">def</span> <span class="nf">assert_text_in_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">wait_for</span><span class="o">=</span><span class="s1">&#39;presence&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -382,8 +376,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_presence_or_visible</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">wait_for</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="n">element_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">any</span><span class="p">([</span><span class="n">text</span> <span class="ow">in</span> <span class="n">element_value</span><span class="p">,</span> <span class="n">text</span> <span class="o">==</span> <span class="n">element_value</span><span class="p">]),</span>
-                        <span class="s2">&quot;{} not in or equal to {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">element_value</span><span class="p">))</span></div>
+        <span class="k">assert</span> <span class="nb">any</span><span class="p">([</span><span class="n">text</span> <span class="ow">in</span> <span class="n">element_value</span><span class="p">,</span> <span class="n">text</span> <span class="o">==</span> <span class="n">element_value</span><span class="p">])</span> <span class="o">==</span> <span class="bp">True</span><span class="p">,</span> <span class="s2">&quot;{} not in or equal to {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">element_value</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="WebTester.assert_element_contains_text"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_element_contains_text">[docs]</a>    <span class="k">def</span> <span class="nf">assert_element_contains_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">wait_for</span><span class="o">=</span><span class="s1">&#39;presence&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -404,7 +397,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_presence_or_visible</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">wait_for</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="n">text_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">text</span> <span class="ow">in</span> <span class="n">text_value</span><span class="p">,</span> <span class="s2">&quot;{} in in {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">text_value</span><span class="p">))</span></div>
+        <span class="k">assert</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">text_value</span><span class="p">,</span> <span class="s2">&quot;{} in in {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">text_value</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="WebTester.assert_not_found"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_not_found">[docs]</a>    <span class="k">def</span> <span class="nf">assert_not_found</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -417,7 +410,7 @@
 
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s1">&#39;{} was unexpectedly found on the page&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selector</span><span class="p">))</span></div>
+        <span class="k">assert</span> <span class="n">elem</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;{} was unexpectedly found on the page&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="WebTester.assert_found"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_found">[docs]</a>    <span class="k">def</span> <span class="nf">assert_found</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -430,7 +423,7 @@
 
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNotNone</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s1">&#39;{} was not found on the page&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selector</span><span class="p">))</span></div>
+        <span class="k">assert</span> <span class="n">elem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;{} was not found on the page&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="WebTester.assert_alert_present"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_alert_present">[docs]</a>    <span class="k">def</span> <span class="nf">assert_alert_present</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -441,11 +434,11 @@
         <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;An alert was not present but was expected.&#39;</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">atext</span> <span class="o">=</span> <span class="n">alert</span><span class="o">.</span><span class="n">text</span>
+            <span class="n">atext</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">alert</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">NoAlertPresentException</span><span class="p">:</span>
             <span class="n">atext</span> <span class="o">=</span> <span class="bp">False</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">atext</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span></div>
+        <span class="k">assert</span> <span class="n">atext</span> <span class="o">==</span> <span class="bp">True</span><span class="p">,</span> <span class="n">msg</span></div>
 
 <div class="viewcode-block" id="WebTester.assert_alert_not_present"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_alert_not_present">[docs]</a>    <span class="k">def</span> <span class="nf">assert_alert_not_present</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -453,10 +446,15 @@
 
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">def</span> <span class="nf">check_text</span><span class="p">(</span><span class="n">alert</span><span class="p">):</span>
-            <span class="n">alert</span><span class="o">.</span><span class="n">text</span>
+            <span class="nb">bool</span><span class="p">(</span><span class="n">alert</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
 
         <span class="n">alert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">switch_to_alert</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">NoAlertPresentException</span><span class="p">,</span> <span class="n">check_text</span><span class="p">,</span> <span class="n">alert</span><span class="p">)</span></div></div>
+        <span class="n">present</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">present</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">alert</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">NoAlertPresentException</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">assert</span> <span class="n">present</span> <span class="o">==</span> <span class="bp">False</span></div></div>
 </pre></div>
 
            </div>

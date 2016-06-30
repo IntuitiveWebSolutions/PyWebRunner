@@ -122,6 +122,7 @@
             
   <h1>Source code for PyWebRunner.WebRunner</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
@@ -172,9 +173,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">command_executor</span> <span class="o">=</span> <span class="n">command_executor</span>
 
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;skip_xvfb&#39;</span><span class="p">):</span>
-            <span class="c1"># If you set this environment variable you can</span>
-            <span class="c1"># run tests from your Mac.</span>
-            <span class="c1"># (XVFB won&#39;t be installed.)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">xvfb</span> <span class="o">=</span> <span class="bp">False</span>
 
         <span class="c1"># Turn off annoying selenium logs</span>
@@ -399,8 +397,8 @@
             <span class="n">scroll_direction</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span>
 
         <span class="k">if</span> <span class="n">scroll_direction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">scroll_width</span> <span class="o">=</span> <span class="n">w_size</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span>
-            <span class="n">scroll_height</span> <span class="o">=</span> <span class="n">w_size</span><span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span>
+            <span class="n">scroll_width</span> <span class="o">=</span> <span class="n">w_size</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
+            <span class="n">scroll_height</span> <span class="o">=</span> <span class="n">w_size</span><span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">js</span><span class="p">(</span><span class="s2">&quot;window.scrollBy({0}{1}, {0}{2});&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">scroll_direction</span><span class="p">,</span>
                                                               <span class="n">scroll_width</span><span class="p">,</span>
                                                               <span class="n">scroll_height</span><span class="p">))</span>
@@ -884,6 +882,14 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span>
             <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/tmp/selenium-screenshot.png&#39;</span>
 
+        <span class="c1"># if isinstance(self.browser, webdriver.remote.webdriver.WebDriver):</span>
+        <span class="c1">#     # Get base64 screenshot from the remote.</span>
+        <span class="c1">#     base64_data = self.browser.get_screenshot_as_base64()</span>
+        <span class="c1">#     ss_data = base64.decodestring(base64_data)</span>
+        <span class="c1">#     with open(path, &#39;w&#39;) as f:</span>
+        <span class="c1">#         f.write(ss_data)</span>
+        <span class="c1">#         f.close()</span>
+        <span class="c1"># else:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">save_screenshot</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="WebRunner.fill"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.fill">[docs]</a>    <span class="k">def</span> <span class="nf">fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form_dict</span><span class="p">):</span>
