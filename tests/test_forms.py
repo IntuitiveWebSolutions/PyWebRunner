@@ -1,35 +1,10 @@
 import sys
 from datetime import datetime
-import unittest
-import threading
-from PyWebRunner import WebTester
-from six.moves import SimpleHTTPServer
-try:
-    import SocketServer
-except ImportError:
-    import socketserver as SocketServer
+
+from HttpBase import HttpBase
 
 
-class HTTPTestServer(SocketServer.TCPServer):
-    allow_reuse_address = True
-
-
-class TestForms(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-        httpd = HTTPTestServer(("", 5000), Handler)
-        httpd_thread = threading.Thread(target=httpd.serve_forever)
-        httpd_thread.setDaemon(True)
-        httpd_thread.start()
-
-        cls.wt = WebTester()
-        cls.wt.start()
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.wt.stop()
+class TestForms(HttpBase):
 
     def tearDown(self):
         if sys.exc_info()[0]:
