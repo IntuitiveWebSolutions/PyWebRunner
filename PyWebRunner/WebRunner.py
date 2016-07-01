@@ -579,6 +579,7 @@ class WebRunner(object):
         selectize_input = selectize_control + ' input'
         # Make sure the selectize control is active so the input is visible
         self.click(selectize_control)
+        self.wait_for_visible(selectize_control + ' .has-options')
         self.set_value(selectize_input, keys_to_send, clear=False, **kwargs)
 
     def clear(self, selector):
