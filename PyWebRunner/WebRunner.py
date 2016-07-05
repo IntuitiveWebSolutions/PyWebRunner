@@ -559,7 +559,7 @@ class WebRunner(object):
         if blur:
             elem.send_keys(Keys.TAB)
 
-    def set_selectize(self, selector, value, text=None, clear=True, blur=False, **kwargs):
+    def set_selectize(self, selector, value, text=None, clear=True, blur=False):
         '''
         Sets visible value of a selectize control based on the "selectized" element.
 
@@ -584,9 +584,6 @@ class WebRunner(object):
             Whether or not we should blur the element after setting the value.
             This corresponds to the 'selectOnTab' selecize setting.
             Defaults to False
-
-        kwargs:
-            passed on to wait_for_visible
         '''
         selectize_control = selector + ' + .selectize-control'
         selectize_input = selectize_control + ' input'
