@@ -559,7 +559,7 @@ class WebRunner(object):
         if blur:
             elem.send_keys(Keys.TAB)
 
-    def set_selectize(self, selector, value, **kwargs):
+    def set_selectize(self, selector, value, text=None, clear=True, blur=False, **kwargs):
         '''
         Sets visible value of a selectize control based on the "selectized" element.
 
@@ -569,18 +569,46 @@ class WebRunner(object):
             A CSS selector to search for. This can be any valid CSS selector.
 
         value: str
-            The value to fill the selectize input with.
-            (Visible value, not necessarily the same as the stored value.
-             This way, we mimick the user's interaction as closely as possible.)
+            The value of the option to select.
+            (Stored Value)
 
+        text: str
+            The visible value that the user sees.
+            (Visible value, if different than the stored value)
+
+        clear: bool
+            Whether or not we should clear the selectize value first.
+            Defaults to True
+
+        blur: bool
+            Whether or not we should blur the element after setting the value.
+            This corresponds to the 'selectOnTab' selecize setting.
+            Defaults to False
+
+        kwargs:
+            passed on to wait_for_visible
         '''
-        keys_to_send = Keys.BACK_SPACE + value
         selectize_control = selector + ' + .selectize-control'
         selectize_input = selectize_control + ' input'
+
         # Make sure the selectize control is active so the input is visible
         self.click(selectize_control)
+
+        input_element = self.get_element(selectize_input)
+
+        if clear:
+            input_element.send_keys(Keys.BACK_SPACE)
+
+        input_element.send_keys(text or value)
+
+        # Wait for options to be rendered
         self.wait_for_visible(selectize_control + ' .has-options')
-        self.set_value(selectize_input, keys_to_send, clear=False, **kwargs)
+
+        if blur:
+            input_element.send_keys(Keys.TAB)
+        else:
+            # Click the option for the given value
+            self.click(selectize_control + ' .option[data-value="{}"]'.format(value))
 
     def clear(self, selector):
         '''
