@@ -1,17 +1,30 @@
 <link rel="stylesheet" type="text/css" href="/tests/html/css/selectize.css" />
-<select id="testSelectize">
-    <option>Option 1</option>
-    <option>Option 2</option>
-    <option>Option 3</option>
-    <option>Option 4</option>
-</select>
+<select id="testSelectize"></select>
 
 <script type="text/javascript" src="/tests/html/js/jquery.js"></script>
 <script type="text/javascript" src="/tests/html/js/selectize.js"></script>
 <script type="text/javascript">
     $(function() {
-        $('#testSelectize').selectize({
-            selectOnTab: true
-        });
+        var selectizeConfiguration = {};
+
+        var options = [
+            {value: 'Option 1', text: 'Option 1'},
+            {value: 'Option 2', text: 'Option 2'},
+            {value: 'Option 3', text: 'Option 3'},
+            {value: 'Option 4', text: 'Option 4'}
+        ]
+
+        if (window.location.search.indexOf('async') !== -1) {
+            selectizeConfiguration.load = function(query, callback) {
+                setTimeout(function() {
+                    callback(options);
+                }, 3000);
+            }
+        }
+        else {
+            selectizeConfiguration.options = options;
+        }
+
+        $('#testSelectize').selectize(selectizeConfiguration);
     });
 </script>
