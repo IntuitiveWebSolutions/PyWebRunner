@@ -3,14 +3,18 @@ WebRunner
 
 A helpful wrapper for Selenium
 
-.. |Build Status| image:: https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner.svg?branch=master
-   :target: https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner
+|Build Status|
 
 Full documentation can be located here:
 https://intuitivewebsolutions.github.io/PyWebRunner
 
 You could use WebRunner to scrape a website, automate web tasks, or
-anything else you could imagine. It is easy to initialize and use.
+anything else you could imagine. It is easy to initialize and use. It's
+also compatible with
+`BrowserStack <https://www.browserstack.com/automate/python>`__ using
+the command\_executor and remote\_capabilities examples on that page.
+Please note that you will need a subscription, username, and API key to
+make it work.
 
 .. code:: python
 
@@ -190,6 +194,26 @@ Forms
     wr.fill(form_data) # Fills a form. Takes a dict of CSS keys and values.
 
     wr.screenshot('/tmp/screenshot1.png')
+
+BrowserStack example:
+^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: python
+
+    from PyWebRunner import WebRunner
+    desired = {
+        'browser': 'Edge',
+        'browser_version': '13.0',
+        'os': 'Windows',
+        'os_version': '10',
+        'resolution': '1440x900'
+    }
+    wr = WebRunner(desired_capabilities=desired,
+                   command_executor='http://USERNAME:API_KEY@hub.browserstack.com:80/wd/hub',
+                                 driver='Remote')
+    wr.start()
+    wr.go('http://google.com')
+    wr.set_value('#lst-ib', 'PyWebRunner')
 
 As you can see, there is almost no reason to ever interact with the
 selenium browser object directly. This is by design. If you ever find

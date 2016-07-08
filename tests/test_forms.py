@@ -15,8 +15,10 @@ class TestForms(HttpBase):
     def test_fill_form(self):
         self.wt.goto('/tests/html/forms.html')
         self.wt.wait_for_visible('#textfield')
+
         self.wt.set_value('#textfield', 'This is a test')
         self.wt.set_value('#selectfield', '3')
+        self.wt.wait(1)
         assert self.wt.get_value('#textfield') == 'This is a test'
         assert self.wt.get_value('#selectfield') == '3'
         # We have to clear the text field when using fill
@@ -25,9 +27,11 @@ class TestForms(HttpBase):
             '#textfield': 'Booya!',
             '#selectfield': 'Four'
         })
+        self.wt.wait(1)
         assert self.wt.get_value('#textfield') == 'Booya!'
         assert self.wt.get_value('#selectfield') == '4'
         self.wt.set_value('#textfield', 'No clear needed')
+        self.wt.wait(1)
         assert self.wt.get_value('#textfield') == 'No clear needed'
 
         # Test set_values:
@@ -37,6 +41,7 @@ class TestForms(HttpBase):
             '#textfield': 'AAAAAAAA',
             '#selectfield': '5'
         })
+        self.wt.wait(1)
         assert self.wt.get_value('#textfield') == 'AAAAAAAA'
         assert self.wt.get_value('#selectfield') == '5'
 
@@ -45,6 +50,7 @@ class TestForms(HttpBase):
             ['#textfield', 'BBBBBBBB'],
             ['#selectfield', '6']
         ])
+        self.wt.wait(1)
         assert self.wt.get_value('#textfield') == 'BBBBBBBB'
         assert self.wt.get_value('#selectfield') == '6'
 
@@ -53,6 +59,7 @@ class TestForms(HttpBase):
             ('#textfield', 'CCCCCCCC'),
             {'#selectfield': '7'}
         ])
+        self.wt.wait(1)
         assert self.wt.get_value('#textfield') == 'CCCCCCCC'
         assert self.wt.get_value('#selectfield') == '7'
 
