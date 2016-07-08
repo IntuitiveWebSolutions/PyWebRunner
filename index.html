@@ -211,7 +211,7 @@ testing.</p>
 <h1>WebRunner<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="PyWebRunner.WebRunner">
-<em class="property">class </em><code class="descclassname">PyWebRunner.</code><code class="descname">WebRunner</code><span class="sig-paren">(</span><em>xvfb=True</em>, <em>driver='Firefox'</em>, <em>mootools=False</em>, <em>timeout=90</em>, <em>width=1440</em>, <em>height=1200</em>, <em>firefox_version=46</em>, <em>remote_capabilities='FIREFOX'</em>, <em>command_executor='http://127.0.0.1:4444/wd/hub'</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">PyWebRunner.</code><code class="descname">WebRunner</code><span class="sig-paren">(</span><em>xvfb=True</em>, <em>driver='Firefox'</em>, <em>mootools=False</em>, <em>timeout=90</em>, <em>width=1440</em>, <em>height=1200</em>, <em>firefox_version=46</em>, <em>desired_capabilities='FIREFOX'</em>, <em>command_executor='http://127.0.0.1:4444/wd/hub'</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner" title="Permalink to this definition">¶</a></dt>
 <dd><p>WebRunner runs an instance of Selenium and adds a lot of helpful
 browser methods.</p>
 <p>Generally this class aims to make the experience of using Selenium
@@ -655,17 +655,24 @@ Defaults to &#8220;url&#8221; which navigates to the current_url</dd>
 
 <dl class="method">
 <dt id="PyWebRunner.WebRunner.set_selectize">
-<code class="descname">set_selectize</code><span class="sig-paren">(</span><em>selector</em>, <em>value</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.set_selectize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.set_selectize" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_selectize</code><span class="sig-paren">(</span><em>selector</em>, <em>value</em>, <em>text=None</em>, <em>clear=True</em>, <em>blur=False</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.set_selectize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.set_selectize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets visible value of a selectize control based on the &#8220;selectized&#8221; element.</p>
 <dl class="docutils">
 <dt>selector: str</dt>
 <dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
 <dt>value: str</dt>
-<dd><p class="first">The value to fill the selectize input with.
-(Visible value, not necessarily the same as the stored value.</p>
-<blockquote class="last">
-<div>This way, we mimick the user&#8217;s interaction as closely as possible.)</div></blockquote>
-</dd>
+<dd>The value of the option to select.
+(Stored Value)</dd>
+<dt>text: str</dt>
+<dd>The visible value that the user sees.
+(Visible value, if different than the stored value)</dd>
+<dt>clear: bool</dt>
+<dd>Whether or not we should clear the selectize value first.
+Defaults to True</dd>
+<dt>blur: bool</dt>
+<dd>Whether or not we should blur the element after setting the value.
+This corresponds to the &#8216;selectOnTab&#8217; selecize setting.
+Defaults to False</dd>
 </dl>
 </dd></dl>
 
@@ -678,6 +685,24 @@ Defaults to &#8220;url&#8221; which navigates to the current_url</dd>
 <dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
 <dt>value: str</dt>
 <dd>The value to set on the element matched by the selector.</dd>
+<dt>clear: bool</dt>
+<dd>Whether or not we should clear the element&#8217;s value first.
+If false, value will be appended to the current value of the element.</dd>
+<dt>blur: bool</dt>
+<dd>Whether or not we should blur the element after setting the value.
+Defaults to True</dd>
+<dt>kwargs:</dt>
+<dd>passed on to wait_for_visible</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyWebRunner.WebRunner.set_values">
+<code class="descname">set_values</code><span class="sig-paren">(</span><em>values</em>, <em>clear=True</em>, <em>blur=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.set_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.set_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets values of elements by CSS selectors.</p>
+<dl class="docutils">
+<dt>values: list of list or dict or list of dict</dt>
+<dd>A list of lists where index 0 is a selector string and 1 is a value.</dd>
 <dt>clear: bool</dt>
 <dd>Whether or not we should clear the element&#8217;s value first.
 If false, value will be appended to the current value of the element.</dd>
@@ -864,6 +889,21 @@ returns that alert.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="PyWebRunner.WebRunner.wait_for_text_in_value">
+<code class="descname">wait_for_text_in_value</code><span class="sig-paren">(</span><em>selector=''</em>, <em>text=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for_text_in_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for_text_in_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait for an element&#8217;s value to contain a specific string.</p>
+<dl class="docutils">
+<dt>selector: str</dt>
+<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
+<dt>text: str</dt>
+<dd>The string to look for. This must be precise.
+(Case, punctuation, UTF characters... etc.)</dd>
+<dt>kwargs:</dt>
+<dd>Passed on to _wait_for</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="PyWebRunner.WebRunner.wait_for_title">
 <code class="descname">wait_for_title</code><span class="sig-paren">(</span><em>title</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for_title"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for_title" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wait for the page title to match given title.</p>
@@ -921,7 +961,7 @@ returns that alert.</p>
 <h1>WebTester<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="PyWebRunner.WebTester">
-<em class="property">class </em><code class="descclassname">PyWebRunner.</code><code class="descname">WebTester</code><span class="sig-paren">(</span><em>base_url='http://127.0.0.1:5000'</em>, <em>xvfb=True</em>, <em>driver='Firefox'</em>, <em>mootools=False</em>, <em>timeout=90</em>, <em>width=1440</em>, <em>height=1200</em>, <em>root_path='./'</em>, <em>firefox_version=46</em>, <em>remote_capabilities='FIREFOX'</em>, <em>command_executor='http://127.0.0.1:4444/wd/hub'</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">PyWebRunner.</code><code class="descname">WebTester</code><span class="sig-paren">(</span><em>base_url='http://127.0.0.1:5000'</em>, <em>xvfb=True</em>, <em>driver='Firefox'</em>, <em>mootools=False</em>, <em>timeout=90</em>, <em>width=1440</em>, <em>height=1200</em>, <em>root_path='./'</em>, <em>firefox_version=46</em>, <em>desired_capabilities='FIREFOX'</em>, <em>command_executor='http://127.0.0.1:4444/wd/hub'</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class that extends WebRunner and TestCase This class adds
 some additional testing capabilities and shortcuts to
 WebRunner.</p>

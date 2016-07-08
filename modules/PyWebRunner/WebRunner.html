@@ -160,7 +160,7 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xvfb</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s1">&#39;Firefox&#39;</span><span class="p">,</span> <span class="n">mootools</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                  <span class="n">timeout</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1440</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">1200</span><span class="p">,</span> <span class="n">firefox_version</span><span class="o">=</span><span class="mi">46</span><span class="p">,</span>
-                 <span class="n">remote_capabilities</span><span class="o">=</span><span class="s1">&#39;FIREFOX&#39;</span><span class="p">,</span>
+                 <span class="n">desired_capabilities</span><span class="o">=</span><span class="s1">&#39;FIREFOX&#39;</span><span class="p">,</span>
                  <span class="n">command_executor</span><span class="o">=</span><span class="s1">&#39;http://127.0.0.1:4444/wd/hub&#39;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">driver</span> <span class="o">=</span> <span class="n">driver</span>  <span class="c1"># Firefox, PhantomJS (Must be installed...)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xvfb</span> <span class="o">=</span> <span class="n">xvfb</span>  <span class="c1"># This is for headless running.</span>
@@ -169,7 +169,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>  <span class="c1"># XVFB virtual monitor width</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span>  <span class="c1"># XVFB virtual monitor width</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">remote_capabilities</span> <span class="o">=</span> <span class="n">remote_capabilities</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desired_capabilities</span> <span class="o">=</span> <span class="n">desired_capabilities</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">command_executor</span> <span class="o">=</span> <span class="n">command_executor</span>
 
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;skip_xvfb&#39;</span><span class="p">):</span>
@@ -227,7 +227,7 @@
                 <span class="n">dc</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">DesiredCapabilities</span><span class="p">,</span> <span class="n">dcu</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">browser</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">Remote</span><span class="p">(</span>
-                <span class="n">command_executor</span><span class="o">=</span><span class="s1">&#39;http://127.0.0.1:4444/wd/hub&#39;</span><span class="p">,</span>
+                <span class="n">command_executor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">command_executor</span><span class="p">,</span>
                 <span class="n">desired_capabilities</span><span class="o">=</span><span class="n">dc</span>
             <span class="p">)</span>
 
@@ -644,6 +644,42 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">Keys</span><span class="p">,</span> <span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()):</span>
             <span class="n">elem</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">Keys</span><span class="p">,</span> <span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()))</span></div>
 
+<div class="viewcode-block" id="WebRunner.set_values"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.set_values">[docs]</a>    <span class="k">def</span> <span class="nf">set_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">clear</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blur</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Sets values of elements by CSS selectors.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        values: list of list or dict or list of dict</span>
+<span class="sd">            A list of lists where index 0 is a selector string and 1 is a value.</span>
+
+<span class="sd">        clear: bool</span>
+<span class="sd">            Whether or not we should clear the element&#39;s value first.</span>
+<span class="sd">            If false, value will be appended to the current value of the element.</span>
+
+<span class="sd">        blur: bool</span>
+<span class="sd">            Whether or not we should blur the element after setting the value.</span>
+<span class="sd">            Defaults to True</span>
+
+<span class="sd">        kwargs:</span>
+<span class="sd">            passed on to wait_for_visible</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="c1"># If the entire var is a dict, just use all the key/value pairs</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">values</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">clear</span><span class="o">=</span><span class="n">clear</span><span class="p">,</span> <span class="n">blur</span><span class="o">=</span><span class="n">blur</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If not a dict it&#39;s a list/tuple of things (dicts or lists / tuples)</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                    <span class="c1"># If it is a dict use it&#39;s key / value pairs.</span>
+                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">clear</span><span class="o">=</span><span class="n">clear</span><span class="p">,</span> <span class="n">blur</span><span class="o">=</span><span class="n">blur</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Otherwise just use the list / tuple positions</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">clear</span><span class="o">=</span><span class="n">clear</span><span class="p">,</span> <span class="n">blur</span><span class="o">=</span><span class="n">blur</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="WebRunner.set_value"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.set_value">[docs]</a>    <span class="k">def</span> <span class="nf">set_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">clear</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blur</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Sets value of an element by CSS selector.</span>
@@ -682,7 +718,7 @@
         <span class="k">if</span> <span class="n">blur</span><span class="p">:</span>
             <span class="n">elem</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="n">Keys</span><span class="o">.</span><span class="n">TAB</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="WebRunner.set_selectize"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.set_selectize">[docs]</a>    <span class="k">def</span> <span class="nf">set_selectize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="WebRunner.set_selectize"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.set_selectize">[docs]</a>    <span class="k">def</span> <span class="nf">set_selectize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">clear</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">blur</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Sets visible value of a selectize control based on the &quot;selectized&quot; element.</span>
 
@@ -692,17 +728,43 @@
 <span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
 
 <span class="sd">        value: str</span>
-<span class="sd">            The value to fill the selectize input with.</span>
-<span class="sd">            (Visible value, not necessarily the same as the stored value.</span>
-<span class="sd">             This way, we mimick the user&#39;s interaction as closely as possible.)</span>
+<span class="sd">            The value of the option to select.</span>
+<span class="sd">            (Stored Value)</span>
 
+<span class="sd">        text: str</span>
+<span class="sd">            The visible value that the user sees.</span>
+<span class="sd">            (Visible value, if different than the stored value)</span>
+
+<span class="sd">        clear: bool</span>
+<span class="sd">            Whether or not we should clear the selectize value first.</span>
+<span class="sd">            Defaults to True</span>
+
+<span class="sd">        blur: bool</span>
+<span class="sd">            Whether or not we should blur the element after setting the value.</span>
+<span class="sd">            This corresponds to the &#39;selectOnTab&#39; selecize setting.</span>
+<span class="sd">            Defaults to False</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">keys_to_send</span> <span class="o">=</span> <span class="n">Keys</span><span class="o">.</span><span class="n">BACK_SPACE</span> <span class="o">+</span> <span class="n">value</span>
         <span class="n">selectize_control</span> <span class="o">=</span> <span class="n">selector</span> <span class="o">+</span> <span class="s1">&#39; + .selectize-control&#39;</span>
         <span class="n">selectize_input</span> <span class="o">=</span> <span class="n">selectize_control</span> <span class="o">+</span> <span class="s1">&#39; input&#39;</span>
+
         <span class="c1"># Make sure the selectize control is active so the input is visible</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">click</span><span class="p">(</span><span class="n">selectize_control</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">selectize_input</span><span class="p">,</span> <span class="n">keys_to_send</span><span class="p">,</span> <span class="n">clear</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+        <span class="n">input_element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_element</span><span class="p">(</span><span class="n">selectize_input</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">clear</span><span class="p">:</span>
+            <span class="n">input_element</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="n">Keys</span><span class="o">.</span><span class="n">BACK_SPACE</span><span class="p">)</span>
+
+        <span class="n">input_element</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="n">text</span> <span class="ow">or</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="c1"># Wait for options to be rendered</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_visible</span><span class="p">(</span><span class="n">selectize_control</span> <span class="o">+</span> <span class="s1">&#39; .has-options&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">blur</span><span class="p">:</span>
+            <span class="n">input_element</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="n">Keys</span><span class="o">.</span><span class="n">TAB</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Click the option for the given value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">click</span><span class="p">(</span><span class="n">selectize_control</span> <span class="o">+</span> <span class="s1">&#39; .option[data-value=&quot;{}&quot;]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="WebRunner.clear"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -1159,6 +1221,25 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for</span><span class="p">(</span><span class="n">EC</span><span class="o">.</span><span class="n">text_to_be_present_in_element</span><span class="p">((</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="n">selector</span><span class="p">),</span>
                                                         <span class="n">text</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.wait_for_text_in_value"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.wait_for_text_in_value">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_text_in_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Wait for an element&#39;s value to contain a specific string.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        text: str</span>
+<span class="sd">            The string to look for. This must be precise.</span>
+<span class="sd">            (Case, punctuation, UTF characters... etc.)</span>
+<span class="sd">        kwargs:</span>
+<span class="sd">            Passed on to _wait_for</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for</span><span class="p">(</span><span class="n">EC</span><span class="o">.</span><span class="n">text_to_be_present_in_element_value</span><span class="p">((</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="n">selector</span><span class="p">),</span>
+                                                              <span class="n">text</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="WebRunner.wait_for_selected"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.wait_for_selected">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">selected</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
