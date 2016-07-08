@@ -37,7 +37,7 @@ class WebRunner(object):
 
     def __init__(self, xvfb=True, driver='Firefox', mootools=False,
                  timeout=90, width=1440, height=1200, firefox_version=46,
-                 remote_capabilities='FIREFOX',
+                 desired_capabilities='FIREFOX',
                  command_executor='http://127.0.0.1:4444/wd/hub'):
         self.driver = driver  # Firefox, PhantomJS (Must be installed...)
         self.xvfb = xvfb  # This is for headless running.
@@ -46,7 +46,7 @@ class WebRunner(object):
         self.width = width  # XVFB virtual monitor width
         self.height = height  # XVFB virtual monitor width
 
-        self.remote_capabilities = remote_capabilities
+        self.desired_capabilities = desired_capabilities
         self.command_executor = command_executor
 
         if os.environ.get('skip_xvfb'):
@@ -104,7 +104,7 @@ class WebRunner(object):
                 dc = getattr(DesiredCapabilities, dcu)
 
             self.browser = webdriver.Remote(
-                command_executor='http://127.0.0.1:4444/wd/hub',
+                command_executor=self.command_executor,
                 desired_capabilities=dc
             )
 
@@ -520,6 +520,42 @@ class WebRunner(object):
 
         if hasattr(Keys, key.upper()):
             elem.send_keys(getattr(Keys, key.upper()))
+
+    def set_values(self, values, clear=True, blur=True, **kwargs):
+        '''
+        Sets values of elements by CSS selectors.
+
+        Parameters
+        ----------
+        values: list of list or dict or list of dict
+            A list of lists where index 0 is a selector string and 1 is a value.
+
+        clear: bool
+            Whether or not we should clear the element's value first.
+            If false, value will be appended to the current value of the element.
+
+        blur: bool
+            Whether or not we should blur the element after setting the value.
+            Defaults to True
+
+        kwargs:
+            passed on to wait_for_visible
+
+        '''
+        if isinstance(values, dict):
+            # If the entire var is a dict, just use all the key/value pairs
+            for key in values:
+                self.set_value(key, values[key], clear=clear, blur=blur, **kwargs)
+        else:
+            # If not a dict it's a list/tuple of things (dicts or lists / tuples)
+            for row in values:
+                if isinstance(row, dict):
+                    # If it is a dict use it's key / value pairs.
+                    for key in row:
+                        self.set_value(key, row[key], clear=clear, blur=blur, **kwargs)
+                else:
+                    # Otherwise just use the list / tuple positions
+                    self.set_value(row[0], row[1], clear=clear, blur=blur, **kwargs)
 
     def set_value(self, selector, value, clear=True, blur=True, **kwargs):
         '''

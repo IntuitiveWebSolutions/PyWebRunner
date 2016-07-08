@@ -17,12 +17,12 @@ class WebTester(WebRunner):
     def __init__(self, base_url='http://127.0.0.1:5000', xvfb=True,
                  driver='Firefox', mootools=False, timeout=90,
                  width=1440, height=1200, root_path='./', firefox_version=46,
-                 remote_capabilities='FIREFOX',
+                 desired_capabilities='FIREFOX',
                  command_executor='http://127.0.0.1:4444/wd/hub'):
         self.base_url = base_url
         self.root_path = root_path
         WebRunner.__init__(self, xvfb, driver, mootools, timeout, width, height,
-                           firefox_version, remote_capabilities, command_executor)
+                           firefox_version, desired_capabilities, command_executor)
 
     def wait(self, seconds=500):
         '''

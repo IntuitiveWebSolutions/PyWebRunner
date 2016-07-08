@@ -3,6 +3,9 @@ WebRunner
 
 A helpful wrapper for Selenium
 
+.. |Build Status| image:: https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner.svg?branch=master
+   :target: https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner
+
 Full documentation can be located here:
 https://intuitivewebsolutions.github.io/PyWebRunner
 
@@ -238,3 +241,6 @@ Testing Asserts
 -  assert\_element\_contains\_text
 -  assert\_value\_of\_element
 -  assert\_element\_not\_has\_class
+
+.. |Build Status| image:: https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner.svg?branch=master
+   :target: https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner

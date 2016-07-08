@@ -30,6 +30,32 @@ class TestForms(HttpBase):
         self.wt.set_value('#textfield', 'No clear needed')
         assert self.wt.get_value('#textfield') == 'No clear needed'
 
+        # Test set_values:
+
+        # Dict:
+        self.wt.set_values({
+            '#textfield': 'AAAAAAAA',
+            '#selectfield': '5'
+        })
+        assert self.wt.get_value('#textfield') == 'AAAAAAAA'
+        assert self.wt.get_value('#selectfield') == '5'
+
+        # List of list:
+        self.wt.set_values([
+            ['#textfield', 'BBBBBBBB'],
+            ['#selectfield', '6']
+        ])
+        assert self.wt.get_value('#textfield') == 'BBBBBBBB'
+        assert self.wt.get_value('#selectfield') == '6'
+
+        # List of Mix:
+        self.wt.set_values([
+            ('#textfield', 'CCCCCCCC'),
+            {'#selectfield': '7'}
+        ])
+        assert self.wt.get_value('#textfield') == 'CCCCCCCC'
+        assert self.wt.get_value('#selectfield') == '7'
+
     def test_screenshot(self):
         import os.path
         path = '/tmp/selenium-screenshot.png'
