@@ -1099,6 +1099,25 @@ class WebRunner(object):
         self._wait_for(EC.text_to_be_present_in_element((By.CSS_SELECTOR, selector),
                                                         text), **kwargs)
 
+    def wait_for_text_in_value(self, selector='', text='', **kwargs):
+        '''
+        Wait for an element's value to contain a specific string.
+
+        Parameters
+        ----------
+        selector: str
+            A CSS selector to search for. This can be any valid CSS selector.
+
+        text: str
+            The string to look for. This must be precise.
+            (Case, punctuation, UTF characters... etc.)
+        kwargs:
+            Passed on to _wait_for
+
+        '''
+        self._wait_for(EC.text_to_be_present_in_element_value((By.CSS_SELECTOR, selector),
+                                                              text), **kwargs)
+
     def wait_for_selected(self, selector='', selected=True, **kwargs):
         '''
         Wait for an element (checkbox/radio) to be selected.

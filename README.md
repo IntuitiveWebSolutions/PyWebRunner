@@ -117,6 +117,7 @@ Here is a list of available methods in WebRunner with basic explanations about w
 - wait_for_presence
 - wait_for_opacity
 - wait_for_text
+- wait_for_text_in_value
 - wait_for_value
 - wait_for_ko
 
