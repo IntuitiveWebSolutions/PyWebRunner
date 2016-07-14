@@ -1422,8 +1422,12 @@ class WebRunner(object):
             Passed on to _wait_for
 
         '''
-        self._wait_for(EC.presence_of_element_located((By.CSS_SELECTOR, selector)) or
-                       EC.presence_of_elements_located((By.CSS_SELECTOR, selector)),
+        if selector.startswith('/'):
+            by = By.XPATH
+        else:
+            by = By.CSS_SELECTOR
+        self._wait_for(EC.presence_of_element_located((by, selector)) or
+                       EC.presence_of_elements_located((by, selector)),
                        **kwargs)
 
     def wait_for_clickable(self, selector='', **kwargs):
@@ -1439,7 +1443,11 @@ class WebRunner(object):
             Passed on to _wait_for
 
         '''
-        self._wait_for(EC.element_to_be_clickable((By.CSS_SELECTOR, selector)), **kwargs)
+        if selector.startswith('/'):
+            by = By.XPATH
+        else:
+            by = By.CSS_SELECTOR
+        self._wait_for(EC.element_to_be_clickable((by, selector)), **kwargs)
 
     def wait_for_ko(self, selector='', **kwargs):
         '''
@@ -1485,7 +1493,11 @@ class WebRunner(object):
             Passed on to _wait_for
 
         '''
-        self._wait_for(EC.visibility_of_element_located((By.CSS_SELECTOR, selector)),
+        if selector.startswith('/'):
+            by = By.XPATH
+        else:
+            by = By.CSS_SELECTOR
+        self._wait_for(EC.visibility_of_element_located((by, selector)),
                        **kwargs)
 
     def _wait_for_presence_or_visible(self, selector, wait_for, **kwargs):
@@ -1511,7 +1523,11 @@ class WebRunner(object):
             Passed on to _wait_for
 
         '''
-        self._wait_for(EC.invisibility_of_element_located((By.CSS_SELECTOR, selector)),
+        if selector.startswith('/'):
+            by = By.XPATH
+        else:
+            by = By.CSS_SELECTOR
+        self._wait_for(EC.invisibility_of_element_located((by, selector)),
                        **kwargs)
 
     def wait_for_all_invisible(self, selector='', **kwargs):
@@ -1564,7 +1580,11 @@ class WebRunner(object):
             Passed on to _wait_for
 
         '''
-        self._wait_for(EC.text_to_be_present_in_element((By.CSS_SELECTOR, selector),
+        if selector.startswith('/'):
+            by = By.XPATH
+        else:
+            by = By.CSS_SELECTOR
+        self._wait_for(EC.text_to_be_present_in_element((by, selector),
                                                         text), **kwargs)
 
     def wait_for_text_in_value(self, selector='', text='', **kwargs):
@@ -1583,7 +1603,11 @@ class WebRunner(object):
             Passed on to _wait_for
 
         '''
-        self._wait_for(EC.text_to_be_present_in_element_value((By.CSS_SELECTOR, selector),
+        if selector.startswith('/'):
+            by = By.XPATH
+        else:
+            by = By.CSS_SELECTOR
+        self._wait_for(EC.text_to_be_present_in_element_value((by, selector),
                                                               text), **kwargs)
 
     def wait_for_selected(self, selector='', selected=True, **kwargs):
@@ -1602,7 +1626,11 @@ class WebRunner(object):
             Passed on to _wait_for
 
         '''
-        self._wait_for(EC.element_located_selection_state_to_be((By.CSS_SELECTOR, selector),
+        if selector.startswith('/'):
+            by = By.XPATH
+        else:
+            by = By.CSS_SELECTOR
+        self._wait_for(EC.element_located_selection_state_to_be((by, selector),
                                                                 selected), **kwargs)
 
     def wait_for_title(self, title, **kwargs):
@@ -1636,7 +1664,11 @@ class WebRunner(object):
             Passed on to _wait_for
 
         '''
-        self._wait_for(EC.text_to_be_present_in_element_value((By.CSS_SELECTOR, selector),
+        if selector.startswith('/'):
+            by = By.XPATH
+        else:
+            by = By.CSS_SELECTOR
+        self._wait_for(EC.text_to_be_present_in_element_value((by, selector),
                                                               value), **kwargs)
 
     def wait_for_opacity(self, selector, opacity, **kwargs):

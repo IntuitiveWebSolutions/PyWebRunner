@@ -15,6 +15,7 @@ class TestMisc(HttpBase):
     def test_misc(self):
         self.wt.goto('/tests/html/misc.html')
         self.wt.wait_for_visible('table')
+        self.wt.wait_for_visible('/html/body/table/tbody/tr')
         assert self.wt.count('/html/body/table/tbody/tr') == 3
         assert self.wt.count('/html/body/table/thead/tr') == 1
         assert self.wt.count('/html/body/table/thead/tr/th') == 8

@@ -4,7 +4,11 @@ PYTHON3=`which python3`
 
 
 test:
-	@echo "TODO: Hook up tests."
+	pip install -r requirements.txt
+	pip install wait
+	pip install pytest
+	pip install -U .
+	py.test tests/test_*.py
 
 doc:
 	cd docs; make html
