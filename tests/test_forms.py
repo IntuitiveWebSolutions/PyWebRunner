@@ -68,9 +68,12 @@ class TestForms(HttpBase):
         assert self.wt.get_value('#textfield') == 'CCCCCCCC'
         assert self.wt.get_value('#selectfield') == '7'
 
-    def test_screenshot(self):
-        import os.path
-        path = '/tmp/selenium-screenshot.png'
-        self.wt.screenshot()
-        assert os.path.isfile(path)
-        assert os.path.getsize(path) > 0
+        # Tuple of tuple:
+        self.wt.set_values((
+            ('#textfield', 'DDDDDDDD'),
+            ('#selectfield', '8')
+        ))
+        self.wt.wait_for_text_in_value('#textfield', 'DDDDDDDD')
+        self.wt.wait_for_text_in_value('#selectfield', '8')
+        assert self.wt.get_value('#textfield') == 'DDDDDDDD'
+        assert self.wt.get_value('#selectfield') == '8'

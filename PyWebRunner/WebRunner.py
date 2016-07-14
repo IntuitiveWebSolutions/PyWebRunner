@@ -800,7 +800,7 @@ class WebRunner(object):
             A list of selenium element objects.
 
         '''
-        elems = self.browser.find_elements_by_css_selector(selector)
+        elems = self.find_elements(selector)
         return elems
 
     def get_element(self, selector):
@@ -810,7 +810,7 @@ class WebRunner(object):
         Parameters
         ----------
         selector: str
-            A CSS selector to search for. This can be any valid CSS selector.
+            A CSS/XPATH selector to search for. This can be any valid CSS/XPATH selector.
 
         Returns
         -------
@@ -818,7 +818,9 @@ class WebRunner(object):
             A selenium element object.
 
         '''
-        elem = self.browser.find_element_by_css_selector(selector)
+
+        elem = self.find_element(selector)
+
         return elem
 
     def get_text(self, selector):
@@ -1124,14 +1126,30 @@ class WebRunner(object):
         '''
         self.browser.get(address)
 
-    def find_element(self, selector):
+    def count(self, selector):
         '''
-        Finds an element by CSS selector.
+        Counts the number of elements that match CSS/XPATH selector.
 
         Parameters
         ----------
         selector: str
-            A CSS selector to search for. This can be any valid CSS selector.
+            A CSS/XPATH selector to search for. This can be any valid CSS/XPATH selector.
+
+        Returns
+        -------
+        int: Number of matching elements.
+
+        '''
+        return len(self.get_elements(selector))
+
+    def find_element(self, selector):
+        '''
+        Finds an element by CSS/XPATH selector.
+
+        Parameters
+        ----------
+        selector: str
+            A CSS/XPATH selector to search for. This can be any valid CSS/XPATH selector.
 
         Returns
         -------
@@ -1141,7 +1159,10 @@ class WebRunner(object):
         '''
         elem = None
         try:
-            elem = self.browser.find_element_by_css_selector(selector)
+            if selector.startswith('/'):
+                elem = self.browser.find_element_by_xpath(selector)
+            else:
+                elem = self.browser.find_element_by_css_selector(selector)
         except NoSuchElementException:
             pass
 
@@ -1149,12 +1170,12 @@ class WebRunner(object):
 
     def find_elements(self, selector):
         '''
-        Finds elements by CSS selector.
+        Finds elements by CSS/XPATH selector.
 
         Parameters
         ----------
         selector: str
-            A CSS selector to search for. This can be any valid CSS selector.
+            A CSS/XPATH selector to search for. This can be any valid CSS/XPATH selector.
 
         Returns
         -------
@@ -1164,7 +1185,10 @@ class WebRunner(object):
         '''
         elems = []
         try:
-            elems = self.browser.find_elements_by_css_selector(selector)
+            if selector.startswith('/'):
+                elems = self.browser.find_elements_by_xpath(selector)
+            else:
+                elems = self.browser.find_elements_by_css_selector(selector)
         except NoSuchElementException:
             pass
 
