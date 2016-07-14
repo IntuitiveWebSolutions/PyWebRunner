@@ -152,6 +152,7 @@ Waiting
 -  wait\_for\_presence
 -  wait\_for\_opacity
 -  wait\_for\_text
+-  wait\_for\_text\_in\_value
 -  wait\_for\_value
 -  wait\_for\_ko
 
