@@ -14,7 +14,7 @@ class TestForms(HttpBase):
 
     def test_fill_form(self):
         self.wt.goto('/tests/html/forms.html')
-        self.wt.wait_for_visible('#textfield')
+        self.wt.wait_for_clickable('#textfield')
 
         self.wt.set_value('#textfield', 'This is a test')
         self.wt.set_value('#selectfield', '3')
