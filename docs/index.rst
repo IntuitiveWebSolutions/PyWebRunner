@@ -1,3 +1,5 @@
+.. image:: http://iws-public.s3.amazonaws.com/Media/PyWebRunner.png
+
 WebRunner
 =========
 

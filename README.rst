@@ -1,7 +1,4 @@
-WebRunner
-=========
-
-A helpful wrapper for Selenium
+|PyWebRunner| A supercharged Python wrapper for Selenium
 
 |Build Status|
 
@@ -267,5 +264,6 @@ Testing Asserts
 -  assert\_value\_of\_element
 -  assert\_element\_not\_has\_class
 
+.. |PyWebRunner| image:: http://iws-public.s3.amazonaws.com/Media/PyWebRunner.png
 .. |Build Status| image:: https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner.svg?branch=master
    :target: https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner

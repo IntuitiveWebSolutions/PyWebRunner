@@ -302,6 +302,32 @@ class WebTester(WebRunner):
         elem = self.find_element(selector)
         assert elem is not None, '{} was not found on the page'.format(selector)
 
+    def assert_checked(self, selector):
+        '''
+        Asserts that the element is checked.
+
+        Parameters
+        ----------
+        selector: str
+            A CSS selector to search for. This can be any valid CSS selector.
+
+        '''
+        elem = self.find_element(selector)
+        assert elem.is_selected() == True, '{} was not checked.'.format(selector)
+
+    def assert_not_checked(self, selector):
+        '''
+        Asserts that the element is not checked.
+
+        Parameters
+        ----------
+        selector: str
+            A CSS selector to search for. This can be any valid CSS selector.
+
+        '''
+        elem = self.find_element(selector)
+        assert elem.is_selected() == False, '{} was checked.'.format(selector)
+
     def assert_alert_present(self):
         '''
         Asserts that an alert exists.

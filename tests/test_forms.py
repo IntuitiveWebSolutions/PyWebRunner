@@ -12,6 +12,16 @@ class TestForms(HttpBase):
             now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             self.wt.screenshot(test_method_name + "-" + now + ".png")
 
+    def test_checked(self):
+        self.wt.goto('/tests/html/forms.html')
+        self.wt.wait_for_clickable('#checkbox')
+        
+        self.wt.click('#checkbox')
+        self.wt.assert_checked('#checkbox')
+
+        self.wt.click('#checkbox')
+        self.wt.assert_not_checked('#checkbox')
+
     def test_fill_form(self):
         self.wt.goto('/tests/html/forms.html')
         self.wt.wait_for_clickable('#textfield')
@@ -36,6 +46,9 @@ class TestForms(HttpBase):
         self.wt.wait_for_text_in_value('#textfield', 'No clear needed')
         assert self.wt.get_value('#textfield') == 'No clear needed'
 
+    def test_set_values(self):
+        self.wt.goto('/tests/html/forms.html')
+        self.wt.wait_for_clickable('#textfield')
         # Test set_values:
 
         # Dict:
