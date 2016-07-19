@@ -425,6 +425,32 @@
         <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">elem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;{} was not found on the page&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="WebTester.assert_checked"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_checked">[docs]</a>    <span class="k">def</span> <span class="nf">assert_checked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Asserts that the element is checked.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">elem</span><span class="o">.</span><span class="n">is_selected</span><span class="p">()</span> <span class="o">==</span> <span class="bp">True</span><span class="p">,</span> <span class="s1">&#39;{} was not checked.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebTester.assert_not_checked"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_not_checked">[docs]</a>    <span class="k">def</span> <span class="nf">assert_not_checked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Asserts that the element is not checked.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        selector: str</span>
+<span class="sd">            A CSS selector to search for. This can be any valid CSS selector.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">elem</span><span class="o">.</span><span class="n">is_selected</span><span class="p">()</span> <span class="o">==</span> <span class="bp">False</span><span class="p">,</span> <span class="s1">&#39;{} was checked.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="WebTester.assert_alert_present"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebTester.assert_alert_present">[docs]</a>    <span class="k">def</span> <span class="nf">assert_alert_present</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Asserts that an alert exists.</span>
