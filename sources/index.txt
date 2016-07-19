@@ -1,4 +1,4 @@
-WebRunner
+Elemental
 =========
 
 A helpful wrapper for Selenium
@@ -8,53 +8,53 @@ Installation
 
 .. code-block:: bash
 
-    pip install PyWebRunner
+    pip install WebElemental
 
 Hello World!
 ============
 
 .. code:: python
 
-    from PyWebRunner import WebRunner
+    from WebElemental import Elemental
 
     # Running headless FireFox is the default.
-    wr = WebRunner() # Defaults to xvfb=True, driver=FireFox
+    elemental = Elemental() # Defaults to xvfb=True, driver=FireFox
     # If xvfb is not installed, it will be bypassed automatically.
 
     # If you explicitly don't want headless operation:
-    wr = WebRunner(xvfb=False)
+    elemental = Elemental(xvfb=False)
 
-Once we've initialized WebRunner, we still need to kick off the browser.
+Once we've initialized Elemental, we still need to kick off the browser.
 I've made this a manual step so that it is easy to start and stop
-different browsers using the same WebRunner instance if desired.
+different browsers using the same Elemental instance if desired.
 
 .. code:: python
 
     # Start your engines...
 
-    wr.start()
+    elemental.start()
 
     # DO SOME STUFF
-    print(wr.current_url())
+    print(elemental.current_url())
     # outputs 'http://someaddress.here/page.html'
 
-    wr.click('#some-button') # Clicks a button.
+    elemental.click('#some-button') # Clicks a button.
 
-    wr.js('console.log("I am executing JS on the page!");')
+    elemental.js('console.log("I am executing JS on the page!");')
 
-    elem = wr.find_element('#my-id') # Returns a selenium element object
+    elem = elemental.find_element('#my-id') # Returns a selenium element object
 
-    elems = wr.find_elements('.some-class') # Returns a list of selenium element objects
+    elems = elemental.find_elements('.some-class') # Returns a list of selenium element objects
 
     form_data = {
         '#username': 'person',
         '#password': 'somepass'
     }
-    wr.fill(form_data) # Fills a form. Takes a dict of CSS keys and values.
+    elemental.fill(form_data) # Fills a form. Takes a dict of CSS keys and values.
 
-    wr.screenshot('/tmp/screenshot1.png')
+    elemental.screenshot('/tmp/screenshot1.png')
 
-    wr.stop()
+    elemental.stop()
 
 As you can see, there is almost no reason to ever interact with the
 selenium browser object directly. This is by design. If you ever find
@@ -70,28 +70,28 @@ selenium browser object.
 
 .. code:: python
 
-    wr.browser.find_elements_by_id('#some-id') # Use wr.find_element instead.
+    elemental.browser.find_elements_by_id('#some-id') # Use elemental.find_element instead.
 
 --------------
 
-WebTester
+TestElemental
 =========
 
-WebTester inherits WebRunner so it has all the same methods that
-WebRunner has but it adds some additional methods that are useful for
+TestElemental inherits Elemental so it has all the same methods that
+Elemental has but it adds some additional methods that are useful for
 testing.
 
 Documentation
 *************
 
-WebRunner
+Elemental
 =========
 
-.. autoclass:: PyWebRunner.WebRunner
+.. autoclass:: WebElemental.Elemental
     :members:
 
-WebTester
+TestElemental
 =========
 
-.. autoclass:: PyWebRunner.WebTester
+.. autoclass:: WebElemental.TestElemental
     :members:
