@@ -1,10 +1,10 @@
 import sys
 from datetime import datetime
 
-from HttpBase import HttpBase
+from DemoBase import DemoBase
 
 
-class TestForms(HttpBase):
+class TestDemo(DemoBase):
 
     def tearDown(self):
         if sys.exc_info()[0]:
@@ -21,6 +21,9 @@ class TestForms(HttpBase):
 
         self.wt.click('#checkbox')
         self.wt.assert_not_checked('#checkbox')
+
+        self.wt.move_to(selector='#some-image')
+        self.wt.move_to(selector='#selectfield')
 
     def test_fill_form(self):
         self.wt.goto('/tests/html/forms.html')

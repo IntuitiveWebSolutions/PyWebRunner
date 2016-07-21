@@ -1,5 +1,4 @@
 from time import sleep
-from unittest import TestCase
 from selenium.common.exceptions import NoSuchElementException, NoAlertPresentException
 
 from PyWebRunner import WebRunner
@@ -23,21 +22,6 @@ class WebTester(WebRunner):
         self.root_path = root_path
         WebRunner.__init__(self, xvfb, driver, mootools, timeout, width, height,
                            firefox_version, desired_capabilities, command_executor)
-
-    def wait(self, seconds=500):
-        '''
-        Sleeps for some amount of time.
-
-        Parameters
-        ----------
-
-        seconds: int
-            Seconds to sleep for.
-
-        '''
-        # You probably shouldn't use this for anything
-        # real in tests. I use this for pausing execution.
-        sleep(seconds)
 
     def goto(self, url, wait_for_visible=None, wait_for_presence=None):
         '''

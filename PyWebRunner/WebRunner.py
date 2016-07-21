@@ -1,5 +1,7 @@
 from functools import partial
-import base64
+from time import sleep
+from random import random
+# import base64
 import logging
 import os
 import re
@@ -499,6 +501,9 @@ class WebRunner(object):
         # Turn off annoying selenium logs
         s_logger.setLevel(logging.WARNING)
 
+    def _before(self):
+        pass
+
     def start(self):
         """Starts Selenium and (optionally) starts XVFB first.
 
@@ -766,6 +771,27 @@ class WebRunner(object):
         sel = Select(elem)
         sel.select_by_value(value)
 
+    def move_to(self, selector, click=False):
+        '''
+        Move to the element matched by selector or passed as argument.
+
+        Parameters
+        ----------
+        selector: str
+            Any valid CSS selector
+        click: bool
+            Whether or not to click the element after hovering
+            defaults to False
+        '''
+        elem = self.get_element(selector)
+
+        action = webdriver.ActionChains(self.browser)
+        action.move_to_element(elem)
+        if click:
+            action.click(elem)
+
+        action.perform()
+
     def hover(self, selector, click=False):
         '''
         Hover over the element matched by selector and optionally click it.
@@ -778,12 +804,7 @@ class WebRunner(object):
             Whether or not to click the element after hovering
             defaults to False
         '''
-        element = self.get_element(selector)
-        hover_action = ActionChains(self.browser).move_to_element(element)
-        if click:
-            hover_action.click(element)
-
-        hover_action.perform()
+        self.move_to(selector, click)
 
     def get_elements(self, selector):
         '''
@@ -818,9 +839,7 @@ class WebRunner(object):
             A selenium element object.
 
         '''
-
         elem = self.find_element(selector)
-
         return elem
 
     def get_text(self, selector):
@@ -967,6 +986,26 @@ class WebRunner(object):
         if hasattr(Keys, key.upper()):
             elem.send_keys(getattr(Keys, key.upper()))
 
+    def drag_and_drop(self, from_selector, to_selector):
+        '''
+        Drags an element into another.
+
+        Parameters
+        ----------
+        from_selector: str
+            A CSS selector to search for. This can be any valid CSS selector.
+            Element to be dragged.
+
+        to_selector: str
+            A CSS selector to search for. This can be any valid CSS selector.
+            Target element to be dragged into.
+
+        '''
+
+        from_element = self.get_element(from_selector)
+        to_element = self.get_element(to_selector)
+        ActionChains(self.browser).drag_and_drop(from_element, to_element).perform()
+
     def set_values(self, values, clear=True, blur=True, **kwargs):
         '''
         Sets values of elements by CSS selectors.
@@ -1003,6 +1042,21 @@ class WebRunner(object):
                     # Otherwise just use the list / tuple positions
                     self.set_value(row[0], row[1], clear=clear, blur=blur, **kwargs)
 
+    def wait(self, seconds=500):
+        '''
+        Sleeps for some amount of time.
+
+        Parameters
+        ----------
+
+        seconds: int
+            Seconds to sleep for.
+
+        '''
+        # You probably shouldn't use this for anything
+        # real in tests. I use this for pausing execution.
+        sleep(seconds)
+
     def set_value(self, selector, value, clear=True, blur=True, **kwargs):
         '''
         Sets value of an element by CSS selector.
@@ -1027,6 +1081,9 @@ class WebRunner(object):
             passed on to wait_for_visible
 
         '''
+        typing = kwargs.get('typing', False)
+        typing_speed = kwargs.get('typing_speed', 3)
+        typing_max_delay = kwargs.get('typing_max_delay', .33)
         self.wait_for_visible(selector, **kwargs)
 
         elem = self.get_element(selector)
@@ -1036,7 +1093,15 @@ class WebRunner(object):
         else:
             if clear:
                 self.clear(selector)
-            elem.send_keys(value)
+            if typing:
+                for k in value:
+                    delay = random() / typing_speed
+                    if delay > typing_max_delay:
+                        delay = typing_max_delay
+                    sleep(delay)
+                    elem.send_keys(k)
+            else:
+                elem.send_keys(value)
 
         if blur:
             elem.send_keys(Keys.TAB)
