@@ -1,4 +1,9 @@
-|PyWebRunner| A supercharged Python wrapper for Selenium
+.. figure:: http://iws-public.s3.amazonaws.com/Media/PyWebRunner.png
+   :alt: PyWebRunner
+
+   PyWebRunner
+
+A supercharged Python wrapper for Selenium
 
 |Build Status|
 
@@ -155,6 +160,5 @@ Testing Asserts
 -  assert\_value\_of\_element
 -  assert\_visible
 
-.. |PyWebRunner| image:: http://iws-public.s3.amazonaws.com/Media/PyWebRunner.png
 .. |Build Status| image:: https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner.svg?branch=master
    :target: https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner

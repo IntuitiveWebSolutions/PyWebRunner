@@ -1,4 +1,5 @@
 ![PyWebRunner](http://iws-public.s3.amazonaws.com/Media/PyWebRunner.png)
+
 A supercharged Python wrapper for Selenium
 
 [![Build Status](https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner.svg?branch=master)](https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner)
