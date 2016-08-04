@@ -675,7 +675,7 @@ class WebRunner(object):
         for index, command in enumerate(script):
             digits = len(str(len(script)))
             if verbose:
-                cmd = command.keys()[0]
+                cmd = list(command.keys())[0]
                 print('({}) Parsing: {}: {}'.format(str(index + 1).zfill(digits), cmd, command[cmd]))
 
             if errors:
