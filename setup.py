@@ -24,7 +24,7 @@ if os.path.exists('README.rst'):
 
 setup(
     name='PyWebRunner',
-    version='1.5.0',
+    version='1.5.1',
     url='http://github.com/IntuitiveWebSolutions/PyWebRunner',
     license='MIT',
     author='Scott Blevins',
@@ -38,7 +38,7 @@ setup(
     keywords=['Selenium', 'Testing'],
     entry_points='''
         [console_scripts]
-        webrunner=PyWebRunner.webrunner:main
+        webrunner=PyWebRunner.runner:main
     ''',
     classifiers=[
         "Development Status :: 5 - Production/Stable",
