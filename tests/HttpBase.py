@@ -19,7 +19,7 @@ class Server(object):
     silence = open(os.devnull, 'w')
 
     def start(self):
-        if sys.version_info >= (3,0):
+        if sys.version_info >= (3, 0):
             module = 'http.server'
         else:
             module = 'SimpleHTTPServer'

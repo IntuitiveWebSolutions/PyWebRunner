@@ -1,0 +1,74 @@
+- goto: /tests/html/forms.html
+- wait_for_clickable: "#checkbox"
+- click: "#checkbox"
+- assert_checked: "#checkbox"
+- click: "#checkbox"
+- assert_not_checked: "#checkbox"
+- goto: /tests/html/forms.html
+- wait_for_clickable: "#textfield"
+- set_value:
+  - "#textfield"
+  - This is a test
+- set_value:
+  - "#selectfield"
+  - "3"
+- wait_for_text_in_value:
+  - "#textfield"
+  - "This is a test"
+- wait_for_text_in_value:
+  - "#selectfield"
+  - "3"
+- assert_value_of_element:
+  - "#textfield"
+  - This is a test
+- assert_value_of_element:
+  - "#selectfield"
+  - "3"
+- set_value:
+  - "#textfield"
+  - "No clear needed"
+- wait_for_text_in_value:
+  - "#textfield"
+  - No clear needed
+- assert_value_of_element:
+  - "#textfield"
+  - "No clear needed"
+- goto: /tests/html/forms.html
+- wait_for_clickable: "#textfield"
+- set_values: {"#textfield": "AAAAAAAA", "#selectfield": "5"}
+- wait_for_text_in_value:
+  - "#textfield"
+  - AAAAAAAA
+- wait_for_text_in_value:
+  - "#selectfield"
+  - "5"
+- assert_value_of_element:
+  - "#textfield"
+  - AAAAAAAA
+- assert_value_of_element:
+  - "#selectfield"
+  - "5"
+- set_values:
+    - ["#textfield", BBBBBBBB]
+    - ["#selectfield", "6"]
+- wait_for_text_in_value:
+  - "#textfield"
+  - BBBBBBBB
+- wait_for_text_in_value:
+  - "#selectfield"
+  - "6"
+- assert_value_of_element:
+  - "#textfield"
+  - BBBBBBBB
+- assert_value_of_element:
+  - "#selectfield"
+  - "6"
+- set_values:
+  - ["#textfield", CCCCCCCC]
+  - "#selectfield": "7"
+- assert_value_of_element:
+  - "#textfield"
+  - "CCCCCCCC"
+- assert_value_of_element:
+  - "#selectfield"
+  - "7"

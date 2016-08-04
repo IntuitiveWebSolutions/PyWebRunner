@@ -24,7 +24,7 @@ if os.path.exists('README.rst'):
 
 setup(
     name='PyWebRunner',
-    version='1.4.7',
+    version='1.5.0',
     url='http://github.com/IntuitiveWebSolutions/PyWebRunner',
     license='MIT',
     author='Scott Blevins',
@@ -34,13 +34,27 @@ setup(
     platforms='OS Independent',
     packages=['PyWebRunner'],
     include_package_data=True,
-    install_requires=['xvfbwrapper', 'selenium'],
+    install_requires=['xvfbwrapper', 'selenium', 'pyaml'],
     keywords=['Selenium', 'Testing'],
+    entry_points='''
+        [console_scripts]
+        webrunner=PyWebRunner.webrunner:main
+    ''',
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "Intended Audience :: System Administrators",
+        "Intended Audience :: End Users/Desktop",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.2",
+        "Programming Language :: Python :: 3.3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Topic :: Software Development :: Testing",
+        "Topic :: Software Development :: User Interfaces",
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ]
