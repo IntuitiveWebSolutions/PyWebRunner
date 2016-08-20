@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>WebRunner &mdash; PyWebRunner  documentation</title>
+  <title>Documentation &mdash; PyWebRunner  documentation</title>
   
 
   
@@ -77,17 +77,16 @@
             
                 <!-- Local TOC -->
                 <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">WebRunner</a><ul>
-<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#">Documentation</a></li>
+<li><a class="reference internal" href="#uses">Uses</a></li>
+<li><a class="reference internal" href="#installing">Installing</a></li>
+<li><a class="reference internal" href="#basic-examples">Basic Examples</a></li>
+<li><a class="reference internal" href="#yaml-scripts">YAML Scripts</a></li>
+<li><a class="reference internal" href="#browserstack-example">BrowserStack example:</a><ul>
+<li><a class="reference internal" href="#testing">Testing</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#hello-world">Hello World!</a></li>
-<li><a class="reference internal" href="#webtester">WebTester</a><ul>
-<li><a class="reference internal" href="#documentation">Documentation</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#id1">WebRunner</a></li>
-<li><a class="reference internal" href="#id2">WebTester</a></li>
+<li><a class="reference internal" href="#webtester">WebTester</a></li>
 </ul>
 </div>
             
@@ -118,7 +117,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="#">Docs</a> &raquo;</li>
       
-    <li>WebRunner</li>
+    <li>Documentation</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -132,1099 +131,143 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <img alt="http://iws-public.s3.amazonaws.com/Media/PyWebRunner.png" src="http://iws-public.s3.amazonaws.com/Media/PyWebRunner.png" />
-<div class="section" id="webrunner">
-<h1>WebRunner<a class="headerlink" href="#webrunner" title="Permalink to this headline">¶</a></h1>
-<p>A helpful wrapper for Selenium</p>
-<div class="section" id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install PyWebRunner
+  <p><img alt="PyWebRunner" src="http://iws-public.s3.amazonaws.com/Media/PyWebRunner.png" /> A supercharged Python wrapper for Selenium</p>
+<p><a class="reference external" href="https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner"><img alt="Build Status" src="https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner.svg?branch=master" /></a></p>
+<div class="section" id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h1>
+<p>Full documentation can be located here:
+<a class="reference external" href="https://intuitivewebsolutions.github.io/PyWebRunner">https://intuitivewebsolutions.github.io/PyWebRunner</a></p>
+</div>
+<div class="section" id="uses">
+<h1>Uses<a class="headerlink" href="#uses" title="Permalink to this headline">¶</a></h1>
+<p>You could use WebRunner to scrape a website, automate web tasks, or
+anything else you could imagine. It is easy to initialize and use. It&#8217;s
+also compatible with
+<a class="reference external" href="https://www.browserstack.com/automate/python">BrowserStack</a> using
+the command_executor and remote_capabilities examples on that page.</p>
+<p>(Please note that you will need a subscription, username, and API key to
+make it work.)</p>
+</div>
+<div class="section" id="installing">
+<h1>Installing<a class="headerlink" href="#installing" title="Permalink to this headline">¶</a></h1>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">PyWebRunner</span>
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="hello-world">
-<h1>Hello World!<a class="headerlink" href="#hello-world" title="Permalink to this headline">¶</a></h1>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">PyWebRunner</span> <span class="k">import</span> <span class="n">WebRunner</span>
+<div class="section" id="basic-examples">
+<h1>Basic Examples<a class="headerlink" href="#basic-examples" title="Permalink to this headline">¶</a></h1>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Import WebRunner if you aren&#39;t going to assert anything.</span>
+<span class="c1"># WebTester is a sub-class of WebRunner</span>
+<span class="kn">from</span> <span class="nn">PyWebRunner</span> <span class="k">import</span> <span class="n">WebRunner</span>
 
 <span class="c1"># Running headless FireFox is the default.</span>
 <span class="n">wr</span> <span class="o">=</span> <span class="n">WebRunner</span><span class="p">()</span> <span class="c1"># Defaults to xvfb=True, driver=FireFox</span>
 <span class="c1"># If xvfb is not installed, it will be bypassed automatically.</span>
 
-<span class="c1"># If you explicitly don&#39;t want headless operation:</span>
-<span class="n">wr</span> <span class="o">=</span> <span class="n">WebRunner</span><span class="p">(</span><span class="n">xvfb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Once we&#8217;ve initialized WebRunner, we still need to kick off the browser.
-I&#8217;ve made this a manual step so that it is easy to start and stop
-different browsers using the same WebRunner instance if desired.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Start your engines...</span>
-
+<span class="c1"># Start the browser instance.</span>
 <span class="n">wr</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
-<span class="c1"># DO SOME STUFF</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">wr</span><span class="o">.</span><span class="n">current_url</span><span class="p">())</span>
-<span class="c1"># outputs &#39;http://someaddress.here/page.html&#39;</span>
+<span class="c1"># Navigate to a page.</span>
+<span class="n">wr</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;https://www.google.com/&#39;</span><span class="p">)</span>
 
-<span class="n">wr</span><span class="o">.</span><span class="n">click</span><span class="p">(</span><span class="s1">&#39;#some-button&#39;</span><span class="p">)</span> <span class="c1"># Clicks a button.</span>
+<span class="c1"># Fill in a text field.</span>
+<span class="n">wr</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s1">&#39;#lst-ib&#39;</span><span class="p">,</span> <span class="s1">&#39;PyWebRunner&#39;</span><span class="p">)</span>
+<span class="n">wr</span><span class="o">.</span><span class="n">send_key</span><span class="p">(</span><span class="s1">&#39;#lst-ib&#39;</span><span class="p">,</span> <span class="s1">&#39;ENTER&#39;</span><span class="p">)</span>
 
-<span class="n">wr</span><span class="o">.</span><span class="n">js</span><span class="p">(</span><span class="s1">&#39;console.log(&quot;I am executing JS on the page!&quot;);&#39;</span><span class="p">)</span>
+<span class="c1"># Click the link based on a (gross) CSS selector.</span>
+<span class="n">wr</span><span class="o">.</span><span class="n">click</span><span class="p">(</span><span class="s1">&#39;#rso &gt; div:nth-child(1) &gt; div:nth-child(1) &gt; div &gt; h3 &gt; a&#39;</span><span class="p">)</span>
 
-<span class="n">elem</span> <span class="o">=</span> <span class="n">wr</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="s1">&#39;#my-id&#39;</span><span class="p">)</span> <span class="c1"># Returns a selenium element object</span>
+<span class="c1"># Wait for the page to load.</span>
+<span class="n">wr</span><span class="o">.</span><span class="n">wait_for_presence</span><span class="p">(</span><span class="s1">&#39;div.document&#39;</span><span class="p">)</span>
 
-<span class="n">elems</span> <span class="o">=</span> <span class="n">wr</span><span class="o">.</span><span class="n">find_elements</span><span class="p">(</span><span class="s1">&#39;.some-class&#39;</span><span class="p">)</span> <span class="c1"># Returns a list of selenium element objects</span>
+<span class="c1"># Are we there yet?</span>
+<span class="n">wr</span><span class="o">.</span><span class="n">is_text_on_page</span><span class="p">(</span><span class="s1">&#39;A helpful wrapper for Selenium&#39;</span><span class="p">)</span> <span class="c1"># True</span>
 
-<span class="n">form_data</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;#username&#39;</span><span class="p">:</span> <span class="s1">&#39;person&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;#password&#39;</span><span class="p">:</span> <span class="s1">&#39;somepass&#39;</span>
-<span class="p">}</span>
-<span class="n">wr</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">form_data</span><span class="p">)</span> <span class="c1"># Fills a form. Takes a dict of CSS keys and values.</span>
-
+<span class="c1"># Take a screenshot!</span>
 <span class="n">wr</span><span class="o">.</span><span class="n">screenshot</span><span class="p">(</span><span class="s1">&#39;/tmp/screenshot1.png&#39;</span><span class="p">)</span>
 
+<span class="c1"># Stop the browser instance.</span>
 <span class="n">wr</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>As you can see, there is almost no reason to ever interact with the
-selenium browser object directly. This is by design. If you ever find
-yourself needing to, it means that you have uncovered a need that was
-unanticipated by the initial design of this utility.</p>
-<p>If you are reading this, you are a programmer so it would be nice if you
-made the method you require and sent a PR. The more people use and
-develop this framework, the better it will become.</p>
-<p>So even though I don&#8217;t recommend using it, you still have access to the
-selenium browser object.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">wr</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">find_elements_by_id</span><span class="p">(</span><span class="s1">&#39;#some-id&#39;</span><span class="p">)</span> <span class="c1"># Use wr.find_element instead.</span>
+</div>
+<div class="section" id="yaml-scripts">
+<h1>YAML Scripts<a class="headerlink" href="#yaml-scripts" title="Permalink to this headline">¶</a></h1>
+<p>PyWebRunner supports running YAML scripts and includes the <code class="docutils literal"><span class="pre">webrunner</span></code>
+command.</p>
+<p>Let&#8217;s say we made a YAML script for the above example and we called it
+<code class="docutils literal"><span class="pre">script.yml</span></code></p>
+<div class="code yaml highlight-default"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">go</span><span class="p">:</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">google</span><span class="o">.</span><span class="n">com</span><span class="o">/</span>
+<span class="o">-</span> <span class="n">set_value</span><span class="p">:</span>
+  <span class="o">-</span> <span class="s2">&quot;#lst-ib&quot;</span>
+  <span class="o">-</span> <span class="n">PyWebRunner</span>
+<span class="o">-</span> <span class="n">send_key</span><span class="p">:</span>
+  <span class="o">-</span> <span class="s2">&quot;#lst-ib&quot;</span>
+  <span class="o">-</span> <span class="s2">&quot;ENTER&quot;</span>
+<span class="o">-</span> <span class="n">click</span><span class="p">:</span> <span class="s2">&quot;#rso &gt; div:nth-child(1) &gt; div:nth-child(1) &gt; div &gt; h3 &gt; a&quot;</span>
+<span class="o">-</span> <span class="n">wait_for_presence</span><span class="p">:</span> <span class="n">div</span><span class="o">.</span><span class="n">document</span>
+<span class="o">-</span> <span class="n">assert_text_on_page</span><span class="p">:</span> <span class="n">A</span> <span class="n">helpful</span> <span class="n">wrapper</span> <span class="k">for</span> <span class="n">Selenium</span>
+<span class="o">-</span> <span class="n">screenshot</span><span class="p">:</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">screenshot1</span><span class="o">.</span><span class="n">png</span>
 </pre></div>
 </div>
+<p>We can run it like so:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">webrunner</span> <span class="n">script</span><span class="o">.</span><span class="n">yml</span>
+</pre></div>
+</div>
+<p>...and it will behave identically to the Python-based example above.</p>
+</div>
+<div class="section" id="browserstack-example">
+<h1>BrowserStack example:<a class="headerlink" href="#browserstack-example" title="Permalink to this headline">¶</a></h1>
+<p>This library also has first-class support for BrowserStack. Using it is
+not much different than the examples above.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">PyWebRunner</span> <span class="k">import</span> <span class="n">WebRunner</span>
+<span class="c1"># Change any of these values to valid ones.</span>
+<span class="n">desired</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;browser&#39;</span><span class="p">:</span> <span class="s1">&#39;Edge&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;browser_version&#39;</span><span class="p">:</span> <span class="s1">&#39;13.0&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;os&#39;</span><span class="p">:</span> <span class="s1">&#39;Windows&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;os_version&#39;</span><span class="p">:</span> <span class="s1">&#39;10&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;resolution&#39;</span><span class="p">:</span> <span class="s1">&#39;1440x900&#39;</span>
+<span class="p">}</span>
+<span class="c1"># Make sure you plug in your own USERNAME and API_KEY values here.</span>
+<span class="n">wr</span> <span class="o">=</span> <span class="n">WebRunner</span><span class="p">(</span><span class="n">desired_capabilities</span><span class="o">=</span><span class="n">desired</span><span class="p">,</span>
+               <span class="n">command_executor</span><span class="o">=</span><span class="s1">&#39;http://USERNAME:API_KEY@hub.browserstack.com:80/wd/hub&#39;</span><span class="p">,</span>
+                             <span class="n">driver</span><span class="o">=</span><span class="s1">&#39;Remote&#39;</span><span class="p">)</span>
+<span class="n">wr</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="n">wr</span><span class="o">.</span><span class="n">go</span><span class="p">(</span><span class="s1">&#39;http://google.com&#39;</span><span class="p">)</span>
+<span class="c1"># ... Etc.</span>
+</pre></div>
 </div>
 <hr class="docutils" />
+<div class="section" id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
 <div class="section" id="webtester">
 <h1>WebTester<a class="headerlink" href="#webtester" title="Permalink to this headline">¶</a></h1>
 <p>WebTester inherits WebRunner so it has all the same methods that
 WebRunner has but it adds some additional methods that are useful for
 testing.</p>
-<div class="section" id="documentation">
-<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
-</div>
-</div>
-<div class="section" id="id1">
-<h1>WebRunner<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="PyWebRunner.WebRunner">
-<em class="property">class </em><code class="descclassname">PyWebRunner.</code><code class="descname">WebRunner</code><span class="sig-paren">(</span><em>xvfb=True</em>, <em>driver='Firefox'</em>, <em>mootools=False</em>, <em>timeout=90</em>, <em>width=1440</em>, <em>height=1200</em>, <em>firefox_version=46</em>, <em>desired_capabilities='FIREFOX'</em>, <em>command_executor='http://127.0.0.1:4444/wd/hub'</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner" title="Permalink to this definition">¶</a></dt>
-<dd><p>WebRunner runs an instance of Selenium and adds a lot of helpful
-browser methods.</p>
-<p>Generally this class aims to make the experience of using Selenium
-better overall.</p>
-<p>Many functions take a &#8220;selector&#8221; argument.
-These can be any valid CSS selector..
-See <a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Getting_started/Selectors">https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Getting_started/Selectors</a></p>
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.alert_present">
-<code class="descname">alert_present</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.alert_present"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.alert_present" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks to see if an alert is present.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.back">
-<code class="descname">back</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.back"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.back" title="Permalink to this definition">¶</a></dt>
-<dd><p>Goes one step back in the browser&#8217;s history.
-Just a convenient wrapper around the browser&#8217;s back command</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.clear">
-<code class="descname">clear</code><span class="sig-paren">(</span><em>selector</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.clear" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clears value of an element by CSS selector.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.click">
-<code class="descname">click</code><span class="sig-paren">(</span><em>selector</em>, <em>elem=None</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.click"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.click" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clicks an element.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector..</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.click_all">
-<code class="descname">click_all</code><span class="sig-paren">(</span><em>selector</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.click_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.click_all" title="Permalink to this definition">¶</a></dt>
-<dd><p>Clicks all elements.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector..
-All matching elements will be clicked.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.close_alert">
-<code class="descname">close_alert</code><span class="sig-paren">(</span><em>ignore_exception=False</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.close_alert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.close_alert" title="Permalink to this definition">¶</a></dt>
-<dd><p>Closes any alert that is present. Raises an exception if no alert is found.</p>
-<dl class="docutils">
-<dt>ignore_exception: bool</dt>
-<dd>Does not throw an exception if an alert is not present.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.close_all_other_windows">
-<code class="descname">close_all_other_windows</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.close_all_other_windows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.close_all_other_windows" title="Permalink to this definition">¶</a></dt>
-<dd><p>Closes all windows except for the currently active one.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.close_window">
-<code class="descname">close_window</code><span class="sig-paren">(</span><em>window_name=None</em>, <em>title=None</em>, <em>url=None</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.close_window"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.close_window" title="Permalink to this definition">¶</a></dt>
-<dd><p>Close window by name, title, or url.</p>
-<dl class="docutils">
-<dt>window_name: str</dt>
-<dd>The name of the window to switch to.</dd>
-<dt>title: str</dt>
-<dd>The title of the window you wish to switch to.</dd>
-<dt>url: str</dt>
-<dd>URL of the window you want to switch to.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.count">
-<code class="descname">count</code><span class="sig-paren">(</span><em>selector</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.count" title="Permalink to this definition">¶</a></dt>
-<dd><p>Counts the number of elements that match CSS/XPATH selector.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS/XPATH selector to search for. This can be any valid CSS/XPATH selector.</dd>
-</dl>
-<p>int: Number of matching elements.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.current_url">
-<code class="descname">current_url</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.current_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.current_url" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets current URL of the browser object.</p>
-<dl class="docutils">
-<dt>str</dt>
-<dd>The curent URL.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.fill">
-<code class="descname">fill</code><span class="sig-paren">(</span><em>form_dict</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.fill"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.fill" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fills a form using Selenium. This helper will save a lot of time
-and effort because working with form data can be tricky and gross.</p>
-<dl class="docutils">
-<dt>form_dict: dict</dt>
-<dd>Takes in a dict where the keys are CSS selectors
-and the values are what will be applied to them.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.fill_form">
-<code class="descname">fill_form</code><span class="sig-paren">(</span><em>form_list</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.fill_form"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.fill_form" title="Permalink to this definition">¶</a></dt>
-<dd><p>This helper can be used directly but it is much easier
-to use the &#8220;fill&#8221; method instead.</p>
-<dl class="docutils">
-<dt>form_list: list of dict</dt>
-<dd>A list of dictionaries where the key is the search method
-and the value is what is passed to Selenium</dd>
-<dt>clear: bool</dt>
-<dd>True/False value indicating whether or not to clear out
-the input currently in any text inputs.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.find_element">
-<code class="descname">find_element</code><span class="sig-paren">(</span><em>selector</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.find_element"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.find_element" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finds an element by CSS/XPATH selector.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS/XPATH selector to search for. This can be any valid CSS/XPATH selector.</dd>
-</dl>
-<dl class="docutils">
-<dt>selenium.webdriver.remote.webelement.WebElement or None</dt>
-<dd>Returns an element or nothing at all</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.find_elements">
-<code class="descname">find_elements</code><span class="sig-paren">(</span><em>selector</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.find_elements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.find_elements" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finds elements by CSS/XPATH selector.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS/XPATH selector to search for. This can be any valid CSS/XPATH selector.</dd>
-</dl>
-<dl class="docutils">
-<dt>list of selenium.webdriver.remote.webelement.WebElement or list</dt>
-<dd>Returns a list of elements or empty list</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.forward">
-<code class="descname">forward</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Goes one step forward in the browser&#8217;s history.
-Just a convenient wrapper around the browser&#8217;s forward command</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.get_alert">
-<code class="descname">get_alert</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.get_alert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.get_alert" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns instance of <code class="xref py py-obj docutils literal"><span class="pre">Alert</span></code>.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.get_element">
-<code class="descname">get_element</code><span class="sig-paren">(</span><em>selector</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.get_element"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.get_element" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets element by CSS selector.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS/XPATH selector to search for. This can be any valid CSS/XPATH selector.</dd>
-</dl>
-<dl class="docutils">
-<dt>selenium.webdriver.remote.webelement.WebElement</dt>
-<dd>A selenium element object.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.get_elements">
-<code class="descname">get_elements</code><span class="sig-paren">(</span><em>selector</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.get_elements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.get_elements" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets elements by CSS selector.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-</dl>
-<dl class="docutils">
-<dt>list of selenium.webdriver.remote.webelement.WebElement</dt>
-<dd>A list of selenium element objects.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.get_page_source">
-<code class="descname">get_page_source</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.get_page_source"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.get_page_source" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets the source code of the page.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.get_text">
-<code class="descname">get_text</code><span class="sig-paren">(</span><em>selector</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.get_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.get_text" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets text from inside of an element by CSS selector.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-</dl>
-<dl class="docutils">
-<dt>str</dt>
-<dd>The text from inside of a selenium element object.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.get_texts">
-<code class="descname">get_texts</code><span class="sig-paren">(</span><em>selector</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.get_texts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.get_texts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets all the text from all elements found by CSS selector.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-</dl>
-<dl class="docutils">
-<dt>list of str</dt>
-<dd>A list of text strings from inside of all found selenium element objects.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.get_value">
-<code class="descname">get_value</code><span class="sig-paren">(</span><em>selector</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.get_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.get_value" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets value of an element by CSS selector.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-</dl>
-<dl class="docutils">
-<dt>str</dt>
-<dd>The value of a selenium element object.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.go">
-<code class="descname">go</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.go"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.go" title="Permalink to this definition">¶</a></dt>
-<dd><p>Go to a web address. (self.browser should be available, but not needed.)</p>
-<dl class="docutils">
-<dt>address: str</dt>
-<dd>The address (URL)</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.hover">
-<code class="descname">hover</code><span class="sig-paren">(</span><em>selector</em>, <em>click=False</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.hover"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.hover" title="Permalink to this definition">¶</a></dt>
-<dd><p>Hover over the element matched by selector and optionally click it.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>Any valid CSS selector</dd>
-<dt>click: bool</dt>
-<dd>Whether or not to click the element after hovering
-defaults to False</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.is_text_on_page">
-<code class="descname">is_text_on_page</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.is_text_on_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.is_text_on_page" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finds text if it is present on the page.</p>
-<dl class="docutils">
-<dt>text: str</dt>
-<dd>The text to search for.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.js">
-<code class="descname">js</code><span class="sig-paren">(</span><em>js_str</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.js"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.js" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run some JavaScript and return the result.</p>
-<dl class="docutils">
-<dt>js_str: str</dt>
-<dd>A string containing some valid JavaScript to be ran on the page.</dd>
-</dl>
-<dl class="docutils">
-<dt>str or bool or list or dict</dt>
-<dd>Returns the result of the JS evaluation.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.refresh_page">
-<code class="descname">refresh_page</code><span class="sig-paren">(</span><em>refresh_method='url'</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.refresh_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.refresh_page" title="Permalink to this definition">¶</a></dt>
-<dd><p>Refreshes the current page</p>
-<dl class="docutils">
-<dt>method: str</dt>
-<dd>The method used to refresh the page.
-Defaults to &#8220;url&#8221; which navigates to the current_url</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.save_page_source">
-<code class="descname">save_page_source</code><span class="sig-paren">(</span><em>path='/tmp/selenium-page-source.html'</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.save_page_source"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.save_page_source" title="Permalink to this definition">¶</a></dt>
-<dd><p>Saves the raw page html in it&#8217;s current state. Takes a path as a parameter.</p>
-<dl class="docutils">
-<dt>path: str</dt>
-<dd>Defaults to: /tmp/selenium-page-source.html</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.screenshot">
-<code class="descname">screenshot</code><span class="sig-paren">(</span><em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.screenshot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.screenshot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Saves a screenshot. Takes a path as a parameter.</p>
-<dl class="docutils">
-<dt>path: str</dt>
-<dd>Defaults to: /tmp/selenium-screenshot.png</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.scroll_browser">
-<code class="descname">scroll_browser</code><span class="sig-paren">(</span><em>amount</em>, <em>direction='down'</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.scroll_browser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.scroll_browser" title="Permalink to this definition">¶</a></dt>
-<dd><p>Scrolls the browser by the given amount in the specified direction.</p>
-<dl class="docutils">
-<dt>amount: int</dt>
-<dd>number of pixels to scroll</dd>
-<dt>direction: str</dt>
-<dd>(up, down, left, right) defaults to &#8216;down&#8217;</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.scroll_to_element">
-<code class="descname">scroll_to_element</code><span class="sig-paren">(</span><em>selector</em>, <em>elem=None</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.scroll_to_element"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.scroll_to_element" title="Permalink to this definition">¶</a></dt>
-<dd><p>Scrolls the given element into view.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>Any valid css selector</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.send_key">
-<code class="descname">send_key</code><span class="sig-paren">(</span><em>selector</em>, <em>key</em>, <em>wait_for='presence'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.send_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.send_key" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets value of an element by CSS selector.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>key: str</dt>
-<dd><p class="first">A str representation of a special key to send.</p>
-<p>Some available keys and their string representations:</p>
-<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;ADD&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue025</span><span class="s1">&#39;</span>
-<span class="s1">&#39;ALT&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue00a</span><span class="s1">&#39;</span>
-<span class="s1">&#39;ARROW_DOWN&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue015</span><span class="s1">&#39;</span>
-<span class="s1">&#39;ARROW_LEFT&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue012</span><span class="s1">&#39;</span>
-<span class="s1">&#39;ARROW_RIGHT&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue014</span><span class="s1">&#39;</span>
-<span class="s1">&#39;ARROW_UP&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue013</span><span class="s1">&#39;</span>
-<span class="s1">&#39;BACKSPACE&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue003</span><span class="s1">&#39;</span>
-<span class="s1">&#39;BACK_SPACE&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue003</span><span class="s1">&#39;</span>
-<span class="s1">&#39;CANCEL&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue001</span><span class="s1">&#39;</span>
-<span class="s1">&#39;CLEAR&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue005</span><span class="s1">&#39;</span>
-<span class="s1">&#39;COMMAND&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue03d</span><span class="s1">&#39;</span>
-<span class="s1">&#39;CONTROL&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue009</span><span class="s1">&#39;</span>
-<span class="s1">&#39;DECIMAL&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue028</span><span class="s1">&#39;</span>
-<span class="s1">&#39;DELETE&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue017</span><span class="s1">&#39;</span>
-<span class="s1">&#39;DIVIDE&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue029</span><span class="s1">&#39;</span>
-<span class="s1">&#39;DOWN&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue015</span><span class="s1">&#39;</span>
-<span class="s1">&#39;END&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue010</span><span class="s1">&#39;</span>
-<span class="s1">&#39;ENTER&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue007</span><span class="s1">&#39;</span>
-<span class="s1">&#39;EQUALS&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue019</span><span class="s1">&#39;</span>
-<span class="s1">&#39;ESCAPE&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue00c</span><span class="s1">&#39;</span>
-<span class="s1">&#39;F1&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue031</span><span class="s1">&#39;</span>
-<span class="s1">&#39;F10&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue03a</span><span class="s1">&#39;</span>
-<span class="s1">&#39;F11&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue03b</span><span class="s1">&#39;</span>
-<span class="s1">&#39;F12&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue03c</span><span class="s1">&#39;</span>
-<span class="s1">&#39;F2&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue032</span><span class="s1">&#39;</span>
-<span class="s1">&#39;F3&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue033</span><span class="s1">&#39;</span>
-<span class="s1">&#39;F4&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue034</span><span class="s1">&#39;</span>
-<span class="s1">&#39;F5&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue035</span><span class="s1">&#39;</span>
-<span class="s1">&#39;F6&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue036</span><span class="s1">&#39;</span>
-<span class="s1">&#39;F7&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue037</span><span class="s1">&#39;</span>
-<span class="s1">&#39;F8&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue038</span><span class="s1">&#39;</span>
-<span class="s1">&#39;F9&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue039</span><span class="s1">&#39;</span>
-<span class="s1">&#39;HELP&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue002</span><span class="s1">&#39;</span>
-<span class="s1">&#39;HOME&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue011</span><span class="s1">&#39;</span>
-<span class="s1">&#39;INSERT&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue016</span><span class="s1">&#39;</span>
-<span class="s1">&#39;LEFT&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue012</span><span class="s1">&#39;</span>
-<span class="s1">&#39;LEFT_ALT&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue00a</span><span class="s1">&#39;</span>
-<span class="s1">&#39;LEFT_CONTROL&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue009</span><span class="s1">&#39;</span>
-<span class="s1">&#39;LEFT_SHIFT&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue008</span><span class="s1">&#39;</span>
-<span class="s1">&#39;META&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue03d</span><span class="s1">&#39;</span>
-<span class="s1">&#39;MULTIPLY&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue024</span><span class="s1">&#39;</span>
-<span class="s1">&#39;NULL&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue000</span><span class="s1">&#39;</span>
-<span class="s1">&#39;NUMPAD0&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue01a</span><span class="s1">&#39;</span>
-<span class="s1">&#39;NUMPAD1&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue01b</span><span class="s1">&#39;</span>
-<span class="s1">&#39;NUMPAD2&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue01c</span><span class="s1">&#39;</span>
-<span class="s1">&#39;NUMPAD3&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue01d</span><span class="s1">&#39;</span>
-<span class="s1">&#39;NUMPAD4&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue01e</span><span class="s1">&#39;</span>
-<span class="s1">&#39;NUMPAD5&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue01f</span><span class="s1">&#39;</span>
-<span class="s1">&#39;NUMPAD6&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue020</span><span class="s1">&#39;</span>
-<span class="s1">&#39;NUMPAD7&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue021</span><span class="s1">&#39;</span>
-<span class="s1">&#39;NUMPAD8&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue022</span><span class="s1">&#39;</span>
-<span class="s1">&#39;NUMPAD9&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue023</span><span class="s1">&#39;</span>
-<span class="s1">&#39;PAGE_DOWN&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue00f</span><span class="s1">&#39;</span>
-<span class="s1">&#39;PAGE_UP&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue00e</span><span class="s1">&#39;</span>
-<span class="s1">&#39;PAUSE&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue00b</span><span class="s1">&#39;</span>
-<span class="s1">&#39;RETURN&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue006</span><span class="s1">&#39;</span>
-<span class="s1">&#39;RIGHT&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue014</span><span class="s1">&#39;</span>
-<span class="s1">&#39;SEMICOLON&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue018</span><span class="s1">&#39;</span>
-<span class="s1">&#39;SEPARATOR&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue026</span><span class="s1">&#39;</span>
-<span class="s1">&#39;SHIFT&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue008</span><span class="s1">&#39;</span>
-<span class="s1">&#39;SPACE&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue00d</span><span class="s1">&#39;</span>
-<span class="s1">&#39;SUBTRACT&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue027</span><span class="s1">&#39;</span>
-<span class="s1">&#39;TAB&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue004</span><span class="s1">&#39;</span>
-<span class="s1">&#39;UP&#39;</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="se">\ue013</span><span class="s1">&#39;</span>
-</pre></div>
-</div>
-</dd>
-<dt>kwargs:</dt>
-<dd>passed on to wait_for_*</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.set_select_by_text">
-<code class="descname">set_select_by_text</code><span class="sig-paren">(</span><em>select</em>, <em>text</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.set_select_by_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.set_select_by_text" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the selected value of a select element by the visible text.</p>
-<dl class="docutils">
-<dt>select: str or selenium.webdriver.remote.webelement.WebElement</dt>
-<dd>Any valid CSS selector or a selenium element</dd>
-<dt>text: str</dt>
-<dd>The visible text in the select element option. (Not the value)</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.set_select_by_value">
-<code class="descname">set_select_by_value</code><span class="sig-paren">(</span><em>select</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.set_select_by_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.set_select_by_value" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the selected value of a select element by the value.</p>
-<dl class="docutils">
-<dt>select: str or selenium.webdriver.remote.webelement.WebElement</dt>
-<dd>Any valid CSS selector or a selenium element</dd>
-<dt>value: str</dt>
-<dd>The value on the select element option. (Not the visible text)</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.set_selectize">
-<code class="descname">set_selectize</code><span class="sig-paren">(</span><em>selector</em>, <em>value</em>, <em>text=None</em>, <em>clear=True</em>, <em>blur=False</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.set_selectize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.set_selectize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets visible value of a selectize control based on the &#8220;selectized&#8221; element.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>value: str</dt>
-<dd>The value of the option to select.
-(Stored Value)</dd>
-<dt>text: str</dt>
-<dd>The visible value that the user sees.
-(Visible value, if different than the stored value)</dd>
-<dt>clear: bool</dt>
-<dd>Whether or not we should clear the selectize value first.
-Defaults to True</dd>
-<dt>blur: bool</dt>
-<dd>Whether or not we should blur the element after setting the value.
-This corresponds to the &#8216;selectOnTab&#8217; selecize setting.
-Defaults to False</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.set_value">
-<code class="descname">set_value</code><span class="sig-paren">(</span><em>selector</em>, <em>value</em>, <em>clear=True</em>, <em>blur=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.set_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.set_value" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets value of an element by CSS selector.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>value: str</dt>
-<dd>The value to set on the element matched by the selector.</dd>
-<dt>clear: bool</dt>
-<dd>Whether or not we should clear the element&#8217;s value first.
-If false, value will be appended to the current value of the element.</dd>
-<dt>blur: bool</dt>
-<dd>Whether or not we should blur the element after setting the value.
-Defaults to True</dd>
-<dt>kwargs:</dt>
-<dd>passed on to wait_for_visible</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.set_values">
-<code class="descname">set_values</code><span class="sig-paren">(</span><em>values</em>, <em>clear=True</em>, <em>blur=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.set_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.set_values" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets values of elements by CSS selectors.</p>
-<dl class="docutils">
-<dt>values: list of list or dict or list of dict</dt>
-<dd>A list of lists where index 0 is a selector string and 1 is a value.</dd>
-<dt>clear: bool</dt>
-<dd>Whether or not we should clear the element&#8217;s value first.
-If false, value will be appended to the current value of the element.</dd>
-<dt>blur: bool</dt>
-<dd>Whether or not we should blur the element after setting the value.
-Defaults to True</dd>
-<dt>kwargs:</dt>
-<dd>passed on to wait_for_visible</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.start">
-<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.start" title="Permalink to this definition">¶</a></dt>
-<dd><p>Starts Selenium and (optionally) starts XVFB first.</p>
-<p>Note:</p>
-<blockquote>
-<div><p>XVFB is typically used with headless runs. If you do not use XVFB
-and the browser you have selected has a GUI (Firefox, Chrome...)
-then your browser will launch and you will be able to view the
-test as it is being ran.</p>
-<p>This is particularly useful for problematic test runs or when building
-new tests.</p>
-</div></blockquote>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.stop">
-<code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.stop" title="Permalink to this definition">¶</a></dt>
-<dd><p>Stops Selenium. Also stops XVFB if it was launched as a part of this
-class run.</p>
-<p>Note:</p>
-<blockquote>
-<div>Anything you don&#8217;t stop here will need to be cleaned up with a kill
-command if you launched it outside of nosetests.</div></blockquote>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.switch_to_window">
-<code class="descname">switch_to_window</code><span class="sig-paren">(</span><em>window_name=None</em>, <em>title=None</em>, <em>url=None</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.switch_to_window"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.switch_to_window" title="Permalink to this definition">¶</a></dt>
-<dd><p>Switch to window by name, title, or url.</p>
-<dl class="docutils">
-<dt>window_name: str</dt>
-<dd>The name of the window to switch to.</dd>
-<dt>title: str</dt>
-<dd>The title of the window you wish to switch to.</dd>
-<dt>url: str</dt>
-<dd>URL of the window you want to switch to.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.wait_for">
-<code class="descname">wait_for</code><span class="sig-paren">(</span><em>method</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wait for the supplied method to return True. A simple wrapper for _wait_for().</p>
-<dl class="docutils">
-<dt>method: callable</dt>
-<dd>The function that determines the conditions for the wait to finish</dd>
-<dt>timeout: int</dt>
-<dd>Number of seconds to wait for <cite>method</cite> to return True</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.wait_for_alert">
-<code class="descname">wait_for_alert</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for_alert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for_alert" title="Permalink to this definition">¶</a></dt>
-<dd><p>Shortcut for waiting for alert. If it not ends with exception, it
-returns that alert.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.wait_for_all_invisible">
-<code class="descname">wait_for_all_invisible</code><span class="sig-paren">(</span><em>selector=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for_all_invisible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for_all_invisible" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wait for all elements that match selector to be invisible.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>kwargs:</dt>
-<dd>Passed on to _wait_for</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.wait_for_clickable">
-<code class="descname">wait_for_clickable</code><span class="sig-paren">(</span><em>selector=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for_clickable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for_clickable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wait for an element to be clickable.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>kwargs:</dt>
-<dd>Passed on to _wait_for</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.wait_for_invisible">
-<code class="descname">wait_for_invisible</code><span class="sig-paren">(</span><em>selector=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for_invisible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for_invisible" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wait for an element to be invisible.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>kwargs:</dt>
-<dd>Passed on to _wait_for</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.wait_for_js">
-<code class="descname">wait_for_js</code><span class="sig-paren">(</span><em>js_script</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for_js"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for_js" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wait for the given JS to return true.</p>
-<dl class="docutils">
-<dt>js_script: str</dt>
-<dd>valid JS that will run in the page dom</dd>
-<dt>kwargs:</dt>
-<dd>passed on to _wait_for</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.wait_for_ko">
-<code class="descname">wait_for_ko</code><span class="sig-paren">(</span><em>selector=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for_ko"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for_ko" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wait for an element to be bound by Knockout JS.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>kwargs:</dt>
-<dd>Passed on to _wait_for</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.wait_for_opacity">
-<code class="descname">wait_for_opacity</code><span class="sig-paren">(</span><em>selector</em>, <em>opacity</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for_opacity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for_opacity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wait for an element to reach a specific opacity.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>opacity: float</dt>
-<dd>The opacity to wait for.</dd>
-<dt>kwargs:</dt>
-<dd>Passed on to _wait_for</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.wait_for_presence">
-<code class="descname">wait_for_presence</code><span class="sig-paren">(</span><em>selector=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for_presence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for_presence" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wait for an element to be present. (Does not need to be visible.)</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>kwargs:</dt>
-<dd>Passed on to _wait_for</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.wait_for_selected">
-<code class="descname">wait_for_selected</code><span class="sig-paren">(</span><em>selector=''</em>, <em>selected=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for_selected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for_selected" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wait for an element (checkbox/radio) to be selected.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>selected: bool</dt>
-<dd>Whether or not the element should be selected. Default True</dd>
-<dt>kwargs:</dt>
-<dd>Passed on to _wait_for</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.wait_for_text">
-<code class="descname">wait_for_text</code><span class="sig-paren">(</span><em>selector=''</em>, <em>text=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for_text" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wait for an element to contain a specific string.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>text: str</dt>
-<dd>The string to look for. This must be precise.
-(Case, punctuation, UTF characters... etc.)</dd>
-<dt>kwargs:</dt>
-<dd>Passed on to _wait_for</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.wait_for_text_in_value">
-<code class="descname">wait_for_text_in_value</code><span class="sig-paren">(</span><em>selector=''</em>, <em>text=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for_text_in_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for_text_in_value" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wait for an element&#8217;s value to contain a specific string.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>text: str</dt>
-<dd>The string to look for. This must be precise.
-(Case, punctuation, UTF characters... etc.)</dd>
-<dt>kwargs:</dt>
-<dd>Passed on to _wait_for</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.wait_for_title">
-<code class="descname">wait_for_title</code><span class="sig-paren">(</span><em>title</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for_title"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for_title" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wait for the page title to match given title.</p>
-<dl class="docutils">
-<dt>title: str</dt>
-<dd>The page title to wait for</dd>
-<dt>kwargs:</dt>
-<dd>Passed on to _wait_for</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.wait_for_url">
-<code class="descname">wait_for_url</code><span class="sig-paren">(</span><em>url=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for_url" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wait for the current url to match the given url.</p>
-<dl class="docutils">
-<dt>url: str</dt>
-<dd>A regular expression to match against the current url</dd>
-<dt>kwargs:</dt>
-<dd>Passed on to _wait_for</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.wait_for_value">
-<code class="descname">wait_for_value</code><span class="sig-paren">(</span><em>selector=''</em>, <em>value=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for_value" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wait for an element to contain a specific string.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>value: str</dt>
-<dd>The string to look for. This must be precise.
-(Case, punctuation, UTF characters... etc.)</dd>
-<dt>kwargs:</dt>
-<dd>Passed on to _wait_for</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebRunner.wait_for_visible">
-<code class="descname">wait_for_visible</code><span class="sig-paren">(</span><em>selector=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebRunner.html#WebRunner.wait_for_visible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebRunner.wait_for_visible" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wait for an element to be visible.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>kwargs:</dt>
-<dd>Passed on to _wait_for</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="id2">
-<h1>WebTester<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="PyWebRunner.WebTester">
-<em class="property">class </em><code class="descclassname">PyWebRunner.</code><code class="descname">WebTester</code><span class="sig-paren">(</span><em>base_url='http://127.0.0.1:5000'</em>, <em>xvfb=True</em>, <em>driver='Firefox'</em>, <em>mootools=False</em>, <em>timeout=90</em>, <em>width=1440</em>, <em>height=1200</em>, <em>root_path='./'</em>, <em>firefox_version=46</em>, <em>desired_capabilities='FIREFOX'</em>, <em>command_executor='http://127.0.0.1:4444/wd/hub'</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester" title="Permalink to this definition">¶</a></dt>
-<dd><p>A class that extends WebRunner and TestCase This class adds
-some additional testing capabilities and shortcuts to
-WebRunner.</p>
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_alert_not_present">
-<code class="descname">assert_alert_not_present</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_alert_not_present"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_alert_not_present" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts that an alert does not exist.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_alert_present">
-<code class="descname">assert_alert_present</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_alert_present"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_alert_present" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts that an alert exists.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_checked">
-<code class="descname">assert_checked</code><span class="sig-paren">(</span><em>selector</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_checked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_checked" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts that the element is checked.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_element_contains_text">
-<code class="descname">assert_element_contains_text</code><span class="sig-paren">(</span><em>selector</em>, <em>text</em>, <em>wait_for='presence'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_element_contains_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_element_contains_text" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts that the text can be found inside of the element
-obtained from a given CSS selector.</p>
-<dl class="docutils">
-<dt>text: str</dt>
-<dd>The string to look for. Must be exact.</dd>
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>wait_for: str</dt>
-<dd>&#8216;presence&#8217; or &#8216;visible&#8217; - defaults to presence</dd>
-<dt>kwargs:</dt>
-<dd>passed on to wait_for_*</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_element_has_class">
-<code class="descname">assert_element_has_class</code><span class="sig-paren">(</span><em>selector</em>, <em>cls</em>, <em>wait_for='presence'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_element_has_class"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_element_has_class" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts the element obtained from a given CSS selector has specified class.
-Parameters
-&#8212;&#8212;&#8212;-
-selector: str</p>
-<blockquote>
-<div>Any valid css selector</div></blockquote>
-<dl class="docutils">
-<dt>class: str</dt>
-<dd>The class to check for</dd>
-<dt>wait_for: str</dt>
-<dd>&#8216;presence&#8217; or &#8216;visible&#8217; - defaults to presence</dd>
-<dt>kwargs:</dt>
-<dd>passed on to wait_for_*</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_element_not_has_class">
-<code class="descname">assert_element_not_has_class</code><span class="sig-paren">(</span><em>selector</em>, <em>cls</em>, <em>wait_for='presence'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_element_not_has_class"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_element_not_has_class" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts the element obtained from a given CSS selector does not have
-the specified class.
-Parameters
-&#8212;&#8212;&#8212;-
-selector: str</p>
-<blockquote>
-<div>Any valid css selector</div></blockquote>
-<dl class="docutils">
-<dt>class: str</dt>
-<dd>The class to check for</dd>
-<dt>wait_for: str</dt>
-<dd>&#8216;presence&#8217; or &#8216;visible&#8217; - defaults to presence</dd>
-<dt>kwargs:</dt>
-<dd>passed on to wait_for_*</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_exists">
-<code class="descname">assert_exists</code><span class="sig-paren">(</span><em>selector</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_exists" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts that the element found from a given CSS selector exists on the page.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_found">
-<code class="descname">assert_found</code><span class="sig-paren">(</span><em>selector</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_found"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_found" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts that the element can be found.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_not_checked">
-<code class="descname">assert_not_checked</code><span class="sig-paren">(</span><em>selector</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_not_checked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_not_checked" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts that the element is not checked.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_not_found">
-<code class="descname">assert_not_found</code><span class="sig-paren">(</span><em>selector</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_not_found"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_not_found" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts that the element cannot be found.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_not_visible">
-<code class="descname">assert_not_visible</code><span class="sig-paren">(</span><em>selector</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_not_visible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_not_visible" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts that the element found from a given CSS selector
-is NOT visible on the page.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_text_in_element">
-<code class="descname">assert_text_in_element</code><span class="sig-paren">(</span><em>selector</em>, <em>text</em>, <em>wait_for='presence'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_text_in_element"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_text_in_element" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts that the text can be found inside of the element
-obtained from a given CSS selector.</p>
-<dl class="docutils">
-<dt>text: str</dt>
-<dd>The string to look for. Must be exact.</dd>
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>wait_for: str</dt>
-<dd>&#8216;presence&#8217; or &#8216;visible&#8217; - defaults to presence</dd>
-<dt>kwargs:</dt>
-<dd>passed on to wait_for_*</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_text_in_elements">
-<code class="descname">assert_text_in_elements</code><span class="sig-paren">(</span><em>selector</em>, <em>text</em>, <em>wait_for='presence'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_text_in_elements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_text_in_elements" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts that the text can be found inside of the elements
-obtained from a given CSS selector.</p>
-<dl class="docutils">
-<dt>text: str</dt>
-<dd>The string to look for. Must be exact.</dd>
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>wait_for: str</dt>
-<dd>&#8216;presence&#8217; or &#8216;visible&#8217; - defaults to presence</dd>
-<dt>kwargs:</dt>
-<dd>passed on to wait_for_*</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_text_in_page">
-<code class="descname">assert_text_in_page</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_text_in_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_text_in_page" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts that the text exists on the page.</p>
-<dl class="docutils">
-<dt>text: str</dt>
-<dd>Text to search for.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_text_not_in_page">
-<code class="descname">assert_text_not_in_page</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_text_not_in_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_text_not_in_page" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts that the text does not exist on the page.</p>
-<dl class="docutils">
-<dt>text: str</dt>
-<dd>Text to search for.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_url">
-<code class="descname">assert_url</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_url" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts that the current URL is equal to a specific value.</p>
-<dl class="docutils">
-<dt>url: str</dt>
-<dd>The URL to assert.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_value_of_element">
-<code class="descname">assert_value_of_element</code><span class="sig-paren">(</span><em>selector</em>, <em>value</em>, <em>wait_for='presence'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_value_of_element"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_value_of_element" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts the value of the element obtained from a given CSS selector.</p>
-<dl class="docutils">
-<dt>value: str</dt>
-<dd>The string to look for. Must be exact.</dd>
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>wait_for: str</dt>
-<dd>&#8216;presence&#8217; or &#8216;visible&#8217; - defaults to presence</dd>
-<dt>kwargs:</dt>
-<dd>passed on to wait_for_*</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.assert_visible">
-<code class="descname">assert_visible</code><span class="sig-paren">(</span><em>selector</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.assert_visible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.assert_visible" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asserts that the element found from a given CSS selector is visible on the page.</p>
-<dl class="docutils">
-<dt>selector: str</dt>
-<dd>A CSS selector to search for. This can be any valid CSS selector.</dd>
-<dt>kwargs:</dt>
-<dd>passed on to wait_for_presence</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.goto">
-<code class="descname">goto</code><span class="sig-paren">(</span><em>url</em>, <em>wait_for_visible=None</em>, <em>wait_for_presence=None</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.goto"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.goto" title="Permalink to this definition">¶</a></dt>
-<dd><p>Shortcut to go to a relative path of the base_url. Useful for navigation
-in the same website.</p>
-<dl class="docutils">
-<dt>url: str</dt>
-<dd>Relative url to go to.</dd>
-<dt>wait_for_visible: str</dt>
-<dd>CSS selector to wait for visibility of after navigation.</dd>
-<dt>wait_for_presence: str</dt>
-<dd>CSS Selector to wait for presence of after navigation.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyWebRunner.WebTester.wait">
-<code class="descname">wait</code><span class="sig-paren">(</span><em>seconds=500</em><span class="sig-paren">)</span><a class="reference internal" href="modules/PyWebRunner/WebTester.html#WebTester.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyWebRunner.WebTester.wait" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sleeps for some amount of time.</p>
-<dl class="docutils">
-<dt>seconds: int</dt>
-<dd>Seconds to sleep for.</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+<ul class="simple">
+<li>assert_alert_not_present</li>
+<li>assert_alert_present</li>
+<li>assert_checked</li>
+<li>assert_element_contains_text</li>
+<li>assert_element_has_class</li>
+<li>assert_element_not_has_class</li>
+<li>assert_exists</li>
+<li>assert_found</li>
+<li>assert_not_checked</li>
+<li>assert_not_found</li>
+<li>assert_not_visible</li>
+<li>assert_text_in_element</li>
+<li>assert_text_in_elements</li>
+<li>assert_text_in_page</li>
+<li>assert_text_not_in_page</li>
+<li>assert_url</li>
+<li>assert_value_of_element</li>
+<li>assert_visible</li>
+</ul>
 </div>
 
 
