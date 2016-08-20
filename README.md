@@ -113,7 +113,7 @@ wr.go('http://google.com')
 
 WebTester inherits WebRunner so it has all the same methods that WebRunner has but it adds some additional methods that are useful for testing.
 
-#### Testing Asserts
+### Testing Asserts
 - assert_alert_not_present
 - assert_alert_present
 - assert_checked

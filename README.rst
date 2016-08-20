@@ -139,7 +139,7 @@ WebRunner has but it adds some additional methods that are useful for
 testing.
 
 Testing Asserts
-^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~
 
 -  assert\_alert\_not\_present
 -  assert\_alert\_present
