@@ -261,14 +261,17 @@ class WebRunner(object):
         return return_value
 
     def _import(self, to_import):
-        parts = to_import.split('.')
-        if len(parts) == 0:
-            if not self.yaml_funcs.get(to_import):
-                self.yaml_funcs[to_import] = importlib.import_module(to_import)
-        else:
-            if not self.yaml_funcs.get(parts[-1]):
-                module = importlib.import_module(*parts)
-                self.yaml_funcs[parts[-1]] = getattr(module, parts[-1])
+        try:
+            parts = to_import.split('.')
+            if len(parts) == 0:
+                if not self.yaml_funcs.get(to_import):
+                    self.yaml_funcs[to_import] = importlib.import_module(to_import)
+            else:
+                if not self.yaml_funcs.get(parts[-1]):
+                    module = importlib.import_module(*parts)
+                    self.yaml_funcs[parts[-1]] = getattr(module, parts[-1])
+        except SystemError:
+            print("Sorry, Python < 3.5 can't import {} via YAML.".format(to_import))
 
     def _run_command(self, command):
         '''
