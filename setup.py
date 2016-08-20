@@ -11,6 +11,7 @@ try:
 except ImportError:
     from distutils.core import setup
 
+
 def read(fname):
     try:
         return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -24,13 +25,13 @@ if os.path.exists('README.rst'):
 
 setup(
     name='PyWebRunner',
-    version='1.5.2',
+    version='1.6.0',
     url='http://github.com/IntuitiveWebSolutions/PyWebRunner',
     license='MIT',
     author='Scott Blevins',
     author_email='scott@britecore.com',
     description='A library that extends and improves the Selenium python library.',
-    long_description= long_description+'\n'+read('CHANGES'),
+    long_description=long_description + '\n' + read('CHANGES'),
     platforms='OS Independent',
     packages=['PyWebRunner'],
     include_package_data=True,

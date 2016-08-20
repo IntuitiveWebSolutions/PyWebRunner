@@ -13,15 +13,10 @@ class WebTester(WebRunner):
 
     base_url = None
 
-    def __init__(self, base_url='http://127.0.0.1:5000', xvfb=True,
-                 driver='Firefox', mootools=False, timeout=90,
-                 width=1440, height=1200, root_path='./', firefox_version=46,
-                 desired_capabilities='FIREFOX',
-                 command_executor='http://127.0.0.1:4444/wd/hub'):
-        self.base_url = base_url
-        self.root_path = root_path
-        WebRunner.__init__(self, xvfb, driver, mootools, timeout, width, height,
-                           firefox_version, desired_capabilities, command_executor)
+    def __init__(self, **kwargs):
+        self.base_url = kwargs.get('base_url', 'http://127.0.0.1:5000')
+        self.root_path = kwargs.get('', './')
+        WebRunner.__init__(self, **kwargs)
 
     def goto(self, url, wait_for_visible=None, wait_for_presence=None):
         '''
@@ -238,6 +233,30 @@ class WebTester(WebRunner):
 
         element_value = self.get_text(selector)
         assert any([text in element_value, text == element_value]) == True, "{} not in or equal to {}".format(text, element_value)
+
+    def assert_text_in_log(self, text):
+        '''
+        Asserts that the text can be found inside of the browser log.
+
+        Parameters
+        ----------
+        text: str
+            The string to look for. Must be exact.
+        '''
+        log = self.get_log_text()
+        assert text in log, "{} in in {}".format(text, log)
+
+    def assert_text_not_in_log(self, text):
+        '''
+        Asserts that the text cannnot be found inside of the browser log.
+
+        Parameters
+        ----------
+        text: str
+            The string to look for. Must be exact.
+        '''
+        log = self.get_log_text()
+        assert text not in log, "{} in in {}".format(text, log)
 
     def assert_element_contains_text(self, selector, text, wait_for='presence', **kwargs):
         '''
