@@ -16,6 +16,7 @@ sys.path.insert(0, '..')
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
     'sphinxtogithub',
