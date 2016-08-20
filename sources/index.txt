@@ -2,12 +2,6 @@
 
 |Build Status|
 
-Documentation
-~~~~~~~~~~~~~
-
-Full documentation can be located here:
-https://intuitivewebsolutions.github.io/PyWebRunner
-
 Uses
 ~~~~
 
@@ -134,7 +128,7 @@ WebRunner has but it adds some additional methods that are useful for
 testing.
 
 Testing Asserts
-^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~
 
 -  assert\_alert\_not\_present
 -  assert\_alert\_present
@@ -160,16 +154,16 @@ Testing Asserts
    :target: https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner
 
 Documentation
-*************
+~~~~~~~~~~~~~
 
 WebRunner
-=========
+~~~~~~~~~
 
 .. autoclass:: PyWebRunner.WebRunner
     :members:
 
 WebTester
-=========
+~~~~~~~~~
 
 .. autoclass:: PyWebRunner.WebTester
     :members:
