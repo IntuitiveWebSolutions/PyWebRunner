@@ -72,6 +72,8 @@
 - assert_value_of_element:
   - "#selectfield"
   - "7"
+- import: random.randint
+- import: random.choice
 - set_value:
   - "#textfield"
   - "(( randint|1,2 ))"
