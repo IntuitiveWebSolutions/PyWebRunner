@@ -13,4 +13,4 @@ class TestScript(HttpBase):
             self.wt.screenshot(test_method_name + "-" + now + ".png")
 
     def test_script(self):
-        self.wt.command_script(filepath='tests/script.yml', errors=False, verbose=True)
+        self.wt.command_script(filepath='tests/script.yml', errors=True, verbose=True)

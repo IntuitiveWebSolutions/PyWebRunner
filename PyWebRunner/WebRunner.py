@@ -223,6 +223,10 @@ class WebRunner(object):
         if parts[0] == 'eval':
             return_value = eval(str(parts[1]))
         elif parts[0] == 'vars':
+            # Automatically default to 0 index if not passed.
+            print(parts)
+            if len(parts) == 2:
+                parts.append('0')
             return self.yaml_vars[parts[1]][int(parts[2])]
         elif self.yaml_funcs.get(parts[0]):
             args_regex = '\[([^}]+)\]'  # Get list args: [1,2,3]
@@ -249,7 +253,7 @@ class WebRunner(object):
             base = parts[0].replace('fake_', '').replace('fake-', '')
             return_value = getattr(fake, base)()
 
-        if parts[0] != 'vars' and not hasattr(self.yaml_vars, parts[0]):
+        if parts[0] != 'vars' and not self.yaml_vars.get(parts[0]):
             self.yaml_vars[parts[0]] = []
 
         self.yaml_vars[parts[0]].append(return_value)
@@ -283,10 +287,18 @@ class WebRunner(object):
                 if type(command[k]) is list:
                     # Loop over the arguments and pre-parse them.
                     for index, item in enumerate(command[k]):
-                        to_parse = [i.strip() for i in re.findall(pre_parse_regex, item)]
-                        if to_parse:
-                            tp = self._parse_item(to_parse[0])
-                            command[k][index] = tp
+                        if type(item) is not list:
+                            if type(item) is not dict:
+                                to_parse = [i.strip() for i in re.findall(pre_parse_regex, item)]
+                                if to_parse:
+                                    tp = self._parse_item(to_parse[0])
+                                    command[k][index] = tp
+                        else:
+                            for subindex, subitem in enumerate(item):
+                                to_parse = [si.strip() for si in re.findall(pre_parse_regex, subitem)]
+                                if to_parse:
+                                    tp = self._parse_item(to_parse[0])
+                                    command[k][index][subindex] = tp
 
                     if type(command[k][0]) is list:
                         getattr(self, k)(command[k])

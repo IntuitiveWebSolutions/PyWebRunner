@@ -12,15 +12,8 @@ class WebDemo(WebTester):
     """
     base_url = None
 
-    def __init__(self, base_url='http://127.0.0.1:5000', xvfb=True,
-                 driver='Firefox', mootools=False, timeout=90,
-                 width=1440, height=1200, root_path='./', firefox_version=46,
-                 desired_capabilities='FIREFOX',
-                 command_executor='http://127.0.0.1:4444/wd/hub'):
-        self.base_url = base_url
-        self.root_path = root_path
-        WebTester.__init__(self, base_url, xvfb, driver, mootools, timeout, width, height,
-                           firefox_version, desired_capabilities, command_executor)
+    def __init__(self, **kwargs):
+        WebTester.__init__(self, **kwargs)
 
     def _before(self):
         sleep(random())

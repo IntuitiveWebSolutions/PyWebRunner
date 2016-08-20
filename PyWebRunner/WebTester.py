@@ -188,7 +188,8 @@ class WebTester(WebRunner):
         self._wait_for_presence_or_visible(selector, wait_for, **kwargs)
 
         sval = self.get_value(selector)
-        assert value == sval
+        # Always cast as text because that's what comes back from the selector
+        assert str(value) == sval
 
     def assert_text_in_elements(self, selector, text, wait_for='presence', **kwargs):
         '''

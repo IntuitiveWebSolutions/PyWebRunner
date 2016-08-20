@@ -72,3 +72,45 @@
 - assert_value_of_element:
   - "#selectfield"
   - "7"
+- set_value:
+  - "#textfield"
+  - "(( randint|1,2 ))"
+- assert_value_of_element:
+  - "#textfield"
+  - "(( vars|randint|0 ))"
+- set_value:
+  - "#textfield"
+  - "(( choice|['frog','cat',7] ))"
+- assert_value_of_element:
+  - "#textfield"
+  - "(( vars|choice|0 ))"
+- set_value:
+  - "#textfield"
+  - "(( fake-name ))"
+- assert_value_of_element:
+  - "#textfield"
+  - "(( vars|fake-name|0 ))"
+- set_value:
+  - "#textfield"
+  - "(( fake-ssn ))"
+- assert_value_of_element:
+  - "#textfield"
+  - "(( vars|fake-ssn|0 ))"
+- set_value:
+  - "#textfield"
+  - "(( fake-ssn ))"
+- assert_value_of_element:
+  - "#textfield"
+  - "(( vars|fake-ssn|1 ))"
+- set_value:
+  - "#textfield"
+  - "(( fake_phone_number ))"
+- assert_value_of_element:
+  - "#textfield"
+  - "(( vars|fake_phone_number|0 ))"
+- set_value:
+  - "#textfield"
+  - "(( fake-email ))"
+- assert_value_of_element:
+  - "#textfield"
+  - "(( vars|fake-email ))"
