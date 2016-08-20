@@ -4,21 +4,21 @@ A supercharged Python wrapper for Selenium
 
 [![Build Status](https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner.svg?branch=master)](https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner)
 
-### Documentation
+## Documentation
 Full documentation can be located here: [https://intuitivewebsolutions.github.io/PyWebRunner](https://intuitivewebsolutions.github.io/PyWebRunner)
 
-### Uses
+## Uses
 You could use WebRunner to scrape a website, automate web tasks, or anything else you could imagine. It is easy to initialize and use. It's also compatible with [BrowserStack](https://www.browserstack.com/automate/python) using the command_executor and remote_capabilities examples on that page.
 
 (Please note that you will need a subscription, username, and API key to make it work.)
 
-### Installing
+## Installing
 
 ```bash
 pip install PyWebRunner
 ```
 
-### Basic Examples
+## Basic Examples
 
 ```python
 # Import WebRunner if you aren't going to assert anything.
@@ -55,7 +55,7 @@ wr.screenshot('/tmp/screenshot1.png')
 wr.stop()
 ```
 
-### YAML Scripts
+## YAML Scripts
 
 PyWebRunner supports running YAML scripts and includes the `webrunner` command.
 
@@ -83,7 +83,118 @@ webrunner script.yml
 
 ...and it will behave identically to the Python-based example above.
 
-### BrowserStack example:
+### Advanced YAML Features
+
+YAML supports the use of the fake-factory library (if it is installed) as well as evals and python function calls. Though the YAML is not intended as a complete replacement for Python scripts, this does enable some pretty flexible scripts to run.
+
+You might be asking yourself, what's the purpose of parsing YAML like this if you can just write Python and have access to all these things by default?
+
+The answer is that I wanted a way to write purely data-driven, front-end tests. The benefits could be summarized as:
+
+- It makes it possible to write a single loader script that grabs all the YAML files in a folder and runs them one at a time (or in parallel).
+- The tests themselves could be served up from a single, remote web-server.
+- Tests could be written by non-programmers with minimal training and effort.
+- GUI tools can easily be created to write tests/automated tasks without needing any programming knowledge.
+
+Consider the following example of registering an account:
+
+```yaml
+# Go to the page.
+- go: https://somesite/page.html
+# Click the register link.
+- click: "#register"
+# Wait for the registration form.
+- wait_for_presence: "#email"
+# Set the email field to a freshly-generated fake email address:
+- set_value:
+  - "#email"
+  - (( fake-email ))
+# Create a fake password string.
+- set_value:
+  - "#password"
+  - (( fake-password ))
+# Reference the fake password we already generated.
+- set_value:
+  - "#password-verify"
+  - (( vars|password ))
+# Click the register button.
+- click: "#register"
+# Wait for the redirect and the confirmation div.
+- wait_for_presence: "#confirmation-div"
+# Assert that the registration was successful.
+- assert_text_in_page: Your registration was successful!
+```
+
+**Fake** **Data**
+
+This example makes use of the fake-factory/faker library to generate a fake email address as well as a password. Any data that is created using the (( )) syntax is automatically assigned to a variable list for reference later.
+
+**Installing** **Faker**
+
+To install prior to September 15th, 2016:
+`pip install fake-factory`
+
+To install after September 15th, 2016:
+`pip install faker`
+
+fake-factory / faker need only be installed for the YAML to support `(( fake-* ))` tags.
+
+`*` can be any of the methods on the faker class. This list is extensive and is under active development. For more information, go to the fake-factory website:
+
+https://faker.readthedocs.io/en/latest/
+
+**((** **special** **))**
+
+Items enclosed in double parentheses (( )) will be parsed in this special way upon the execution of the script.
+
+**Examples**
+
+```yaml
+- import: random.randint
+- set_value:
+  - "#someinput"
+  - (( randint|1,2 ))
+```
+The previous example will import random.randint and use it to generate a value of either 1 or 2 and insert it into the #someinput element.
+
+---
+
+```yaml
+- import: random.choice
+- set_value:
+  - "#someinput"
+  - (( choice|['frog','cat','bird'] ))
+```
+
+As you can see, the choice function doesn't take positional arguments like the randint function does. It needs a list of options.
+
+---
+
+What happens when we run a function more than once and we need to reference the second or third output?
+
+```yaml
+- import: random.choice
+- set_value:
+  - "#someinput-a"
+  - (( choice|['frog','cat','bird'] )) # bird
+- set_value:
+  - "#someinput-b"
+  - (( choice|['frog','cat','bird'] )) # cat
+- set_value:
+  - "#someinput-c"
+  - (( choice|['frog','cat','bird'] )) # cat (again)
+- assert_value_of_element:
+  - "#someinput-a"
+  - (( vars|choice )) # The "choice" array. Defaults to index 0.
+- assert_value_of_element:
+  - "#someinput-b"
+  - (( vars|choice|1 )) # The "choice" array index 1.
+- assert_value_of_element:
+  - "#someinput-c"
+  - (( vars|choice|2 )) # The "choice" array index 2.
+```
+
+## BrowserStack example:
 
 This library also has first-class support for BrowserStack. Using it is not much different than the examples above.
 
@@ -109,7 +220,7 @@ wr.go('http://google.com')
 
 ## Testing
 
-### WebTester
+## WebTester
 
 WebTester inherits WebRunner so it has all the same methods that WebRunner has but it adds some additional methods that are useful for testing.
 
