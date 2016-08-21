@@ -81,6 +81,7 @@
 <li><a class="reference internal" href="#installing">Installing</a></li>
 <li><a class="reference internal" href="#basic-examples">Basic Examples</a></li>
 <li><a class="reference internal" href="#yaml-scripts">YAML Scripts</a></li>
+<li><a class="reference internal" href="#advanced-yaml-features">Advanced YAML Features</a></li>
 <li><a class="reference internal" href="#browserstack-example">BrowserStack example:</a><ul>
 <li><a class="reference internal" href="#testing">Testing</a></li>
 </ul>
@@ -213,6 +214,128 @@ command.</p>
 </pre></div>
 </div>
 <p>...and it will behave identically to the Python-based example above.</p>
+</div>
+<div class="section" id="advanced-yaml-features">
+<h1>Advanced YAML Features<a class="headerlink" href="#advanced-yaml-features" title="Permalink to this headline">¶</a></h1>
+<p>YAML supports the use of the fake-factory library (if it is installed)
+as well as evals and python function calls. Though the YAML is not
+intended as a complete replacement for Python scripts, this does enable
+some pretty flexible scripts to run.</p>
+<p>You might be asking yourself, what&#8217;s the purpose of parsing YAML like
+this if you can just write Python and have access to all these things by
+default?</p>
+<p>The answer is that I wanted a way to write purely data-driven, front-end
+tests. The benefits could be summarized as:</p>
+<ul class="simple">
+<li>It makes it possible to write a single loader script that grabs all
+the YAML files in a folder and runs them one at a time (or in
+parallel).</li>
+<li>The tests themselves could be served up from a single, remote
+web-server.</li>
+<li>Tests could be written by non-programmers with minimal training and
+effort.</li>
+<li>GUI tools can easily be created to write tests/automated tasks
+without needing any programming knowledge.</li>
+</ul>
+<p>Consider the following example of registering an account:</p>
+<div class="code yaml highlight-default"><div class="highlight"><pre><span></span># Go to the page.
+- go: https://somesite/page.html
+# Click the register link.
+- click: &quot;#register&quot;
+# Wait for the registration form.
+- wait_for_presence: &quot;#email&quot;
+# Set the email field to a freshly-generated fake email address:
+- set_value:
+  - &quot;#email&quot;
+  - (( fake-email ))
+# Create a fake password string.
+- set_value:
+  - &quot;#password&quot;
+  - (( fake-password ))
+# Reference the fake password we already generated.
+- set_value:
+  - &quot;#password-verify&quot;
+  - (( vars|password ))
+# Click the register button.
+- click: &quot;#register&quot;
+# Wait for the redirect and the confirmation div.
+- wait_for_presence: &quot;#confirmation-div&quot;
+# Assert that the registration was successful.
+- assert_text_in_page: Your registration was successful!
+</pre></div>
+</div>
+<p><strong>Fake</strong> <strong>Data</strong></p>
+<p>This example makes use of the fake-factory/faker library to generate a
+fake email address as well as a password. Any data that is created using
+the (( )) syntax is automatically assigned to a variable list for
+reference later.</p>
+<p><strong>Installing</strong> <strong>Faker</strong></p>
+<p>To install prior to September 15th, 2016: <code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">fake-factory</span></code></p>
+<p>To install after September 15th, 2016: <code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">faker</span></code></p>
+<p>fake-factory / faker need only be installed for the YAML to support
+<code class="docutils literal"><span class="pre">((</span> <span class="pre">fake-*</span> <span class="pre">))</span></code> tags.</p>
+<p><code class="docutils literal"><span class="pre">*</span></code> can be any of the methods on the faker class. This list is
+extensive and is under active development. For more information, go to
+the fake-factory website:</p>
+<p><a class="reference external" href="https://faker.readthedocs.io/en/latest/">https://faker.readthedocs.io/en/latest/</a></p>
+<p><strong>((</strong> <strong>special</strong> <strong>))</strong></p>
+<p>Items enclosed in double parentheses (( )) will be parsed in this
+special way upon the execution of the script.</p>
+<p><strong>Examples</strong></p>
+<div class="code yaml highlight-default"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">import</span><span class="p">:</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span>
+<span class="o">-</span> <span class="n">set_value</span><span class="p">:</span>
+  <span class="o">-</span> <span class="s2">&quot;#someinput&quot;</span>
+  <span class="o">-</span> <span class="p">((</span> <span class="n">randint</span><span class="o">|</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span> <span class="p">))</span>
+</pre></div>
+</div>
+<p>The previous example will import random.randint and use it to generate a
+value of either 1 or 2 and insert it into the #someinput element.</p>
+<hr class="docutils" />
+<div class="code yaml highlight-default"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">import</span><span class="p">:</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span>
+<span class="o">-</span> <span class="n">set_value</span><span class="p">:</span>
+  <span class="o">-</span> <span class="s2">&quot;#someinput&quot;</span>
+  <span class="o">-</span> <span class="p">((</span> <span class="n">choice</span><span class="o">|</span><span class="p">[</span><span class="s1">&#39;frog&#39;</span><span class="p">,</span><span class="s1">&#39;cat&#39;</span><span class="p">,</span><span class="s1">&#39;bird&#39;</span><span class="p">]</span> <span class="p">))</span>
+</pre></div>
+</div>
+<p>As you can see, the choice function doesn&#8217;t take positional arguments
+like the randint function does. It needs a list of options.</p>
+<hr class="docutils" />
+<p>What happens when we run a function more than once and we need to
+reference the second or third output?</p>
+<div class="code yaml highlight-default"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">import</span><span class="p">:</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span>
+<span class="o">-</span> <span class="n">set_value</span><span class="p">:</span>
+  <span class="o">-</span> <span class="s2">&quot;#someinput-a&quot;</span>
+  <span class="o">-</span> <span class="p">((</span> <span class="n">choice</span><span class="o">|</span><span class="p">[</span><span class="s1">&#39;frog&#39;</span><span class="p">,</span><span class="s1">&#39;cat&#39;</span><span class="p">,</span><span class="s1">&#39;bird&#39;</span><span class="p">]</span> <span class="p">))</span> <span class="c1"># bird</span>
+<span class="o">-</span> <span class="n">set_value</span><span class="p">:</span>
+  <span class="o">-</span> <span class="s2">&quot;#someinput-b&quot;</span>
+  <span class="o">-</span> <span class="p">((</span> <span class="n">choice</span><span class="o">|</span><span class="p">[</span><span class="s1">&#39;frog&#39;</span><span class="p">,</span><span class="s1">&#39;cat&#39;</span><span class="p">,</span><span class="s1">&#39;bird&#39;</span><span class="p">]</span> <span class="p">))</span> <span class="c1"># cat</span>
+<span class="o">-</span> <span class="n">set_value</span><span class="p">:</span>
+  <span class="o">-</span> <span class="s2">&quot;#someinput-c&quot;</span>
+  <span class="o">-</span> <span class="p">((</span> <span class="n">choice</span><span class="o">|</span><span class="p">[</span><span class="s1">&#39;frog&#39;</span><span class="p">,</span><span class="s1">&#39;cat&#39;</span><span class="p">,</span><span class="s1">&#39;bird&#39;</span><span class="p">]</span> <span class="p">))</span> <span class="c1"># cat (again)</span>
+<span class="o">-</span> <span class="n">assert_value_of_element</span><span class="p">:</span>
+  <span class="o">-</span> <span class="s2">&quot;#someinput-a&quot;</span>
+  <span class="o">-</span> <span class="p">((</span> <span class="nb">vars</span><span class="o">|</span><span class="n">choice</span> <span class="p">))</span> <span class="c1"># The &quot;choice&quot; array. Defaults to index 0.</span>
+<span class="o">-</span> <span class="n">assert_value_of_element</span><span class="p">:</span>
+  <span class="o">-</span> <span class="s2">&quot;#someinput-b&quot;</span>
+  <span class="o">-</span> <span class="p">((</span> <span class="nb">vars</span><span class="o">|</span><span class="n">choice</span><span class="o">|</span><span class="mi">1</span> <span class="p">))</span> <span class="c1"># The &quot;choice&quot; array index 1.</span>
+<span class="o">-</span> <span class="n">assert_value_of_element</span><span class="p">:</span>
+  <span class="o">-</span> <span class="s2">&quot;#someinput-c&quot;</span>
+  <span class="o">-</span> <span class="p">((</span> <span class="nb">vars</span><span class="o">|</span><span class="n">choice</span><span class="o">|</span><span class="mi">2</span> <span class="p">))</span> <span class="c1"># The &quot;choice&quot; array index 2.</span>
+</pre></div>
+</div>
+<hr class="docutils" />
+<p>OK, how about values on the page itself? Is there any way to obtain and
+reference them from inside a YAML WebRunner script?</p>
+<div class="code yaml highlight-default"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">value_of</span><span class="p">:</span> <span class="s2">&quot;#my-input-element&quot;</span> <span class="c1"># Set the value.</span>
+<span class="o">-</span> <span class="n">set_value</span><span class="p">:</span>
+  <span class="o">-</span> <span class="s2">&quot;#someinput-a&quot;</span>
+  <span class="o">-</span> <span class="p">((</span> <span class="nb">vars</span><span class="o">|</span><span class="n">value_of</span><span class="o">|</span><span class="mi">0</span> <span class="p">))</span> <span class="c1"># Use the value at index 0.</span>
+<span class="o">-</span> <span class="n">text_of</span><span class="p">:</span> <span class="s2">&quot;#my-div-element&quot;</span> <span class="c1"># Set the text to a variable.</span>
+<span class="o">-</span> <span class="n">set_value</span><span class="p">:</span>
+  <span class="o">-</span> <span class="s2">&quot;#someinput-b&quot;</span>
+  <span class="o">-</span> <span class="p">((</span> <span class="nb">vars</span><span class="o">|</span><span class="n">text_of</span><span class="o">|</span><span class="mi">0</span> <span class="p">))</span> <span class="c1"># Use the text value at index 0.</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="browserstack-example">
 <h1>BrowserStack example:<a class="headerlink" href="#browserstack-example" title="Permalink to this headline">¶</a></h1>

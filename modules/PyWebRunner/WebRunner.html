@@ -435,34 +435,14 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;import&#39;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_import</span><span class="p">(</span><span class="n">command</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
-
-<div class="viewcode-block" id="WebRunner.get_log"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.get_log">[docs]</a>    <span class="k">def</span> <span class="nf">get_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Gets the console log for the browser.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">log</span><span class="p">:</span>
-            <span class="n">log</span> <span class="o">=</span> <span class="s1">&#39;browser&#39;</span>
-        <span class="n">log_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">get_log</span><span class="p">(</span><span class="n">log</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">log_list</span></div>
-
-<div class="viewcode-block" id="WebRunner.get_log_text"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.get_log_text">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Gets the console log text for the browser.</span>
-<span class="sd">        [{u&#39;level&#39;: u&#39;SEVERE&#39;,</span>
-<span class="sd">        u&#39;message&#39;: u&#39;ReferenceError: foo is not defined&#39;,</span>
-<span class="sd">        u&#39;timestamp&#39;: 1450769357488,</span>
-<span class="sd">        u&#39;type&#39;: u&#39;&#39;},</span>
-<span class="sd">        {u&#39;level&#39;: u&#39;INFO&#39;,</span>
-<span class="sd">        u&#39;message&#39;: u&#39;The character encoding of the HTML document was not declared. The document will render with garbled text in some browser configurations if the document contains characters from outside the US-ASCII range. The character encoding of the page must be declared in the document or in the transfer protocol.&#39;,</span>
-<span class="sd">        u&#39;timestamp&#39;: 1450769357498,</span>
-<span class="sd">        u&#39;type&#39;: u&#39;&#39;}]</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_log</span><span class="p">()</span>
-        <span class="n">log_text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-        <span class="n">log_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">log</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">log_items</span><span class="p">:</span>
-            <span class="n">log_text</span> <span class="o">+=</span> <span class="n">item</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
-        <span class="k">return</span> <span class="n">log_text</span></div>
+                <span class="k">elif</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;value_of&#39;</span><span class="p">,</span> <span class="s1">&#39;text_of&#39;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">yaml_vars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">yaml_vars</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;value_of&#39;</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">command</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+                    <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;text_of&#39;</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_text</span><span class="p">(</span><span class="n">command</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">yaml_vars</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
 <div class="viewcode-block" id="WebRunner.command_script"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.command_script">[docs]</a>    <span class="k">def</span> <span class="nf">command_script</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">script</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -498,6 +478,34 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_run_command</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">bail_out</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="n">e</span><span class="p">,</span> <span class="n">caller</span><span class="o">=</span><span class="s1">&#39;command_script&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebRunner.get_log"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.get_log">[docs]</a>    <span class="k">def</span> <span class="nf">get_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Gets the console log for the browser.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">log</span><span class="p">:</span>
+            <span class="n">log</span> <span class="o">=</span> <span class="s1">&#39;browser&#39;</span>
+        <span class="n">log_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">get_log</span><span class="p">(</span><span class="n">log</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">log_list</span></div>
+
+<div class="viewcode-block" id="WebRunner.get_log_text"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.get_log_text">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Gets the console log text for the browser.</span>
+<span class="sd">        [{u&#39;level&#39;: u&#39;SEVERE&#39;,</span>
+<span class="sd">        u&#39;message&#39;: u&#39;ReferenceError: foo is not defined&#39;,</span>
+<span class="sd">        u&#39;timestamp&#39;: 1450769357488,</span>
+<span class="sd">        u&#39;type&#39;: u&#39;&#39;},</span>
+<span class="sd">        {u&#39;level&#39;: u&#39;INFO&#39;,</span>
+<span class="sd">        u&#39;message&#39;: u&#39;The character encoding of the HTML document was not declared. The document will render with garbled text in some browser configurations if the document contains characters from outside the US-ASCII range. The character encoding of the page must be declared in the document or in the transfer protocol.&#39;,</span>
+<span class="sd">        u&#39;timestamp&#39;: 1450769357498,</span>
+<span class="sd">        u&#39;type&#39;: u&#39;&#39;}]</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_log</span><span class="p">()</span>
+        <span class="n">log_text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">log_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">log</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">log_items</span><span class="p">:</span>
+            <span class="n">log_text</span> <span class="o">+=</span> <span class="n">item</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">log_text</span></div>
 
 <div class="viewcode-block" id="WebRunner.bail_out"><a class="viewcode-back" href="../../index.html#PyWebRunner.WebRunner.bail_out">[docs]</a>    <span class="k">def</span> <span class="nf">bail_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">caller</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
