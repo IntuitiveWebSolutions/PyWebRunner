@@ -41,15 +41,15 @@ class WebRunner(object):
 
     def __init__(self, **kwargs):
         self.base_url = kwargs.get('base_url', 'http://127.0.0.1:5000')
-        self.root_path = kwargs.get('', './')
-        xvfb = kwargs.get('', True)
-        driver = kwargs.get('', 'Firefox')
-        mootools = kwargs.get('', False)
-        timeout = kwargs.get('', 90)
-        width = kwargs.get('', 1440)
-        height = kwargs.get('', 1200)
-        desired_capabilities = kwargs.get('', 'FIREFOX')
-        command_executor = kwargs.get('', 'http://127.0.0.1:4444/wd/hub')
+        self.root_path = kwargs.get('root_path', './')
+        xvfb = kwargs.get('xvfb', True)
+        driver = kwargs.get('driver', 'Firefox')
+        mootools = kwargs.get('mootools', False)
+        timeout = kwargs.get('timeout', 90)
+        width = kwargs.get('width', 1440)
+        height = kwargs.get('height', 1200)
+        desired_capabilities = kwargs.get('desired_capabilities', 'FIREFOX')
+        command_executor = kwargs.get('command_executor', 'http://127.0.0.1:4444/wd/hub')
 
         # Firefox, PhantomJS (Must be installed...)
         self.driver = os.environ.get('WR_DRIVER', driver)
@@ -113,7 +113,10 @@ class WebRunner(object):
         if self.driver == "PhantomJS":
             self.browser = webdriver.PhantomJS()
         elif self.driver == "Chrome":
-            self.browser = webdriver.Chrome()
+            from selenium.webdriver.chrome.options import Options
+            chrome_options = Options()
+            chrome_options.add_extension('JSErrorCollector.crx')
+            self.browser = webdriver.Chrome(chrome_options=chrome_options)
         elif self.driver == "Opera":
             self.browser = webdriver.Opera()
         elif self.driver == "Ie":
@@ -138,7 +141,7 @@ class WebRunner(object):
             # Get rid of the annoying start page by setting preferences
             fp = webdriver.FirefoxProfile()
             # Download from: https://github.com/mguillem/JSErrorCollector/raw/master/dist/JSErrorCollector.xpi
-            # fp.add_extension('JSErrorCollector.xpi')
+            fp.add_extension('JSErrorCollector.xpi')
             fp.set_preference("browser.startup.homepage_override.mstone", "ignore")
             fp.set_preference("startup.homepage_welcome_url.additional", "about:blank")
             self.browser = webdriver.Firefox(firefox_profile=fp)
@@ -210,6 +213,25 @@ class WebRunner(object):
             elem = self.get_element(selector)
 
         elem.click()
+
+    def get_js_errors(self):
+        '''
+        Uses the JSErrorCollector plugin for Chrome / Firefox to get any JS errors.
+
+        [
+            {
+                'sourceName': u'tests/html/js_error.html',
+                'pageUrl': u'tests/html/js_error.html',
+                'errorMessage': 'ReferenceError: b is not defined',
+                'lineNumber': 7
+            }
+        ]
+        '''
+        if self.driver in ('Chrome', 'Firefox'):
+            return self.js('return window.JSErrorCollector_errors ? window.JSErrorCollector_errors.pump() : []')
+        else:
+            print("Checking for JS errors with this method only works in Firefox or Chrome")
+            return []
 
     def _parse_item(self, tp):
         try:

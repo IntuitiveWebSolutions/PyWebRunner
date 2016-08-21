@@ -25,7 +25,7 @@ if os.path.exists('README.rst'):
 
 setup(
     name='PyWebRunner',
-    version='1.6.3',
+    version='1.7.0',
     url='http://github.com/IntuitiveWebSolutions/PyWebRunner',
     license='MIT',
     author='Scott Blevins',
@@ -34,6 +34,7 @@ setup(
     long_description=long_description + '\n' + read('CHANGES'),
     platforms='OS Independent',
     packages=['PyWebRunner'],
+    package_data={'PyWebRunner': ['JSErrorCollector.xpi', 'JSErrorCollector.crx']},
     include_package_data=True,
     install_requires=['xvfbwrapper', 'selenium', 'pyaml'],
     keywords=['Selenium', 'Testing'],

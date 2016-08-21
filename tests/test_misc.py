@@ -28,3 +28,11 @@ class TestMisc(HttpBase):
         self.wt.screenshot()
         assert os.path.isfile(path)
         assert os.path.getsize(path) > 0
+
+    def test_no_js_errors(self):
+        self.wt.goto('/tests/html/misc.html')
+        self.wt.assert_no_js_errors()
+
+    def test_js_errors(self):
+        self.wt.goto('/tests/html/js_error.html')
+        self.wt.assert_js_errors()
