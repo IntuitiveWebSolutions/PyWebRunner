@@ -339,8 +339,15 @@ class WebRunner(object):
         self._import('random.choice')
         if not script and filepath:
             from yaml import load
+            from json import loads
             with open(filepath, 'r') as f:
-                script = load(f)
+                if filepath.lower().endswith('yaml') or filepath.lower().endswith('yml'):
+                    script = load(f)
+                elif filepath.lower().endswith('json'):
+                    script = loads(f.read())
+                else:
+                    print("Couldn't detect filetype from extension. Defaulting to YAML.")
+                    script = load(f)
 
         for index, command in enumerate(script):
             digits = len(str(len(script)))

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#coding:utf-8
+# -*- coding: utf-8 -*-
 # Author:  smeggingsmegger
 # Purpose: setup
 # Created: 2016-06-23
@@ -25,7 +25,7 @@ if os.path.exists('README.rst'):
 
 setup(
     name='PyWebRunner',
-    version='1.6.2',
+    version='1.6.3',
     url='http://github.com/IntuitiveWebSolutions/PyWebRunner',
     license='MIT',
     author='Scott Blevins',
