@@ -194,6 +194,21 @@ What happens when we run a function more than once and we need to reference the 
   - (( vars|choice|2 )) # The "choice" array index 2.
 ```
 
+---
+
+OK, how about values on the page itself? Is there any way to obtain and reference them from inside a YAML WebRunner script?
+
+```yaml
+- value_of: "#my-input-element" # Set the value.
+- set_value:
+  - "#someinput-a"
+  - (( vars|value_of|0 )) # Use the value at index 0.
+- text_of: "#my-div-element" # Set the text to a variable.
+- set_value:
+  - "#someinput-b"
+  - (( vars|text_of|0 )) # Use the text value at index 0.
+```
+
 ## BrowserStack example:
 
 This library also has first-class support for BrowserStack. Using it is not much different than the examples above.

@@ -312,34 +312,14 @@ class WebRunner(object):
             else:
                 if k == 'import':
                     self._import(command[k])
-
-    def get_log(self, log=None):
-        '''
-        Gets the console log for the browser.
-        '''
-        if not log:
-            log = 'browser'
-        log_list = self.browser.get_log(log)
-        return log_list
-
-    def get_log_text(self):
-        '''
-        Gets the console log text for the browser.
-        [{u'level': u'SEVERE',
-        u'message': u'ReferenceError: foo is not defined',
-        u'timestamp': 1450769357488,
-        u'type': u''},
-        {u'level': u'INFO',
-        u'message': u'The character encoding of the HTML document was not declared. The document will render with garbled text in some browser configurations if the document contains characters from outside the US-ASCII range. The character encoding of the page must be declared in the document or in the transfer protocol.',
-        u'timestamp': 1450769357498,
-        u'type': u''}]
-        '''
-        log = self.get_log()
-        log_text = ''
-        log_items = [item['message'] for item in log]
-        for item in log_items:
-            log_text += item + '\n'
-        return log_text
+                elif k in ('value_of', 'text_of'):
+                    if not self.yaml_vars.get(k):
+                        self.yaml_vars[k] = []
+                    if k == 'value_of':
+                        value = self.get_value(command[k])
+                    elif k == 'text_of':
+                        value = self.get_text(command[k])
+                    self.yaml_vars[k].append(value)
 
     def command_script(self, filepath=None, script=None, errors=True, verbose=False):
         '''
@@ -375,6 +355,34 @@ class WebRunner(object):
                     self._run_command(command)
                 except Exception as e:
                     self.bail_out(exception=e, caller='command_script')
+
+    def get_log(self, log=None):
+        '''
+        Gets the console log for the browser.
+        '''
+        if not log:
+            log = 'browser'
+        log_list = self.browser.get_log(log)
+        return log_list
+
+    def get_log_text(self):
+        '''
+        Gets the console log text for the browser.
+        [{u'level': u'SEVERE',
+        u'message': u'ReferenceError: foo is not defined',
+        u'timestamp': 1450769357488,
+        u'type': u''},
+        {u'level': u'INFO',
+        u'message': u'The character encoding of the HTML document was not declared. The document will render with garbled text in some browser configurations if the document contains characters from outside the US-ASCII range. The character encoding of the page must be declared in the document or in the transfer protocol.',
+        u'timestamp': 1450769357498,
+        u'type': u''}]
+        '''
+        log = self.get_log()
+        log_text = ''
+        log_items = [item['message'] for item in log]
+        for item in log_items:
+            log_text += item + '\n'
+        return log_text
 
     def bail_out(self, exception=None, caller=None):
         '''

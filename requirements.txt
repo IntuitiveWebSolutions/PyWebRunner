@@ -1,3 +1,3 @@
-selenium==2.53.5
+selenium==2.53.6
 xvfbwrapper==0.2.8
 pyaml

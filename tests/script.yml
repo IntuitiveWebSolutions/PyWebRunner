@@ -116,3 +116,16 @@
 - assert_value_of_element:
   - "#textfield"
   - "(( vars|fake-email ))"
+- value_of: "#textfield"
+- set_value:
+  - "#textfield"
+  - "RESET"
+- assert_value_of_element:
+  - "#textfield"
+  - "RESET"
+- set_value:
+  - "#textfield"
+  - "(( vars|value_of ))"
+- assert_value_of_element:
+  - "#textfield"
+  - "(( vars|fake-email ))"
