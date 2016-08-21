@@ -1,1 +1,4 @@
-- go: file:///Users/scottblevins/git/PyWebRunner/tests/html/js_error.html
+- go: tests/html/js_error.html
+- assert_js_errors: true
+- go: tests/html/misc.html
+- assert_js_errors: false

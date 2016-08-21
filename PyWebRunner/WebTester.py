@@ -363,18 +363,13 @@ class WebTester(WebRunner):
             pass
         assert present == False
 
-    def assert_no_js_errors(self):
-        '''
-        Asserts that no JS errors are present.
-
-        '''
-        js_errors = self.get_js_errors()
-        assert len(js_errors) == 0, js_errors
-
-    def assert_js_errors(self):
+    def assert_js_errors(self, present=True):
         '''
         Asserts that JS errors are, in fact, present.
 
         '''
         js_errors = self.get_js_errors()
-        assert len(js_errors) > 0, "Asserted that JS errors existed but they did not."
+        if present:
+            assert len(js_errors) > 0, "Asserted that JS errors existed but they did not."
+        else:
+            assert len(js_errors) == 0, js_errors

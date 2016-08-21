@@ -31,8 +31,8 @@ class TestMisc(HttpBase):
 
     def test_no_js_errors(self):
         self.wt.goto('/tests/html/misc.html')
-        self.wt.assert_no_js_errors()
+        self.wt.assert_js_errors(False)
 
     def test_js_errors(self):
         self.wt.goto('/tests/html/js_error.html')
-        self.wt.assert_js_errors()
+        self.wt.assert_js_errors(True)
