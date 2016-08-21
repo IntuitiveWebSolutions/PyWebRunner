@@ -2,7 +2,7 @@
 
 A supercharged Python wrapper for Selenium
 
-[![Build Status](https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner.svg?branch=master)](https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner)
+[![Build Status](https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner.svg?branch=master)](https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner) [![PyPI version](https://badge.fury.io/py/PyWebRunner.svg)](https://badge.fury.io/py/PyWebRunner)
 
 ## Documentation
 Full documentation can be located here: [https://intuitivewebsolutions.github.io/PyWebRunner](https://intuitivewebsolutions.github.io/PyWebRunner)

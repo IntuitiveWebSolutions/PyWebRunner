@@ -5,7 +5,7 @@
 
 A supercharged Python wrapper for Selenium
 
-|Build Status|
+|Build Status| |PyPI version|
 
 Documentation
 -------------
@@ -233,6 +233,22 @@ reference the second or third output?
       - "#someinput-c"
       - (( vars|choice|2 )) # The "choice" array index 2.
 
+--------------
+
+OK, how about values on the page itself? Is there any way to obtain and
+reference them from inside a YAML WebRunner script?
+
+.. code:: yaml
+
+    - value_of: "#my-input-element" # Set the value.
+    - set_value:
+      - "#someinput-a"
+      - (( vars|value_of|0 )) # Use the value at index 0.
+    - text_of: "#my-div-element" # Set the text to a variable.
+    - set_value:
+      - "#someinput-b"
+      - (( vars|text_of|0 )) # Use the text value at index 0.
+
 BrowserStack example:
 ---------------------
 
@@ -294,3 +310,5 @@ Testing Asserts
 
 .. |Build Status| image:: https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner.svg?branch=master
    :target: https://travis-ci.org/IntuitiveWebSolutions/PyWebRunner
+.. |PyPI version| image:: https://badge.fury.io/py/PyWebRunner.svg
+   :target: https://badge.fury.io/py/PyWebRunner
