@@ -6,6 +6,7 @@ import importlib
 # import base64
 import logging
 import os
+import sys
 import re
 from xvfbwrapper import Xvfb
 
@@ -115,7 +116,8 @@ class WebRunner(object):
         elif self.driver == "Chrome":
             from selenium.webdriver.chrome.options import Options
             chrome_options = Options()
-            chrome_options.add_extension('JSErrorCollector.crx')
+            extension = os.path.join(sys.prefix, 'extensions/JSErrorCollector.crx')
+            chrome_options.add_extension(extension)
             self.browser = webdriver.Chrome(chrome_options=chrome_options)
         elif self.driver == "Opera":
             self.browser = webdriver.Opera()
@@ -141,7 +143,8 @@ class WebRunner(object):
             # Get rid of the annoying start page by setting preferences
             fp = webdriver.FirefoxProfile()
             # Download from: https://github.com/mguillem/JSErrorCollector/raw/master/dist/JSErrorCollector.xpi
-            fp.add_extension('JSErrorCollector.xpi')
+            extension = os.path.join(sys.prefix, 'extensions/JSErrorCollector.xpi')
+            fp.add_extension(extension)
             fp.set_preference("browser.startup.homepage_override.mstone", "ignore")
             fp.set_preference("startup.homepage_welcome_url.additional", "about:blank")
             self.browser = webdriver.Firefox(firefox_profile=fp)
