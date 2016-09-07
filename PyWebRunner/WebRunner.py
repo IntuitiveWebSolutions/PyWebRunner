@@ -6,10 +6,11 @@ import importlib
 # import base64
 import logging
 import os
+import sys
 import pkg_resources
 import re
+from PyWebRunner.utils import which, Timeout, fix_firefox, fix_chrome
 from xvfbwrapper import Xvfb
-
 from selenium import webdriver
 from selenium.common.exceptions import (NoSuchElementException, NoSuchWindowException,
                                         NoAlertPresentException)
@@ -44,8 +45,14 @@ class WebRunner(object):
         self.base_url = kwargs.get('base_url', 'http://127.0.0.1:5000')
         self.root_path = kwargs.get('root_path', './')
         xvfb = kwargs.get('xvfb', True)
-        driver = kwargs.get('driver', 'Firefox')
+        driver = kwargs.get('driver')
+        if not driver:
+            if which('wires'):
+                driver = 'Gecko'
+            else:
+                driver = 'Firefox'
         mootools = kwargs.get('mootools', False)
+        errors = kwargs.get('errors', False)
         timeout = kwargs.get('timeout', 90)
         width = kwargs.get('width', 1440)
         height = kwargs.get('height', 1200)
@@ -64,6 +71,7 @@ class WebRunner(object):
         self.width = os.environ.get('WR_WIDTH', width)
         # XVFB virtual monitor width
         self.height = os.environ.get('WR_HEIGHT', height)
+        self.js_errorcollector = True
 
         self.desired_capabilities = os.environ.get(
             'WR_DESIRED_CAPABILITIES', desired_capabilities)
@@ -114,10 +122,17 @@ class WebRunner(object):
         if self.driver == "PhantomJS":
             self.browser = webdriver.PhantomJS()
         elif self.driver == "Chrome":
+            if not which('chromedriver'):
+                fix_chrome()
+
             from selenium.webdriver.chrome.options import Options
             chrome_options = Options()
-            extension = pkg_resources.resource_filename('PyWebRunner', "../../../../extensions/JSErrorCollector.crx")
-            chrome_options.add_extension(extension)
+            try:
+                extension = pkg_resources.resource_filename('PyWebRunner', "../../../../extensions/JSErrorCollector.crx")
+                chrome_options.add_extension(extension)
+            except IOError:
+                self.js_errorcollector = False
+
             self.browser = webdriver.Chrome(chrome_options=chrome_options)
         elif self.driver == "Opera":
             self.browser = webdriver.Opera()
@@ -139,15 +154,41 @@ class WebRunner(object):
                 desired_capabilities=dc
             )
 
-        elif self.driver == 'Firefox':
+        elif self.driver in ('Firefox', 'Gecko'):
             # Get rid of the annoying start page by setting preferences
             fp = webdriver.FirefoxProfile()
             # Download from: https://github.com/mguillem/JSErrorCollector/raw/master/dist/JSErrorCollector.xpi
-            extension = pkg_resources.resource_filename('PyWebRunner', "../../../../extensions/JSErrorCollector.xpi")
-            fp.add_extension(extension)
+            try:
+                extension = pkg_resources.resource_filename('PyWebRunner', "../../../../extensions/JSErrorCollector.xpi")
+                fp.add_extension(extension)
+            except IOError:
+                self.js_errorcollector = False
             fp.set_preference("browser.startup.homepage_override.mstone", "ignore")
             fp.set_preference("startup.homepage_welcome_url.additional", "about:blank")
-            self.browser = webdriver.Firefox(firefox_profile=fp)
+            if self.driver == 'Gecko':
+                if which('wires'):
+                    caps = DesiredCapabilities.FIREFOX
+                    caps['marionette'] = True
+                    self.browser = webdriver.Firefox(firefox_profile=fp, capabilities=caps)
+                    self.browser.switch_to_window(self.browser.window_handles[0])
+                else:
+                    print('"wires" not found in path. Exiting.')
+                    sys.exit(1)
+            else:
+                try:
+                    with Timeout(5):
+                        self.browser = webdriver.Firefox(firefox_profile=fp)
+                except Timeout.Timeout:
+                    fix_firefox()
+
+                    if which('wires'):
+                        caps = DesiredCapabilities.FIREFOX
+                        caps['marionette'] = True
+                        self.browser = webdriver.Firefox(firefox_profile=fp, capabilities=caps)
+                        self.browser.switch_to_window(self.browser.window_handles[0])
+                    else:
+                        print('"wires" not found in path. Exiting.')
+                        sys.exit(1)
         else:
             raise UserWarning('No valid driver detected.')
 
@@ -317,7 +358,7 @@ class WebRunner(object):
                     for index, item in enumerate(command[k]):
                         if type(item) is not list:
                             if type(item) is not dict:
-                                to_parse = [i.strip() for i in re.findall(pre_parse_regex, item)]
+                                to_parse = [i.strip() for i in re.findall(pre_parse_regex, str(item))]
                                 if to_parse:
                                     tp = self._parse_item(to_parse[0])
                                     command[k][index] = tp
@@ -346,6 +387,19 @@ class WebRunner(object):
                         value = self.get_text(command[k])
                     self.yaml_vars[k].append(value)
 
+    def _load_yaml_file(self, filepath):
+        from yaml import load
+        from json import loads
+        with open(filepath, 'r') as f:
+            if filepath.lower().endswith('yaml') or filepath.lower().endswith('yml'):
+                script = load(f)
+            elif filepath.lower().endswith('json'):
+                script = loads(f.read())
+            else:
+                print("Couldn't detect filetype from extension. Defaulting to YAML.")
+                script = load(f)
+        return script
+
     def command_script(self, filepath=None, script=None, errors=True, verbose=False):
         '''
         Runs a script of PyWebRunner command_script
@@ -363,30 +417,37 @@ class WebRunner(object):
         self._import('random.randint')
         self._import('random.choice')
         if not script and filepath:
-            from yaml import load
-            from json import loads
-            with open(filepath, 'r') as f:
-                if filepath.lower().endswith('yaml') or filepath.lower().endswith('yml'):
-                    script = load(f)
-                elif filepath.lower().endswith('json'):
-                    script = loads(f.read())
-                else:
-                    print("Couldn't detect filetype from extension. Defaulting to YAML.")
-                    script = load(f)
+            script = self._load_yaml_file(filepath)
 
         for index, command in enumerate(script):
+            key = list(command.keys())[0]
             digits = len(str(len(script)))
             if verbose:
-                cmd = list(command.keys())[0]
-                print('({}) Parsing: {}: {}'.format(str(index + 1).zfill(digits), cmd, command[cmd]))
+                print('({}) Parsing: {}: {}'.format(str(index + 1).zfill(digits), key, command[key]))
 
-            if errors:
-                self._run_command(command)
+            # If the include command is given, parse those commands in-place before
+            # continuing. This allows yaml scripts to include and use other yaml files.
+            if key == 'include':
+                i_script = self._load_yaml_file(command[key])
+                for i_index, i_command in enumerate(i_script):
+                    if errors:
+                        self._run_command(i_command)
+                    else:
+                        try:
+                            self._run_command(i_command)
+                        except Exception as e:
+                            self.bail_out(exception=e, caller='command_script')
+                            raise
+
             else:
-                try:
+                if errors:
                     self._run_command(command)
-                except Exception as e:
-                    self.bail_out(exception=e, caller='command_script')
+                else:
+                    try:
+                        self._run_command(command)
+                    except Exception as e:
+                        self.bail_out(exception=e, caller='command_script')
+                        raise
 
     def get_log(self, log=None):
         '''

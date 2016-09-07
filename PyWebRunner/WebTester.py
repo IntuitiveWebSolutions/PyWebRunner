@@ -332,6 +332,21 @@ class WebTester(WebRunner):
         elem = self.find_element(selector)
         assert elem.is_selected() == False, '{} was checked.'.format(selector)
 
+    def assert_element_count(self, selector, count):
+        '''
+        Asserts that the selector returns (( count )) elements.
+
+        Parameters
+        ----------
+        selector: str
+            A CSS selector to search for. This can be any valid CSS selector.
+        count: int
+            The number of expected elements
+
+        '''
+        elems = self.find_elements(selector)
+        assert len(elems) == int(count),'Expected {} elements from selector {} not {}.'.format(count, selector, len(elems))
+
     def assert_alert_present(self):
         '''
         Asserts that an alert exists.
@@ -381,4 +396,3 @@ class WebTester(WebRunner):
         '''
         js_errors = self.get_js_errors()
         assert len(js_errors) == count, js_errors
-
