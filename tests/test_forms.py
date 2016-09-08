@@ -22,30 +22,6 @@ class TestForms(HttpBase):
         self.wt.click('#checkbox')
         self.wt.assert_not_checked('#checkbox')
 
-    def test_fill_form(self):
-        self.wt.goto('/tests/html/forms.html')
-        self.wt.wait_for_clickable('#textfield')
-
-        self.wt.set_value('#textfield', 'This is a test')
-        self.wt.set_value('#selectfield', '3')
-        self.wt.wait_for_text_in_value('#textfield', 'This is a test')
-        self.wt.wait_for_text_in_value('#selectfield', '3')
-        assert self.wt.get_value('#textfield') == 'This is a test'
-        assert self.wt.get_value('#selectfield') == '3'
-        # We have to clear the text field when using fill
-        self.wt.clear('#textfield')
-        self.wt.fill({
-            '#textfield': 'Booya!',
-            '#selectfield': 'Four'
-        })
-        self.wt.wait_for_text_in_value('#textfield', 'Booya!')
-        self.wt.wait_for_text_in_value('#selectfield', '4')
-        assert self.wt.get_value('#textfield') == 'Booya!'
-        assert self.wt.get_value('#selectfield') == '4'
-        self.wt.set_value('#textfield', 'No clear needed')
-        self.wt.wait_for_text_in_value('#textfield', 'No clear needed')
-        assert self.wt.get_value('#textfield') == 'No clear needed'
-
     def test_set_values(self):
         self.wt.goto('/tests/html/forms.html')
         self.wt.wait_for_clickable('#textfield')
@@ -57,7 +33,6 @@ class TestForms(HttpBase):
             '#selectfield': '5'
         })
         self.wt.wait_for_text_in_value('#textfield', 'AAAAAAAA')
-        self.wt.wait_for_text_in_value('#selectfield', '5')
         assert self.wt.get_value('#textfield') == 'AAAAAAAA'
         assert self.wt.get_value('#selectfield') == '5'
 
@@ -67,7 +42,6 @@ class TestForms(HttpBase):
             ['#selectfield', '6']
         ])
         self.wt.wait_for_text_in_value('#textfield', 'BBBBBBBB')
-        self.wt.wait_for_text_in_value('#selectfield', '6')
         assert self.wt.get_value('#textfield') == 'BBBBBBBB'
         assert self.wt.get_value('#selectfield') == '6'
 
@@ -77,7 +51,6 @@ class TestForms(HttpBase):
             {'#selectfield': '7'}
         ])
         self.wt.wait_for_text_in_value('#textfield', 'CCCCCCCC')
-        self.wt.wait_for_text_in_value('#selectfield', '7')
         assert self.wt.get_value('#textfield') == 'CCCCCCCC'
         assert self.wt.get_value('#selectfield') == '7'
 
@@ -87,6 +60,5 @@ class TestForms(HttpBase):
             ('#selectfield', '8')
         ))
         self.wt.wait_for_text_in_value('#textfield', 'DDDDDDDD')
-        self.wt.wait_for_text_in_value('#selectfield', '8')
         assert self.wt.get_value('#textfield') == 'DDDDDDDD'
         assert self.wt.get_value('#selectfield') == '8'

@@ -46,9 +46,9 @@ class WebRunner(object):
         self.base_url = kwargs.get('base_url', 'http://127.0.0.1:5000')
         self.root_path = kwargs.get('root_path', './')
         xvfb = kwargs.get('xvfb', True)
-        driver = kwargs.get('driver')
-        if not driver:
-            if which('wires') or which('geckodriver'):
+        driver = kwargs.get('driver', 'Chrome')
+        if driver == 'Firefox':
+            if which('geckodriver'):
                 driver = 'Gecko'
             else:
                 driver = 'Firefox'
@@ -57,7 +57,7 @@ class WebRunner(object):
         timeout = kwargs.get('timeout', 90)
         width = kwargs.get('width', 1440)
         height = kwargs.get('height', 1200)
-        desired_capabilities = kwargs.get('desired_capabilities', 'FIREFOX')
+        desired_capabilities = kwargs.get('desired_capabilities', 'CHROME')
         command_executor = kwargs.get('command_executor', 'http://127.0.0.1:4444/wd/hub')
 
         # Firefox, PhantomJS (Must be installed...)
@@ -176,20 +176,22 @@ class WebRunner(object):
                     print('"wires" or "geckodriver" not found in path. Exiting.')
                     sys.exit(1)
             else:
+                # self.browser = webdriver.Firefox(firefox_profile=fp)
                 try:
-                    with Timeout(5):
+                    with Timeout(8):
                         self.browser = webdriver.Firefox(firefox_profile=fp)
                 except (Timeout.Timeout, WebDriverException):
-                    fix_firefox()
+                    if not self.browser:
+                        fix_firefox()
 
-                    if which('wires') or which('geckodriver'):
-                        caps = DesiredCapabilities.FIREFOX
-                        caps['marionette'] = True
-                        self.browser = webdriver.Firefox(firefox_profile=fp, capabilities=caps)
-                        self.browser.switch_to_window(self.browser.window_handles[0])
-                    else:
-                        print('"wires" or "geckodriver" not found in path. Exiting.')
-                        sys.exit(1)
+                        if which('wires') or which('geckodriver'):
+                            caps = DesiredCapabilities.FIREFOX
+                            caps['marionette'] = True
+                            self.browser = webdriver.Firefox(firefox_profile=fp, capabilities=caps)
+                            self.browser.switch_to_window(self.browser.window_handles[0])
+                        else:
+                            print('"wires" or "geckodriver" not found in path. Exiting.')
+                            sys.exit(1)
         else:
             raise UserWarning('No valid driver detected.')
 
@@ -1328,7 +1330,7 @@ class WebRunner(object):
                     self.set_value('', row['value'], elem=elem)
 
                 elif tag_name == 'select':
-                    self.set_select_by_text(elem, row['value'])
+                    self.set_value('', row['value'], elem=elem)
 
             else:
                 print("{} Element not found.".format(row))

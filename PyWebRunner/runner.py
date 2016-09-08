@@ -8,14 +8,15 @@ from json import loads
 def main():
     import argparse
     parser = argparse.ArgumentParser(description='Run a PyWebRunner YAML/JSON script.')
-    parser.add_argument('-b', '--browser', help='Which browser to load. Defaults to Firefox.')
+    parser.add_argument('-b', '--browser', help='Which browser to load. Defaults to Chrome.')
     parser.add_argument('--base-url', help='Base URL to use with goto command.')
     parser.add_argument('--errors', dest='errors', action='store_true', help='Whether or not to show errors.')
     parser.add_argument('files', nargs='*')
     args = parser.parse_args()
 
     errors = args.errors or False
-    wt = WebTester(driver=args.browser, base_url=args.base_url)
+    driver = args.browser or 'Chrome'
+    wt = WebTester(driver=driver, base_url=args.base_url)
     wt.start()
     for filepath in args.files:
         print("Processing {}:".format(filepath))
