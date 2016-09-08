@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Fix set_value on Nightly Firefox + Selenium 3 beta for Gecko
 - Etc... Geckodriver is horrible right now.
+- Default to Chrome.
 
 
 ## [1.8.0] - 2016-09-07
