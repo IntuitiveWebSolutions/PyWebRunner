@@ -55,7 +55,25 @@ class WebRunner(object):
         desired_capabilities = kwargs.get('desired_capabilities', 'CHROME')
         command_executor = kwargs.get('command_executor', 'http://127.0.0.1:4444/wd/hub')
 
-        # Firefox, PhantomJS (Must be installed...)
+        if driver == 'Firefox':
+            print('=' * 80)
+            print("*** WARNING ***")
+            print('=' * 80)
+            print('You are using "Firefox" as your driver which is only compatible with')
+            print('Firefox < 48.0.0 - This is probably the wrong driver. You are probably')
+            print('looking for "Gecko" which uses the Mozilla geckodriver under the hood.')
+            print("If you know what you are doing it is safe to ignore this warning.")
+            print('=' * 80)
+        elif driver == 'Gecko':
+            print('=' * 80)
+            print("*** WARNING ***")
+            print('=' * 80)
+            print('The "Gecko" driver is currently in a bad place and might not work as')
+            print('expected. I have tried to work around its limitations automatically')
+            print('but I still recommend that you use Chrome / chromedriver or Firefox 47')
+            print('for now.')
+
+        # Chrome, Firefox, Gecko, PhantomJS, Etc... (Must be installed...)
         self.driver = os.environ.get('WR_DRIVER', driver)
         # This is for headless running.
         self.xvfb = os.environ.get('WR_XVFB', xvfb)
