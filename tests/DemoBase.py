@@ -52,7 +52,7 @@ class DemoBase(unittest.TestCase):
         cls.server = Server()
         cls.server.start()
 
-        cls.wt = WebDemo(base_url='http://127.0.0.1:8000/')
+        cls.wt = WebDemo(base_url='http://127.0.0.1:8000/', driver='Firefox', timeout=5)
         cls.wt.start()
 
     @classmethod
