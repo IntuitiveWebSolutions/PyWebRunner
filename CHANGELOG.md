@@ -1,6 +1,16 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+
+## [1.8.1] - 2016-09-08
+### Added
+- Automatically install "geckodriver" as well as "wires" for forward compat with Selenium 3X
+
+### Changed
+- Fix set_value on Nightly Firefox + Selenium 3 beta for Gecko
+- Etc... Geckodriver is horrible right now.
+
+
 ## [1.8.0] - 2016-09-07
 ### Added
 - This CHANGELOG file

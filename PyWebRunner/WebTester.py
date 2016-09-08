@@ -189,7 +189,29 @@ class WebTester(WebRunner):
 
         sval = self.get_value(selector)
         # Always cast as text because that's what comes back from the selector
-        assert str(value) == sval
+        assert str(value) == str(sval), 'The value "{}" was not found in the selector: {}. Instead: {}'.format(value, selector, sval)
+
+    def assert_value_of_elements(self, selector, value, wait_for='presence', **kwargs):
+        '''
+        Asserts the value of any of the elements obtained from a given CSS selector.
+
+        Parameters
+        ----------
+        value: str
+            The string to look for. Must be exact.
+        selector: str
+            A CSS selector to search for. This can be any valid CSS selector.
+        wait_for: str
+            'presence' or 'visible' - defaults to presence
+        kwargs:
+            passed on to wait_for_*
+
+        '''
+        self._wait_for_presence_or_visible(selector, wait_for, **kwargs)
+
+        svals = self.get_values(selector)
+        # Always cast as text because that's what comes back from the selector
+        assert str(value) in svals, 'The value "{}" was not found in the selector: {}'.format(text, selector)
 
     def assert_text_in_elements(self, selector, text, wait_for='presence', **kwargs):
         '''

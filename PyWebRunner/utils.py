@@ -14,8 +14,8 @@ except ImportError:
 def get_remote_binary(whichbin):
     if not which(whichbin):
         print("=" * 80)
-        fixit = yn(
-            "Would you like for PyWebRunner to attempt to fix this for you? [Y/N]: ")
+        print("PyWebRunner can try to download the correct driver automatically.")
+        fixit = yn("Would you like for PyWebRunner to attempt to fix this for you? [Y/N]: ")
         if fixit:
             pathdirs = [p for p in os.environ[
                 'PATH'].split(':') if os.access(p, os.W_OK)]
@@ -59,36 +59,45 @@ def get_remote_binary(whichbin):
 
             answer = get_input("Choose one or hit enter to abort: ")
             if answer and available_binaries.get(answer):
-                if available_binaries[answer].endswith('.tar.gz'):
-                    ext = '.tar.gz'
-                else:
-                    ext = '.zip'
-                print("Downloading from: {}".format(available_binaries[answer]))
-                download_file(available_binaries[answer], '/tmp/pwr_temp{}'.format(ext))
-                if ext == '.tar.gz':
-                    import tarfile
-                    tar = tarfile.open('/tmp/pwr_temp{}'.format(ext), "r:gz")
-                    tar.extractall('{}/'.format(base_path))
-                    tar.close()
-                else:
-                    import zipfile
-                    with zipfile.ZipFile('/tmp/pwr_temp{}'.format(ext), "r") as z:
-                        z.extractall('{}/'.format(base_path))
-
                 if whichbin == 'wires':
-                    os.rename('{}/geckodriver'.format(base_path),
-                              '{}/wires'.format(base_path))
-                    os.chmod('{}/wires'.format(base_path), 0o775)
+                    download_driver_file(whichbin, available_binaries[answer], base_path)
+                    latest = "https://github.com/mozilla/geckodriver/releases/download/v0.10.0/geckodriver-v0.10.0-macos.tar.gz"
+                    download_driver_file(whichbin, latest, base_path)
                 else:
-                    os.chmod('{}/chromedriver'.format(base_path), 0o775)
-
+                    download_driver_file(whichbin, available_binaries[answer], base_path)
                 print("Done! You should be able to use the driver now.")
 
+def download_driver_file(whichbin, url, base_path):
+    if url.endswith('.tar.gz'):
+        ext = '.tar.gz'
+    else:
+        ext = '.zip'
+    print("Downloading from: {}".format(url))
+    download_file(url, '/tmp/pwr_temp{}'.format(ext))
+    if ext == '.tar.gz':
+        import tarfile
+        tar = tarfile.open('/tmp/pwr_temp{}'.format(ext), "r:gz")
+        tar.extractall('{}/'.format(base_path))
+        tar.close()
+    else:
+        import zipfile
+        with zipfile.ZipFile('/tmp/pwr_temp{}'.format(ext), "r") as z:
+            z.extractall('{}/'.format(base_path))
+
+    if whichbin == 'wires' and '/v0.9.0/' in url:
+        os.rename('{}/geckodriver'.format(base_path),
+                  '{}/wires'.format(base_path))
+        os.chmod('{}/wires'.format(base_path), 0o775)
+    elif whichbin == 'wires':
+        os.chmod('{}/geckodriver'.format(base_path), 0o775)
+    else:
+        os.chmod('{}/chromedriver'.format(base_path), 0o775)
 
 def fix_firefox():
     print("You are running FireFox >= 48.0.0")
-    print("This means you need geckodriver: https://github.com/mozilla/geckodriver/releases/tag/v0.9.0")
-    print("(Be sure and rename the executable to \"wires\" instead of geckodriver and put it in your path.)")
+    print("This means you need geckodriver: https://github.com/mozilla/geckodriver/releases")
+    print("(If using selenium==2.x.x Be sure and rename the executable to \"wires\" instead of geckodriver")
+    print("and put it in your path.)")
     get_remote_binary('wires')
 
 def fix_chrome():

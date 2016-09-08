@@ -13,7 +13,8 @@ from PyWebRunner.utils import which, Timeout, fix_firefox, fix_chrome
 from xvfbwrapper import Xvfb
 from selenium import webdriver
 from selenium.common.exceptions import (NoSuchElementException, NoSuchWindowException,
-                                        NoAlertPresentException)
+                                        NoAlertPresentException, WebDriverException,
+                                        TimeoutException)
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.by import By
@@ -47,7 +48,7 @@ class WebRunner(object):
         xvfb = kwargs.get('xvfb', True)
         driver = kwargs.get('driver')
         if not driver:
-            if which('wires'):
+            if which('wires') or which('geckodriver'):
                 driver = 'Gecko'
             else:
                 driver = 'Firefox'
@@ -166,28 +167,28 @@ class WebRunner(object):
             fp.set_preference("browser.startup.homepage_override.mstone", "ignore")
             fp.set_preference("startup.homepage_welcome_url.additional", "about:blank")
             if self.driver == 'Gecko':
-                if which('wires'):
+                if which('wires') or which('geckodriver'):
                     caps = DesiredCapabilities.FIREFOX
                     caps['marionette'] = True
                     self.browser = webdriver.Firefox(firefox_profile=fp, capabilities=caps)
                     self.browser.switch_to_window(self.browser.window_handles[0])
                 else:
-                    print('"wires" not found in path. Exiting.')
+                    print('"wires" or "geckodriver" not found in path. Exiting.')
                     sys.exit(1)
             else:
                 try:
                     with Timeout(5):
                         self.browser = webdriver.Firefox(firefox_profile=fp)
-                except Timeout.Timeout:
+                except (Timeout.Timeout, WebDriverException):
                     fix_firefox()
 
-                    if which('wires'):
+                    if which('wires') or which('geckodriver'):
                         caps = DesiredCapabilities.FIREFOX
                         caps['marionette'] = True
                         self.browser = webdriver.Firefox(firefox_profile=fp, capabilities=caps)
                         self.browser.switch_to_window(self.browser.window_handles[0])
                     else:
-                        print('"wires" not found in path. Exiting.')
+                        print('"wires" or "geckodriver" not found in path. Exiting.')
                         sys.exit(1)
         else:
             raise UserWarning('No valid driver detected.')
@@ -644,14 +645,18 @@ class WebRunner(object):
             Whether or not to click the element after hovering
             defaults to False
         '''
-        elem = self.get_element(selector)
+        try:
+            elem = self.get_element(selector)
 
-        action = webdriver.ActionChains(self.browser)
-        action.move_to_element(elem)
-        if click:
-            action.click(elem)
+            action = webdriver.ActionChains(self.browser)
+            action.move_to_element(elem)
+            if click:
+                action.click(elem)
 
-        action.perform()
+            action.perform()
+        except WebDriverException:
+            print("move_to isn't supported with this browser driver.")
+
 
     def hover(self, selector, click=False):
         '''
@@ -665,7 +670,10 @@ class WebRunner(object):
             Whether or not to click the element after hovering
             defaults to False
         '''
-        self.move_to(selector, click)
+        try:
+            self.move_to(selector, click)
+        except WebDriverException:
+            print("hover isn't supported with this browser driver.")
 
     def get_elements(self, selector):
         '''
@@ -756,7 +764,17 @@ class WebRunner(object):
 
         '''
         elem = self.get_element(selector)
-        return elem.get_attribute('value')
+        if self.driver == 'Gecko':
+            # Let's do this the stupid way because Mozilla thinks geckodriver is
+            # so incredibly amazing.
+            tag_name = elem.tag_name
+            if tag_name == 'select':
+                select = Select(elem)
+                return select.all_selected_options[0].get_attribute('value')
+            else:
+                return elem.get_attribute('value')
+        else:
+            return elem.get_attribute('value')
 
     def send_key(self, selector, key, wait_for='presence', **kwargs):
         '''
@@ -947,7 +965,9 @@ class WebRunner(object):
         typing_max_delay = kwargs.get('typing_max_delay', .33)
         self.wait_for_visible(selector, **kwargs)
 
-        elem = self.get_element(selector)
+        elem = kwargs.get('elem')
+        if not elem:
+            elem = self.get_element(selector)
 
         if elem.tag_name == 'select':
             self.set_select_by_value(elem, value)
@@ -963,6 +983,10 @@ class WebRunner(object):
                     elem.send_keys(k)
             else:
                 elem.send_keys(value)
+
+            if self.driver == 'Gecko':
+                # Thank you so much Mozilla. This is awesome to have to do.
+                self.js("arguments[0].setAttribute('value', '" + value +"')", elem)
 
         if blur:
             elem.send_keys(Keys.TAB)
@@ -1026,7 +1050,8 @@ class WebRunner(object):
 
         '''
         elem = self.get_element(selector)
-        elem.clear()
+        if elem:
+            elem.clear()
 
     def current_url(self):
         '''
@@ -1300,7 +1325,7 @@ class WebRunner(object):
 
                 if tag_name in ('input', 'textarea'):
                     # File upload needs a path to a file.
-                    elem.send_keys(row['value'])
+                    self.set_value('', row['value'], elem=elem)
 
                 elif tag_name == 'select':
                     self.set_select_by_text(elem, row['value'])
@@ -1325,8 +1350,14 @@ class WebRunner(object):
             Overrides WebRunner.timeout
 
         '''
-        wait = WebDriverWait(self.browser, kwargs.get('timeout') or self.timeout)
-        wait.until(wait_function)
+        try:
+            wait = WebDriverWait(self.browser, kwargs.get('timeout') or self.timeout)
+            wait.until(wait_function)
+        except TimeoutException:
+          if self.driver == 'Gecko':
+              print("Geckodriver can't use the text_to_be_present_in_element_value wait for some reason.")
+          else:
+              raise
 
     def wait_for_alert(self, **kwargs):
         '''
