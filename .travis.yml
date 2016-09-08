@@ -1,6 +1,6 @@
 language: python
 addons:
-  firefox: "37.0.1"
+  firefox: "47.0.1"
 python:
   - "2.7"
   - "3.2"
