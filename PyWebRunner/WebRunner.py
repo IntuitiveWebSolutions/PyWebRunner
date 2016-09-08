@@ -47,11 +47,6 @@ class WebRunner(object):
         self.root_path = kwargs.get('root_path', './')
         xvfb = kwargs.get('xvfb', True)
         driver = kwargs.get('driver', 'Chrome')
-        if driver == 'Firefox':
-            if which('geckodriver'):
-                driver = 'Gecko'
-            else:
-                driver = 'Firefox'
         mootools = kwargs.get('mootools', False)
         errors = kwargs.get('errors', False)
         timeout = kwargs.get('timeout', 90)
