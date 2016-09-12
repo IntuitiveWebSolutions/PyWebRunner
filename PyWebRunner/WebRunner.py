@@ -491,7 +491,7 @@ class WebRunner(object):
             Amount of time to wait (in seconds) before accepting that an action cannot occur. (Crash)
 
         '''
-        self.timeout = timeout
+        self.timeout = int(timeout)
 
     def focus_window(self, windex=None):
         '''
