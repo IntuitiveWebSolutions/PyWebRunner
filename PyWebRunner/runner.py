@@ -10,6 +10,7 @@ def main():
     parser = argparse.ArgumentParser(description='Run a PyWebRunner YAML/JSON script.')
     parser.add_argument('-b', '--browser', help='Which browser to load. Defaults to Chrome.')
     parser.add_argument('--base-url', help='Base URL to use with goto command.')
+    parser.add_argument('-t', '--timeout', help='Global wait timeout (in seconds). Defaults to 30.')
     parser.add_argument('--errors', dest='errors', action='store_true', help='Show errors.')
     parser.add_argument('--focus', dest='focus', action='store_true', help='Focus the browser on launch.')
     parser.add_argument('files', nargs='*')
@@ -17,7 +18,8 @@ def main():
 
     errors = args.errors or False
     driver = args.browser or 'Chrome'
-    wt = WebTester(driver=driver, base_url=args.base_url)
+    timeout = args.timeout or 30
+    wt = WebTester(driver=driver, base_url=args.base_url, timeout=timeout)
     wt.start()
     if args.focus:
         wt.focus_browser()

@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.8.3] - 2016-09-12
+### Added
+- `set_timeout` command for altering the global wait timeout on the fly.
+- `-t, --timeout` flag for webrunner
+
 ## [1.8.2] - 2016-09-12
 ### Added
 - `focus_browser` command. Uses JS alert to focus the browser in the OS.

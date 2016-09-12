@@ -481,6 +481,18 @@ class WebRunner(object):
         log_list = self.browser.get_log(log)
         return log_list
 
+    def set_timeout(self, timeout=90):
+        '''
+        Sets the global wait timeout.
+
+        Parameters
+        ----------
+        timeout: int
+            Amount of time to wait (in seconds) before accepting that an action cannot occur. (Crash)
+
+        '''
+        self.timeout = timeout
+
     def focus_window(self, windex=None):
         '''
         Focuses on the window with index (#).
