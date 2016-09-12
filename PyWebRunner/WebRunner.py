@@ -184,7 +184,6 @@ class WebRunner(object):
                     caps = DesiredCapabilities.FIREFOX
                     caps['marionette'] = True
                     self.browser = webdriver.Firefox(firefox_profile=fp, capabilities=caps)
-                    self.browser.switch_to_window(self.browser.window_handles[0])
                 else:
                     print('"wires" or "geckodriver" not found in path. Exiting.')
                     sys.exit(1)
@@ -207,6 +206,10 @@ class WebRunner(object):
                             sys.exit(1)
         else:
             raise UserWarning('No valid driver detected.')
+
+        # Raise window automatically
+        if self.browser:
+            self.focus_window()
 
     def stop(self):
         '''
@@ -436,34 +439,38 @@ class WebRunner(object):
             script = self._load_yaml_file(filepath)
 
         for index, command in enumerate(script):
-            key = list(command.keys())[0]
-            digits = len(str(len(script)))
-            if verbose:
-                print('({}) Parsing: {}: {}'.format(str(index + 1).zfill(digits), key, command[key]))
+            if type(command) is str:
+                if hasattr(self, command):
+                    getattr(self, command)()
+            else:
+                key = list(command.keys())[0]
+                digits = len(str(len(script)))
+                if verbose:
+                    print('({}) Parsing: {}: {}'.format(str(index + 1).zfill(digits), key, command[key]))
 
-            # If the include command is given, parse those commands in-place before
-            # continuing. This allows yaml scripts to include and use other yaml files.
-            if key == 'include':
-                i_script = self._load_yaml_file(command[key])
-                for i_index, i_command in enumerate(i_script):
+                # If the include command is given, parse those commands in-place before
+                # continuing. This allows yaml scripts to include and use other yaml files.
+                if key == 'include':
+                    i_script = self._load_yaml_file(command[key])
+                    for i_index, i_command in enumerate(i_script):
+                        if errors:
+                            self._run_command(i_command)
+                        else:
+                            try:
+                                self._run_command(i_command)
+                            except Exception as e:
+                                self.bail_out(exception=e, caller='command_script')
+                                raise
+
+                else:
                     if errors:
-                        self._run_command(i_command)
+                        self._run_command(command)
                     else:
                         try:
-                            self._run_command(i_command)
+                            self._run_command(command)
                         except Exception as e:
                             self.bail_out(exception=e, caller='command_script')
                             raise
-
-            else:
-                if errors:
-                    self._run_command(command)
-                else:
-                    try:
-                        self._run_command(command)
-                    except Exception as e:
-                        self.bail_out(exception=e, caller='command_script')
-                        raise
 
     def get_log(self, log=None):
         '''
@@ -473,6 +480,27 @@ class WebRunner(object):
             log = 'browser'
         log_list = self.browser.get_log(log)
         return log_list
+
+    def focus_window(self, windex=None):
+        '''
+        Focuses on the window with index (#).
+
+        Parameters
+        ----------
+        windex: int
+            The index of the window to focus on. Defaults to the first window opened.
+
+        '''
+        if not windex:
+            windex = 0
+        self.browser.switch_to_window(self.browser.window_handles[windex])
+
+    def focus_browser(self):
+        '''
+        Raises and closes an empty alert in order to focus the browser app in most OSes.
+        '''
+        self.js('alert("");')
+        self.close_alert()
 
     def get_log_text(self):
         '''

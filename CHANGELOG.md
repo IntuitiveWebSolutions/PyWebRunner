@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.8.2] - 2016-09-12
+### Added
+- `focus_browser` command. Uses JS alert to focus the browser in the OS.
+- `focus_window` command. Takes in an index of the window number to focus on.
+- `--focus` option for webrunner to automatically run `focus_browser` on launch.
 
 ## [1.8.1] - 2016-09-08
 ### Added
