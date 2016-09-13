@@ -9,6 +9,8 @@ import os
 import sys
 import pkg_resources
 import re
+import yaml
+import json
 from PyWebRunner.utils import which, Timeout, fix_firefox, fix_chrome
 from xvfbwrapper import Xvfb
 from selenium import webdriver
@@ -407,16 +409,14 @@ class WebRunner(object):
                     self.yaml_vars[k].append(value)
 
     def _load_yaml_file(self, filepath):
-        from yaml import load
-        from json import loads
         with open(filepath, 'r') as f:
             if filepath.lower().endswith('yaml') or filepath.lower().endswith('yml'):
-                script = load(f)
+                script = yaml.load(f)
             elif filepath.lower().endswith('json'):
-                script = loads(f.read())
+                script = json.loads(f.read())
             else:
                 print("Couldn't detect filetype from extension. Defaulting to YAML.")
-                script = load(f)
+                script = yaml.load(f)
         return script
 
     def command_script(self, filepath=None, script=None, errors=True, verbose=False):
@@ -441,7 +441,13 @@ class WebRunner(object):
         for index, command in enumerate(script):
             if type(command) is str:
                 if hasattr(self, command):
-                    getattr(self, command)()
+                    try:
+                        getattr(self, command)()
+                    except Exception as e:
+                        self._print_command_error(command, e.msg)
+                        self.stop()
+                        if errors:
+                            raise
             else:
                 key = list(command.keys())[0]
                 digits = len(str(len(script)))
@@ -453,24 +459,32 @@ class WebRunner(object):
                 if key == 'include':
                     i_script = self._load_yaml_file(command[key])
                     for i_index, i_command in enumerate(i_script):
-                        if errors:
+                        try:
                             self._run_command(i_command)
-                        else:
-                            try:
-                                self._run_command(i_command)
-                            except Exception as e:
-                                self.bail_out(exception=e, caller='command_script')
+                        except Exception as e:
+                            self._print_command_error(i_command, e.msg)
+                            self.stop()
+                            if errors:
                                 raise
 
                 else:
-                    if errors:
+                    # Run most commands with arguments.
+                    try:
                         self._run_command(command)
-                    else:
-                        try:
-                            self._run_command(command)
-                        except Exception as e:
-                            self.bail_out(exception=e, caller='command_script')
+                    except Exception as e:
+                        self._print_command_error(command, e.msg)
+                        self.stop()
+                        if errors:
                             raise
+
+    def _print_command_error(self, command, message):
+        print("=" * 80)
+        print("")
+        print("There was an error processing: {}".format(yaml.dump(command, default_flow_style=False)))
+        print("")
+        print("Selenium said: {}".format(message))
+        print("")
+        print("=" * 80)
 
     def get_log(self, log=None):
         '''
@@ -533,7 +547,7 @@ class WebRunner(object):
             log_text += item + '\n'
         return log_text
 
-    def bail_out(self, exception=None, caller=None):
+    def bail_out(self, line=None, exception=None, caller=None):
         '''
         Method for reporting and, optionally, bypassing errors during a command.
 
@@ -545,6 +559,7 @@ class WebRunner(object):
             The method that called the bail_out.
 
         '''
+        print(line)
         print(caller)
         print(exception)
         self.stop()

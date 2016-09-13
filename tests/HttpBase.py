@@ -52,7 +52,8 @@ class HttpBase(unittest.TestCase):
         cls.server = Server()
         cls.server.start()
 
-        cls.wt = WebTester(base_url='http://127.0.0.1:8000/', driver='Firefox', timeout=5)
+        browser = os.environ.get('BROWSER', 'Firefox')
+        cls.wt = WebTester(base_url='http://127.0.0.1:8000/', driver=browser, timeout=5)
         cls.wt.start()
 
     @classmethod

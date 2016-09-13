@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.8.5] - 2016-09-12
+### Changed
+- Better YAML script error handling.
+
 ## [1.8.4] - 2016-09-12
 ### Added
 - `set_timeout` command for altering the global wait timeout on the fly.

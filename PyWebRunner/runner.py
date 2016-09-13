@@ -18,8 +18,8 @@ def main():
 
     errors = args.errors or False
     driver = args.browser or 'Chrome'
-    timeout = int(args.timeout) or 30
-    wt = WebTester(driver=driver, base_url=args.base_url, timeout=timeout)
+    timeout = args.timeout or 30
+    wt = WebTester(driver=driver, base_url=args.base_url, timeout=int(timeout))
     wt.start()
     if args.focus:
         wt.focus_browser()
