@@ -629,7 +629,7 @@ class WebRunner(object):
 
         self.js(scroll_string)
 
-    def scroll_to_element(self, selector, elem=None):
+    def scroll_to_element(self, selector, offset=0, offset_selector=None):
         '''
         Scrolls the given element into view.
 
@@ -637,35 +637,22 @@ class WebRunner(object):
         ----------
         selector: str
             Any valid css selector
+        offset: number
+            Number of pixels to offset the scroll
+        offset_selector: str
+            A selector whose corresponding element's height
+            will be added to the offset
         '''
-        if not elem:
-            elem = self.get_element(selector)
+        if offset_selector:
+            offset_el = self.get_element(offset_selector)
+            if offset_el:
+                offset += offset_el.size['height']
 
-        # Before we do any scrolling, make sure BC isn't scrolling
-        self.wait_for_invisible('.js-scrolling')
+        scroll_to_el = self.get_element(selector)
 
-        self.js("arguments[0].scrollIntoView();", elem)
-
-        # Find out if we're right on the edge of the screen
-        w_size = self.browser.get_window_size()
-        scrolled_location = elem.location_once_scrolled_into_view
-        edge_threshold = 50
-        bottom_diff = abs(w_size['height'] - scrolled_location['y'])
-
-        scroll_direction = None
-        if bottom_diff < edge_threshold:
-            scroll_direction = ''
-        elif scrolled_location['y'] < edge_threshold:
-            scroll_direction = '-'
-
-        if scroll_direction is not None:
-            scroll_width = w_size['width'] / 2
-            scroll_height = w_size['height'] / 2
-            self.js("window.scrollBy({0}{1}, {0}{2});".format(scroll_direction,
-                                                              scroll_width,
-                                                              scroll_height))
-
-        self.wait_for_visible(selector)
+        scroll_location = scroll_to_el.location['y'] - offset
+        self.js("window.scrollTo(0, arguments[0]);", scroll_location)
+        self.wait(0.5)  # no good way to wait for scrolling to finish
 
     def set_select_by_text(self, select, text):
         '''
