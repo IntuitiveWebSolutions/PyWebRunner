@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+
+## [1.8.6] - 2016-09-16
+### Added
+- `-v, --verbose` flag for webrunner.
+- `(( prompt|Something ))` parameter added.
+
 ## [1.8.5] - 2016-09-12
 ### Changed
 - Better YAML script error handling.
@@ -24,7 +30,6 @@ All notable changes to this project will be documented in this file.
 - Fix set_value on Nightly Firefox + Selenium 3 beta for Gecko
 - Etc... Geckodriver is horrible right now.
 - Default to Chrome.
-
 
 ## [1.8.0] - 2016-09-07
 ### Added

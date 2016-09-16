@@ -11,7 +11,7 @@ import pkg_resources
 import re
 import yaml
 import json
-from PyWebRunner.utils import which, Timeout, fix_firefox, fix_chrome
+from PyWebRunner.utils import which, Timeout, fix_firefox, fix_chrome, prompt
 from xvfbwrapper import Xvfb
 from selenium import webdriver
 from selenium.common.exceptions import (NoSuchElementException, NoSuchWindowException,
@@ -192,7 +192,7 @@ class WebRunner(object):
             else:
                 # self.browser = webdriver.Firefox(firefox_profile=fp)
                 try:
-                    with Timeout(8):
+                    with Timeout(10):
                         self.browser = webdriver.Firefox(firefox_profile=fp)
                 except (Timeout.Timeout, WebDriverException):
                     if not self.browser:
@@ -360,7 +360,7 @@ class WebRunner(object):
         except SystemError:
             print("Sorry, Python < 3.5 can't import {} via YAML.".format(to_import))
 
-    def _run_command(self, command):
+    def _run_command(self, command, verbose=False):
         '''
         Internal method for running a command from a parsed YAML script.
 
@@ -372,6 +372,9 @@ class WebRunner(object):
 
         '''
         pre_parse_regex = '\(\(([^}]+)\)\)'  # Grab things wrapped like so: (( something ))
+        if verbose:
+            print('Processing command: {}'.format(yaml.dump(command)))
+
         for k in command:
             if hasattr(self, k):
                 if type(command[k]) is list:
@@ -435,6 +438,7 @@ class WebRunner(object):
         '''
         self._import('random.randint')
         self._import('random.choice')
+        self.yaml_funcs['prompt'] = prompt
         if not script and filepath:
             script = self._load_yaml_file(filepath)
 
@@ -460,7 +464,7 @@ class WebRunner(object):
                     i_script = self._load_yaml_file(command[key])
                     for i_index, i_command in enumerate(i_script):
                         try:
-                            self._run_command(i_command)
+                            self._run_command(i_command, verbose=verbose)
                         except Exception as e:
                             self._print_command_error(i_command, e.msg)
                             self.stop()
@@ -470,7 +474,7 @@ class WebRunner(object):
                 else:
                     # Run most commands with arguments.
                     try:
-                        self._run_command(command)
+                        self._run_command(command, verbose=verbose)
                     except Exception as e:
                         self._print_command_error(command, e.msg)
                         self.stop()

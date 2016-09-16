@@ -114,6 +114,10 @@ def yn(question):
     return get_input(question).lower().strip()[0] == "y"
 
 
+def prompt(question):
+    return get_input('{}: '.format(question))
+
+
 def get_input(question):
     py3=sys.version_info[0] > 2
 

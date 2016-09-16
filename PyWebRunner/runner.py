@@ -13,6 +13,7 @@ def main():
     parser.add_argument('-t', '--timeout', help='Global wait timeout (in seconds). Defaults to 30.')
     parser.add_argument('--errors', dest='errors', action='store_true', help='Show errors.')
     parser.add_argument('--focus', dest='focus', action='store_true', help='Focus the browser on launch.')
+    parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Verbose output of commands being executed.')
     parser.add_argument('files', nargs='*')
     args = parser.parse_args()
 
@@ -34,7 +35,7 @@ def main():
             else:
                 print("Couldn't detect filetype from extension. Defaulting to YAML.")
                 script = load(f)
-            wt.command_script(script=script, errors=errors)
+            wt.command_script(script=script, errors=errors, verbose=args.verbose)
     wt.stop()
 
 
