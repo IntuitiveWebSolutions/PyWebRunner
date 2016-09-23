@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.8.8] - 2016-09-16
+### Changed
+- Added `driver_init_timeout` parameter to control the timeout of instantiating the driver.
+
 ## [1.8.7] - 2016-09-16
 ### Changed
 - Simplified `scroll_to_element` to accept offset parameters.

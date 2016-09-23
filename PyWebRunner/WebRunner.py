@@ -47,13 +47,15 @@ class WebRunner(object):
     def __init__(self, **kwargs):
         self.base_url = kwargs.get('base_url', 'http://127.0.0.1:5000')
         self.root_path = kwargs.get('root_path', './')
+        self.driver_init_timeout = kwargs.get('driver_init_timeout', 10)
+        self.errors = kwargs.get('errors', False)
         xvfb = kwargs.get('xvfb', True)
         driver = kwargs.get('driver', 'Chrome')
         mootools = kwargs.get('mootools', False)
-        errors = kwargs.get('errors', False)
         timeout = kwargs.get('timeout', 90)
         width = kwargs.get('width', 1440)
         height = kwargs.get('height', 1200)
+
         desired_capabilities = kwargs.get('desired_capabilities', 'CHROME')
         command_executor = kwargs.get('command_executor', 'http://127.0.0.1:4444/wd/hub')
 
@@ -192,7 +194,7 @@ class WebRunner(object):
             else:
                 # self.browser = webdriver.Firefox(firefox_profile=fp)
                 try:
-                    with Timeout(10):
+                    with Timeout(self.driver_init_timeout):
                         self.browser = webdriver.Firefox(firefox_profile=fp)
                 except (Timeout.Timeout, WebDriverException):
                     if not self.browser:
