@@ -150,6 +150,7 @@ Items enclosed in double parentheses (( )) will be parsed in this special way up
 **Examples**
 
 ```yaml
+- include: basic_setup.yml
 - import: random.randint
 - set_value:
   - "#someinput"
