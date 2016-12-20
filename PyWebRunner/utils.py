@@ -5,67 +5,77 @@ import time
 
 try:
     # Python 3+
-    from urllib.request import urlretrieve
+    from urllib.request import urlretrieve, urlopen
 except ImportError:
     # Python 2
     from urllib import urlretrieve
+    from urllib2 import urlopen
 
 
 def get_remote_binary(whichbin):
-    if not which(whichbin):
-        print("=" * 80)
-        print("PyWebRunner can try to download the correct driver automatically.")
-        fixit = yn("Would you like for PyWebRunner to attempt to fix this for you? [Y/N]: ")
-        if fixit:
-            pathdirs = [p for p in os.environ[
-                'PATH'].split(':') if os.access(p, os.W_OK)]
-            if '/usr/local/bin' in pathdirs:
-                base_path = '/usr/local/bin'
-            else:
-                print(
-                    "The following directories are in your path and appear to be writable: ")
-                for p in pathdirs:
-                    print(p)
-                print("Which of those directories would you like to use?")
-                answer = get_input("Hit the enter key to cancel.")
-                if answer:
-                    if answer in pathdirs:
-                        base_path = answer
-                    else:
-                        print("Oops... that path is not in the list. Aborting.")
-                        sys.exit(1)
+    # if not which(whichbin):
+    print("=" * 80)
+    print("PyWebRunner can try to download the correct driver automatically.")
+    fixit = yn("Would you like for PyWebRunner to attempt to fix this for you? [Y/N]: ")
+    if fixit:
+
+        latest_chrome_url = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
+        latest_chrome_version = '2.26'
+
+        pathdirs = [p for p in os.environ[
+            'PATH'].split(':') if os.access(p, os.W_OK)]
+        if '/usr/local/bin' in pathdirs:
+            base_path = '/usr/local/bin'
+        else:
+            print(
+                "The following directories are in your path and appear to be writable: ")
+            for p in pathdirs:
+                print(p)
+            print("Which of those directories would you like to use?")
+            answer = get_input("Hit the enter key to cancel.")
+            if answer:
+                if answer in pathdirs:
+                    base_path = answer
                 else:
-                    print("Aborting.")
+                    print("Oops... that path is not in the list. Aborting.")
                     sys.exit(1)
-
-            if whichbin == 'wires':
-                available_binaries = {
-                    'arm7hf': 'https://github.com/mozilla/geckodriver/releases/download/v0.9.0/geckodriver-v0.9.0-arm7hf.tar.gz',
-                    'linux64': 'https://github.com/mozilla/geckodriver/releases/download/v0.9.0/geckodriver-v0.9.0-linux64.tar.gz',
-                    'mac': 'https://github.com/mozilla/geckodriver/releases/download/v0.9.0/geckodriver-v0.9.0-mac.tar.gz',
-                    'win64': 'https://github.com/mozilla/geckodriver/releases/download/v0.9.0/geckodriver-v0.9.0-win64.zip'
-                }
             else:
-                available_binaries = {
-                    'linux32': 'http://chromedriver.storage.googleapis.com/2.23/chromedriver_linux32.zip',
-                    'linux64': 'http://chromedriver.storage.googleapis.com/2.23/chromedriver_linux64.zip',
-                    'mac64': 'http://chromedriver.storage.googleapis.com/2.23/chromedriver_mac64.zip',
-                    'win32': 'http://chromedriver.storage.googleapis.com/2.23/chromedriver_win32.zip',
-                }
+                print("Aborting.")
+                sys.exit(1)
 
-            print("Which of these fits your system?")
-            for k in available_binaries:
-                print(k)
+        if whichbin == 'wires':
+            available_binaries = {
+                'arm7hf': 'https://github.com/mozilla/geckodriver/releases/download/v0.11.1/geckodriver-v0.11.1-arm7hf.tar.gz',
+                'linux64': 'https://github.com/mozilla/geckodriver/releases/download/v0.11.1/geckodriver-v0.11.1-linux64.tar.gz',
+                'mac': 'https://github.com/mozilla/geckodriver/releases/download/v0.11.1/geckodriver-v0.11.1-mac.tar.gz',
+                'win64': 'https://github.com/mozilla/geckodriver/releases/download/v0.11.1/geckodriver-v0.11.1-win64.zip'
+            }
+        else:
+            try:
+                latest_chrome_version = urlopen(latest_chrome_url).read().strip()
+            except:
+                pass
 
-            answer = get_input("Choose one or hit enter to abort: ")
-            if answer and available_binaries.get(answer):
-                if whichbin == 'wires':
-                    download_driver_file(whichbin, available_binaries[answer], base_path)
-                    latest = "https://github.com/mozilla/geckodriver/releases/download/v0.10.0/geckodriver-v0.10.0-macos.tar.gz"
-                    download_driver_file(whichbin, latest, base_path)
-                else:
-                    download_driver_file(whichbin, available_binaries[answer], base_path)
-                print("Done! You should be able to use the driver now.")
+            available_binaries = {
+                'linux32': 'http://chromedriver.storage.googleapis.com/{}/chromedriver_linux32.zip'.format(latest_chrome_version),
+                'linux64': 'http://chromedriver.storage.googleapis.com/{}/chromedriver_linux64.zip'.format(latest_chrome_version),
+                'mac64': 'http://chromedriver.storage.googleapis.com/{}/chromedriver_mac64.zip'.format(latest_chrome_version),
+                'win32': 'http://chromedriver.storage.googleapis.com/{}/chromedriver_win32.zip'.format(latest_chrome_version),
+            }
+
+        print("Which of these fits your system?")
+        for k in available_binaries:
+            print(k)
+
+        answer = get_input("Choose one or hit enter to abort: ")
+        if answer and available_binaries.get(answer):
+            if whichbin == 'wires':
+                download_driver_file(whichbin, available_binaries[answer], base_path)
+                latest = "https://github.com/mozilla/geckodriver/releases/download/v0.11.1/geckodriver-v0.11.1-macos.tar.gz"
+                download_driver_file(whichbin, latest, base_path)
+            else:
+                download_driver_file(whichbin, available_binaries[answer], base_path)
+            print("Done! You should be able to use the driver now.")
 
 def download_driver_file(whichbin, url, base_path):
     if url.endswith('.tar.gz'):
@@ -84,7 +94,7 @@ def download_driver_file(whichbin, url, base_path):
         with zipfile.ZipFile('/tmp/pwr_temp{}'.format(ext), "r") as z:
             z.extractall('{}/'.format(base_path))
 
-    if whichbin == 'wires' and '/v0.9.0/' in url:
+    if whichbin == 'wires' and '/v0.11.1/' in url:
         os.rename('{}/geckodriver'.format(base_path),
                   '{}/wires'.format(base_path))
         os.chmod('{}/wires'.format(base_path), 0o775)
@@ -102,7 +112,7 @@ def fix_firefox():
 
 def fix_chrome():
     print("You are running Chrome")
-    print("This means you need chromedriver: http://chromedriver.storage.googleapis.com/index.html?path=2.23")
+    print("This means you need chromedriver: https://sites.google.com/a/chromium.org/chromedriver/downloads")
     get_remote_binary('chromedriver')
 
 

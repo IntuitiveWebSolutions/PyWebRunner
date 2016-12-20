@@ -151,7 +151,13 @@ class WebRunner(object):
             except IOError:
                 self.js_errorcollector = False
 
-            self.browser = webdriver.Chrome(chrome_options=chrome_options)
+            try:
+                self.browser = webdriver.Chrome(chrome_options=chrome_options)
+            except WebDriverException:
+                print("Chrome could not start. Downloading latest webdriver...")
+                fix_chrome()
+                self.browser = webdriver.Chrome(chrome_options=chrome_options)
+
         elif self.driver == "Opera":
             self.browser = webdriver.Opera()
         elif self.driver == "Ie":

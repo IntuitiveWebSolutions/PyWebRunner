@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.8.9] - 2016-12-14
+### Added
+- chromedriver failure detection
+- chromedriver latest version detection
+
+### Changed
+- Prompts to fix chromedriver installation if chromedriver crash.
+- Updated wires to latest version 0.11.1
+
 ## [1.8.8] - 2016-09-16
 ### Changed
 - Added `driver_init_timeout` parameter to control the timeout of instantiating the driver.
