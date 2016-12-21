@@ -186,6 +186,7 @@ special way upon the execution of the script.
 
 .. code:: yaml
 
+    - include: basic_setup.yml
     - import: random.randint
     - set_value:
       - "#someinput"
