@@ -55,6 +55,7 @@ class WebRunner(object):
         timeout = kwargs.get('timeout', 90)
         width = kwargs.get('width', 1440)
         height = kwargs.get('height', 1200)
+        self.default_offset = kwargs.get('default_offset', 0)
 
         desired_capabilities = kwargs.get('desired_capabilities', 'CHROME')
         command_executor = kwargs.get('command_executor', 'http://127.0.0.1:4444/wd/hub')
@@ -519,6 +520,18 @@ class WebRunner(object):
         '''
         self.timeout = int(timeout)
 
+    def set_default_offset(self, default_offset=0):
+            '''
+            Sets the global default offset for scroll_to_element.
+
+            Parameters
+            ----------
+            offset: int
+                The offset in pixels.
+
+            '''
+            self.default_offset = int(default_offset)
+
     def focus_window(self, windex=None):
         '''
         Focuses on the window with index (#).
@@ -637,7 +650,7 @@ class WebRunner(object):
 
         self.js(scroll_string)
 
-    def scroll_to_element(self, selector, offset=0, offset_selector=None):
+    def scroll_to_element(self, selector, offset=None, offset_selector=None):
         '''
         Scrolls the given element into view.
 
@@ -651,6 +664,9 @@ class WebRunner(object):
             A selector whose corresponding element's height
             will be added to the offset
         '''
+        if offset is None:
+            offset = self.default_offset
+
         if offset_selector:
             offset_el = self.get_element(offset_selector)
             if offset_el:

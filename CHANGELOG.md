@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.9.0] - 2016-12-20
+### Added
+- set_default_offset method
+- `-do, --default-offset` parameters for webrunner
+- default_offset parameter for scroll_to_element
+
 ## [1.8.9] - 2016-12-14
 ### Added
 - chromedriver failure detection
