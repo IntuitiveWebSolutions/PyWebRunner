@@ -11,6 +11,7 @@ except ImportError:
     from urllib import urlretrieve
     from urllib2 import urlopen
 
+latest_gecko_driver = '0.18.0'
 
 def get_remote_binary(whichbin):
     # if not which(whichbin):
@@ -20,7 +21,7 @@ def get_remote_binary(whichbin):
     if fixit:
 
         latest_chrome_url = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
-        latest_chrome_version = '2.26'
+        latest_chrome_version = '2.31'
 
         pathdirs = [p for p in os.environ[
             'PATH'].split(':') if os.access(p, os.W_OK)]
@@ -45,10 +46,10 @@ def get_remote_binary(whichbin):
 
         if whichbin == 'wires':
             available_binaries = {
-                'arm7hf': 'https://github.com/mozilla/geckodriver/releases/download/v0.11.1/geckodriver-v0.11.1-arm7hf.tar.gz',
-                'linux64': 'https://github.com/mozilla/geckodriver/releases/download/v0.11.1/geckodriver-v0.11.1-linux64.tar.gz',
-                'mac': 'https://github.com/mozilla/geckodriver/releases/download/v0.11.1/geckodriver-v0.11.1-mac.tar.gz',
-                'win64': 'https://github.com/mozilla/geckodriver/releases/download/v0.11.1/geckodriver-v0.11.1-win64.zip'
+                'arm7hf': 'https://github.com/mozilla/geckodriver/releases/download/v{}/geckodriver-v{}-arm7hf.tar.gz'.format(latest_gecko_driver, latest_gecko_driver),
+                'linux64': 'https://github.com/mozilla/geckodriver/releases/download/v{}/geckodriver-v{}-linux64.tar.gz'.format(latest_gecko_driver, latest_gecko_driver),
+                'mac': 'https://github.com/mozilla/geckodriver/releases/download/v{}/geckodriver-v{}-macos.tar.gz'.format(latest_gecko_driver, latest_gecko_driver),
+                'win64': 'https://github.com/mozilla/geckodriver/releases/download/v{}/geckodriver-v{}-win64.zip'.format(latest_gecko_driver, latest_gecko_driver)
             }
         else:
             try:
@@ -69,12 +70,12 @@ def get_remote_binary(whichbin):
 
         answer = get_input("Choose one or hit enter to abort: ")
         if answer and available_binaries.get(answer):
-            if whichbin == 'wires':
-                download_driver_file(whichbin, available_binaries[answer], base_path)
-                latest = "https://github.com/mozilla/geckodriver/releases/download/v0.11.1/geckodriver-v0.11.1-macos.tar.gz"
-                download_driver_file(whichbin, latest, base_path)
-            else:
-                download_driver_file(whichbin, available_binaries[answer], base_path)
+            # if whichbin == 'wires':
+            #     download_driver_file(whichbin, available_binaries[answer], base_path)
+            #     latest = "https://github.com/mozilla/geckodriver/releases/download/v{}/geckodriver-v{}-macos.tar.gz".format(latest_gecko_driver)
+            #     download_driver_file(whichbin, latest, base_path)
+            # else:
+            download_driver_file(whichbin, available_binaries[answer], base_path)
             print("Done! You should be able to use the driver now.")
 
 def download_driver_file(whichbin, url, base_path):
@@ -94,11 +95,11 @@ def download_driver_file(whichbin, url, base_path):
         with zipfile.ZipFile('/tmp/pwr_temp{}'.format(ext), "r") as z:
             z.extractall('{}/'.format(base_path))
 
-    if whichbin == 'wires' and '/v0.11.1/' in url:
-        os.rename('{}/geckodriver'.format(base_path),
-                  '{}/wires'.format(base_path))
-        os.chmod('{}/wires'.format(base_path), 0o775)
-    elif whichbin == 'wires':
+    # if whichbin == 'wires' and '/v{}/'.format(latest_gecko_driver) in url:
+    #     os.rename('{}/geckodriver'.format(base_path),
+    #               '{}/wires'.format(base_path))
+    #     os.chmod('{}/wires'.format(base_path), 0o775)
+    if whichbin == 'wires':
         os.chmod('{}/geckodriver'.format(base_path), 0o775)
     else:
         os.chmod('{}/chromedriver'.format(base_path), 0o775)
@@ -108,6 +109,9 @@ def fix_firefox():
     print("This means you need geckodriver: https://github.com/mozilla/geckodriver/releases")
     print("(If using selenium==2.x.x Be sure and rename the executable to \"wires\" instead of geckodriver")
     print("and put it in your path.)")
+    get_remote_binary('wires')
+
+def fix_gecko():
     get_remote_binary('wires')
 
 def fix_chrome():

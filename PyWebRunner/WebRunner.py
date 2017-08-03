@@ -11,7 +11,8 @@ import pkg_resources
 import re
 import yaml
 import json
-from PyWebRunner.utils import which, Timeout, fix_firefox, fix_chrome, prompt
+from PyWebRunner.utils import (which, Timeout, fix_firefox, fix_chrome,
+                              fix_gecko, prompt, download_file)
 from xvfbwrapper import Xvfb
 from selenium import webdriver
 from selenium.common.exceptions import (NoSuchElementException, NoSuchWindowException,
@@ -196,8 +197,12 @@ class WebRunner(object):
                     caps['marionette'] = True
                     self.browser = webdriver.Firefox(firefox_profile=fp, capabilities=caps)
                 else:
-                    print('"wires" or "geckodriver" not found in path. Exiting.')
-                    sys.exit(1)
+                    print('"wires" or "geckodriver" not found in path.')
+                    fix_gecko()
+                    caps = DesiredCapabilities.FIREFOX
+                    caps['marionette'] = True
+                    self.browser = webdriver.Firefox(firefox_profile=fp, capabilities=caps)
+                    # sys.exit(1)
             else:
                 # self.browser = webdriver.Firefox(firefox_profile=fp)
                 try:
@@ -718,6 +723,40 @@ class WebRunner(object):
         sel = Select(elem)
         sel.select_by_value(value)
 
+
+    def download(self, url, filepath):
+        '''
+        Download a file.
+
+        Parameters
+        ----------
+        filepath: str
+            The location and name of the file.
+        src: str
+            The URL to download
+        '''
+        download_file(url, filepath)
+
+
+    def save_image(self, filepath, selector=None, elem=None):
+        '''
+        Download an image.
+
+        Parameters
+        ----------
+        filepath: str
+            The location and name of the file.
+        selector: str
+            Any valid CSS selector
+        '''
+        if selector:
+            elem = self.get_element(selector)
+
+        if elem:
+            src = elem.get_attribute('src')
+            download_file(src, filepath)
+
+
     def move_to(self, selector, click=False):
         '''
         Move to the element matched by selector or passed as argument.
@@ -796,7 +835,7 @@ class WebRunner(object):
         elem = self.find_element(selector)
         return elem
 
-    def get_text(self, selector):
+    def get_text(self, selector=None, elem=None):
         '''
         Gets text from inside of an element by CSS selector.
 
@@ -811,7 +850,9 @@ class WebRunner(object):
             The text from inside of a selenium element object.
 
         '''
-        elem = self.get_element(selector)
+        if not elem:
+            elem = self.get_element(selector)
+
         return str(elem.text)
 
     def get_texts(self, selector):
