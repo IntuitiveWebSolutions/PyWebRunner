@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.9.2] - 2017-08-02
+### Added
+- Update Gecko
+- Fix geckodriver download
+- Try to fix Gecko on start.
+
 ## [1.9.1] - 2017-08-02
 ### Added
 - download method

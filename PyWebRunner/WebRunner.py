@@ -11,7 +11,8 @@ import pkg_resources
 import re
 import yaml
 import json
-from PyWebRunner.utils import which, Timeout, fix_firefox, fix_chrome, prompt, download_file
+from PyWebRunner.utils import (which, Timeout, fix_firefox, fix_chrome,
+                              fix_gecko, prompt, download_file)
 from xvfbwrapper import Xvfb
 from selenium import webdriver
 from selenium.common.exceptions import (NoSuchElementException, NoSuchWindowException,
@@ -196,8 +197,12 @@ class WebRunner(object):
                     caps['marionette'] = True
                     self.browser = webdriver.Firefox(firefox_profile=fp, capabilities=caps)
                 else:
-                    print('"wires" or "geckodriver" not found in path. Exiting.')
-                    sys.exit(1)
+                    print('"wires" or "geckodriver" not found in path.')
+                    fix_gecko()
+                    caps = DesiredCapabilities.FIREFOX
+                    caps['marionette'] = True
+                    self.browser = webdriver.Firefox(firefox_profile=fp, capabilities=caps)
+                    # sys.exit(1)
             else:
                 # self.browser = webdriver.Firefox(firefox_profile=fp)
                 try:
