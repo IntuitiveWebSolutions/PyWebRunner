@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.9.1] - 2017-08-02
+### Added
+- download method
+- save_image method
+
 ## [1.9.0] - 2016-12-20
 ### Added
 - set_default_offset method
