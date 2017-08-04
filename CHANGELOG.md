@@ -1,6 +1,20 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.9.3] - 2017-08-04
+### Added
+- Adding 'chrome-headless' option.
+- `-p, --processes` flag for webrunner. (Number of simultaneous browser instances)
+- Add set_window_size method
+- Add refresh method
+- Add maximize_window method
+- Add add_cookie method
+- Add delete_cookie method
+- Add delete_all_cookies method
+
+### Changed
+- Update Selenium requirement
+
 ## [1.9.2] - 2017-08-02
 ### Added
 - Update Gecko

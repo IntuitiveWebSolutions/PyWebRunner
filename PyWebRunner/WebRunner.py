@@ -50,8 +50,8 @@ class WebRunner(object):
         self.root_path = kwargs.get('root_path', './')
         self.driver_init_timeout = kwargs.get('driver_init_timeout', 10)
         self.errors = kwargs.get('errors', False)
-        xvfb = kwargs.get('xvfb', True)
-        driver = kwargs.get('driver', 'Chrome')
+        xvfb = kwargs.get('xvfb', False)
+        driver = kwargs.get('driver', 'chrome').lower()
         mootools = kwargs.get('mootools', False)
         timeout = kwargs.get('timeout', 90)
         width = kwargs.get('width', 1440)
@@ -61,7 +61,7 @@ class WebRunner(object):
         desired_capabilities = kwargs.get('desired_capabilities', 'CHROME')
         command_executor = kwargs.get('command_executor', 'http://127.0.0.1:4444/wd/hub')
 
-        if driver == 'Firefox':
+        if driver == 'firefox':
             print('=' * 80)
             print("*** WARNING ***")
             print('=' * 80)
@@ -70,17 +70,17 @@ class WebRunner(object):
             print('looking for "Gecko" which uses the Mozilla geckodriver under the hood.')
             print("If you know what you are doing it is safe to ignore this warning.")
             print('=' * 80)
-        elif driver == 'Gecko':
+        elif driver == 'gecko':
             print('=' * 80)
             print("*** WARNING ***")
             print('=' * 80)
-            print('The "Gecko" driver is currently in a bad place and might not work as')
+            print('The "Gecko" driver is currently in a lesser place and might not work as')
             print('expected. I have tried to work around its limitations automatically')
             print('but I still recommend that you use Chrome / chromedriver or Firefox 47')
             print('for now.')
 
         # Chrome, Firefox, Gecko, PhantomJS, Etc... (Must be installed...)
-        self.driver = os.environ.get('WR_DRIVER', driver)
+        self.driver = os.environ.get('WR_DRIVER', driver).lower()
         # This is for headless running.
         self.xvfb = os.environ.get('WR_XVFB', xvfb)
         # Use MooTools instead of jQuery
@@ -139,14 +139,20 @@ class WebRunner(object):
 
         print("\nStarting browser ({})...".format(self.driver))
 
-        if self.driver == "PhantomJS":
+        if self.driver == "phantomjs":
             self.browser = webdriver.PhantomJS()
-        elif self.driver == "Chrome":
+        elif self.driver == "chrome" or self.driver == 'chrome-headless':
             if not which('chromedriver'):
                 fix_chrome()
 
             from selenium.webdriver.chrome.options import Options
             chrome_options = Options()
+
+            # Set the width and height from arguments
+            chrome_options.add_argument('--window-size={}x{}'.format(self.width, self.height))
+
+            if self.driver == 'chrome-headless':
+                chrome_options.add_argument("--headless")
             try:
                 extension = pkg_resources.resource_filename('PyWebRunner', "../../../../extensions/JSErrorCollector.crx")
                 chrome_options.add_extension(extension)
@@ -160,11 +166,11 @@ class WebRunner(object):
                 fix_chrome()
                 self.browser = webdriver.Chrome(chrome_options=chrome_options)
 
-        elif self.driver == "Opera":
+        elif self.driver == "opera":
             self.browser = webdriver.Opera()
-        elif self.driver == "Ie":
+        elif self.driver == "ie":
             self.browser = webdriver.Ie()
-        elif self.driver == "Remote":
+        elif self.driver == "remote":
             if isinstance(self.desired_capabilities, dict):
                 dc = self.desired_capabilities
             else:
@@ -180,7 +186,7 @@ class WebRunner(object):
                 desired_capabilities=dc
             )
 
-        elif self.driver in ('Firefox', 'Gecko'):
+        elif self.driver in ('firefox', 'gecko'):
             # Get rid of the annoying start page by setting preferences
             fp = webdriver.FirefoxProfile()
             # Download from: https://github.com/mguillem/JSErrorCollector/raw/master/dist/JSErrorCollector.xpi
@@ -191,7 +197,7 @@ class WebRunner(object):
                 self.js_errorcollector = False
             fp.set_preference("browser.startup.homepage_override.mstone", "ignore")
             fp.set_preference("startup.homepage_welcome_url.additional", "about:blank")
-            if self.driver == 'Gecko':
+            if self.driver == 'gecko':
                 if which('wires') or which('geckodriver'):
                     caps = DesiredCapabilities.FIREFOX
                     caps['marionette'] = True
@@ -292,6 +298,32 @@ class WebRunner(object):
             elem = self.get_element(selector)
 
         elem.click()
+
+    def maximize_window(self):
+        '''
+        Maximizes the window.
+        '''
+        self.driver.maximize_window()
+
+    def set_window_size(self, width=None, height=None):
+        '''
+        Sets the window size.
+
+        Parameters
+        ----------
+        width: int
+            Width of window in pixels
+        height: int
+            Height of the window in pixels
+
+        '''
+        if not width:
+            width = self.width
+        if not height:
+            height = self.height
+
+        self.driver.set_window_size(int(width), int(height))
+
 
     def get_js_errors(self):
         '''
@@ -526,16 +558,16 @@ class WebRunner(object):
         self.timeout = int(timeout)
 
     def set_default_offset(self, default_offset=0):
-            '''
-            Sets the global default offset for scroll_to_element.
+        '''
+        Sets the global default offset for scroll_to_element.
 
-            Parameters
-            ----------
-            offset: int
-                The offset in pixels.
+        Parameters
+        ----------
+        offset: int
+            The offset in pixels.
 
-            '''
-            self.default_offset = int(default_offset)
+        '''
+        self.default_offset = int(default_offset)
 
     def focus_window(self, windex=None):
         '''
@@ -1271,9 +1303,44 @@ class WebRunner(object):
 
         return elems
 
+    def add_cookie(self, cookie_dict):
+        '''
+        Adds a cookie from a dict.
+
+        Parameters
+        ----------
+        cookie_dict: dict
+            A dict with the cookie information
+        '''
+        self.browser.add_cookie(cookie_dict)
+
+    def delete_cookie(self, cookie_name):
+        '''
+        Adds a cookie from a dict.
+
+        Parameters
+        ----------
+        cookie_name: str
+            The name of the cookie to delete
+        '''
+        self.browser.delete_cookie(cookie_name)
+
+    def delete_all_cookies(self):
+        '''
+        Deletes all cookies
+
+        '''
+        self.browser.delete_all_cookies()
+
+    def refresh(self):
+        '''
+        Refreshes the page using the selenium binding.
+        '''
+        self.driver.refresh()
+
     def refresh_page(self, refresh_method="url"):
         '''
-        Refreshes the current page
+        Refreshes the current page using either a URL redirect or JavaScript
 
         Parameters
         ----------
@@ -1374,7 +1441,10 @@ class WebRunner(object):
         #         f.write(ss_data)
         #         f.close()
         # else:
-        self.browser.save_screenshot(path)
+        if self.browser == 'chrome-headless':
+            print("You are running Chrome in headless mode. Screenshots will be blank.")
+        else:
+            self.browser.save_screenshot(path)
 
     def fill(self, form_dict):
         '''
