@@ -12,7 +12,7 @@ import re
 import yaml
 import json
 from PyWebRunner.utils import (which, Timeout, fix_firefox, fix_chrome,
-                              fix_gecko, prompt, download_file)
+                               fix_gecko, prompt, download_file)
 from xvfbwrapper import Xvfb
 from selenium import webdriver
 from selenium.common.exceptions import (NoSuchElementException, NoSuchWindowException,
@@ -26,6 +26,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.remote_connection import LOGGER as s_logger
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.remote.webelement import WebElement
 
 
 class WebRunner(object):
@@ -106,6 +107,14 @@ class WebRunner(object):
 
         # Turn off annoying selenium logs
         s_logger.setLevel(logging.WARNING)
+
+        # Start and Go somewhere with the go keyword.
+        if kwargs.get('go'):
+            self.start()
+            self.go(kwargs['go'])
+        elif kwargs.start:
+            # Go ahead and start the browser
+            self.start()
 
     def _before(self):
         pass
@@ -289,9 +298,7 @@ class WebRunner(object):
 
         '''
         self.wait_for_presence(selector)
-
         self.scroll_to_element(selector)
-
         self.wait_for_clickable(selector)
 
         if not elem:
@@ -324,7 +331,6 @@ class WebRunner(object):
 
         self.driver.set_window_size(int(width), int(height))
 
-
     def get_js_errors(self):
         '''
         Uses the JSErrorCollector plugin for Chrome / Firefox to get any JS errors.
@@ -343,6 +349,35 @@ class WebRunner(object):
         else:
             print("Checking for JS errors with this method only works in Firefox or Chrome")
             return []
+
+    def generate_otp_hash(self):
+        try:
+            import pyotp
+            return pyotp.random_base32()
+        except ImportError:
+            print("You must install pyotp to use `generate_otp_hash`.")
+            print("pip install pyotp")
+            return None
+
+    def set_otp(self, hash, selector=None, elem=None, otp_type='time', otp_index=1):
+        try:
+            import pyotp
+        except ImportError:
+            print("You must install pyotp to use `set_otp`.")
+            print("pip install pyotp")
+            return
+
+        if not elem:
+            elem = self.get_element(selector)
+
+        if otp_type == 'time':
+            otp = pyotp.TOTP(hash)
+            response = otp.now()
+        else:
+            otp = pyotp.HOTP(hash)
+            response = otp.at(otp_index)
+
+        self.set_value(selector, response, elem=elem)
 
     def _parse_item(self, tp):
         try:
@@ -755,7 +790,6 @@ class WebRunner(object):
         sel = Select(elem)
         sel.select_by_value(value)
 
-
     def download(self, url, filepath):
         '''
         Download a file.
@@ -768,7 +802,6 @@ class WebRunner(object):
             The URL to download
         '''
         download_file(url, filepath)
-
 
     def save_image(self, filepath, selector=None, elem=None):
         '''
@@ -787,7 +820,6 @@ class WebRunner(object):
         if elem:
             src = elem.get_attribute('src')
             download_file(src, filepath)
-
 
     def move_to(self, selector, click=False):
         '''
@@ -813,7 +845,6 @@ class WebRunner(object):
         except WebDriverException:
             print("move_to isn't supported with this browser driver.")
 
-
     def hover(self, selector, click=False):
         '''
         Hover over the element matched by selector and optionally click it.
@@ -831,6 +862,44 @@ class WebRunner(object):
         except WebDriverException:
             print("hover isn't supported with this browser driver.")
 
+    def _selector_or_elements(self, what):
+        if isinstance(what, WebElement) or isinstance(what, list):
+            return what
+        else:
+            elems = self.get_elements(what)
+            lelems = len(elems)
+            if lelems > 1:
+                return elems
+            elif lelems == 1:
+                return lelems[0]
+            else:
+                return None
+
+    def get_links(self, what):
+        '''
+        Gets links by CSS selector or WebElement list.
+
+        Parameters
+        ----------
+        what: str or list of WebElement
+            A CSS selector to search for. This can be any valid CSS selector.
+            -- or --
+            A list of previously selected WebElement instances.
+
+        Returns
+        -------
+        list of str
+            A list of URL strings.
+
+        '''
+        elems = self._selector_or_elements(what)
+        urls = []
+        for elem in elems:
+            href = elem.get_attribute('href')
+            if href:
+                urls.append(href)
+        return urls
+
     def get_elements(self, selector):
         '''
         Gets elements by CSS selector.
@@ -847,7 +916,10 @@ class WebRunner(object):
 
         '''
         elems = self.find_elements(selector)
-        return elems
+
+        # Extend all the elements
+        _elems = [WebRunnerElement(elem._parent, elem._id, elem._w3c) for elem in elems]
+        return _elems
 
     def get_element(self, selector):
         '''
@@ -865,7 +937,7 @@ class WebRunner(object):
 
         '''
         elem = self.find_element(selector)
-        return elem
+        return WebRunnerElement(elem._parent, elem._id, elem._w3c)
 
     def get_text(self, selector=None, elem=None):
         '''
@@ -885,7 +957,7 @@ class WebRunner(object):
         if not elem:
             elem = self.get_element(selector)
 
-        return str(elem.text)
+        return elem.text
 
     def get_texts(self, selector):
         '''
@@ -903,7 +975,7 @@ class WebRunner(object):
 
         '''
         elems = self.get_elements(selector)
-        texts = [str(e.text) for e in elems]
+        texts = [e.text for e in elems]
         return texts
 
     def get_value(self, selector):
@@ -1144,7 +1216,7 @@ class WebRunner(object):
 
             if self.driver == 'Gecko':
                 # Thank you so much Mozilla. This is awesome to have to do.
-                self.js("arguments[0].setAttribute('value', '" + value +"')", elem)
+                self.js("arguments[0].setAttribute('value', '" + value + "')", elem)
 
         if blur:
             elem.send_keys(Keys.TAB)
@@ -1550,10 +1622,10 @@ class WebRunner(object):
             wait = WebDriverWait(self.browser, kwargs.get('timeout') or self.timeout)
             wait.until(wait_function)
         except TimeoutException:
-          if self.driver == 'Gecko':
-              print("Geckodriver can't use the text_to_be_present_in_element_value wait for some reason.")
-          else:
-              raise
+            if self.driver == 'Gecko':
+                print("Geckodriver can't use the text_to_be_present_in_element_value wait for some reason.")
+            else:
+                raise
 
     def wait_for_alert(self, **kwargs):
         '''
@@ -1948,6 +2020,24 @@ class WebRunner(object):
 
         except NoAlertPresentException:
             return False
+
+
+class WebRunnerElement(WebElement):
+    ''' Checks for a known element to be invisible.
+        Much like the builtin visibility_of:
+        https://github.com/SeleniumHQ/selenium/search?utf8=%E2%9C%93&q=visibility_of
+    '''
+
+    def has_class(self, name):
+        return name in self.classes
+
+    @property
+    def classes(self):
+        _classes = self.get_attribute('class') or []
+        if _classes:
+            _classes = _classes.split(' ')
+
+        return _classes
 
 
 class expect_url_match(object):

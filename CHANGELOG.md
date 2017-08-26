@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.9.4] - 2017-08-14
+### Added
+- Adding ability to fill in OTP fields using known secret
+
 ## [1.9.3] - 2017-08-04
 ### Added
 - Adding 'chrome-headless' option.

@@ -41,7 +41,7 @@ def run_test(filepath):
 
 def main():
     global ARGS
-    
+
     parser = argparse.ArgumentParser(description='Run a PyWebRunner YAML/JSON script.')
     parser.add_argument('-b', '--browser', help='Which browser to load. Defaults to Chrome.')
     parser.add_argument('--base-url', help='Base URL to use with goto command.')
@@ -61,6 +61,7 @@ def main():
 
     pool.close()
     pool.join()
+
 
 if __name__ == '__main__':
     main()

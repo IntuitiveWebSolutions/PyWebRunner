@@ -1,4 +1,3 @@
-from time import sleep
 from selenium.common.exceptions import NoSuchElementException, NoAlertPresentException
 
 from PyWebRunner import WebRunner
@@ -211,7 +210,7 @@ class WebTester(WebRunner):
 
         svals = self.get_values(selector)
         # Always cast as text because that's what comes back from the selector
-        assert str(value) in svals, 'The value "{}" was not found in the selector: {}'.format(text, selector)
+        assert str(value) in svals, 'The value "{}" was not found in the selector: {}'.format(str(value), selector)
 
     def assert_text_in_elements(self, selector, text, wait_for='presence', **kwargs):
         '''
@@ -367,7 +366,7 @@ class WebTester(WebRunner):
 
         '''
         elems = self.find_elements(selector)
-        assert len(elems) == int(count),'Expected {} elements from selector {} not {}.'.format(count, selector, len(elems))
+        assert len(elems) == int(count), 'Expected {} elements from selector {} not {}.'.format(count, selector, len(elems))
 
     def assert_alert_present(self):
         '''

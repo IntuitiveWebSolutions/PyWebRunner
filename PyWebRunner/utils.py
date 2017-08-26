@@ -53,7 +53,7 @@ def get_remote_binary(whichbin):
             }
         else:
             try:
-                latest_chrome_version = urlopen(latest_chrome_url).read().strip()
+                latest_chrome_version = str(urlopen(latest_chrome_url).read().strip())
             except:
                 pass
 
