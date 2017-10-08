@@ -698,8 +698,14 @@ class WebRunner(object):
 
         '''
         src = self.get_page_source()
-        src = src.encode('ascii', errors='ignore')
-        return bool(text in src)
+        # try:
+        #     src = src.encode('ascii', errors='ignore')
+        #     return bool(text in src)
+        # except TypeError:
+        index = src.find(text)
+        if index == -1:
+            return False
+        return True
 
     def scroll_browser(self, amount, direction='down'):
         '''
