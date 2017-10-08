@@ -1,7 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [1.9.4] - 2017-08-14
+## [1.9.6] - 2017-08-14
+### Changed
+- (Python 3) Fixed byte encoding on chromedriver version in URL.
+
+## [1.9.5] - 2017-08-14
 ### Added
 - Adding ability to fill in OTP fields using known secret
 

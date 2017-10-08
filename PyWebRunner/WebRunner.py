@@ -1,7 +1,9 @@
 from ast import literal_eval
 from functools import partial
-from time import sleep
 from random import random
+from time import sleep
+from types import FunctionType
+
 import importlib
 # import base64
 import logging
@@ -112,7 +114,7 @@ class WebRunner(object):
         if kwargs.get('go'):
             self.start()
             self.go(kwargs['go'])
-        elif kwargs.start:
+        elif kwargs.get('start'):
             # Go ahead and start the browser
             self.start()
 
@@ -310,7 +312,7 @@ class WebRunner(object):
         '''
         Maximizes the window.
         '''
-        self.driver.maximize_window()
+        self.browser.maximize_window()
 
     def set_window_size(self, width=None, height=None):
         '''
@@ -329,7 +331,7 @@ class WebRunner(object):
         if not height:
             height = self.height
 
-        self.driver.set_window_size(int(width), int(height))
+        self.browser.set_window_size(int(width), int(height))
 
     def get_js_errors(self):
         '''
@@ -875,7 +877,16 @@ class WebRunner(object):
             else:
                 return None
 
-    def get_links(self, what):
+    def get_link_elements_by_partial_text(self, text):
+        links = []
+        _links = self.find_elements('a')
+        for link in _links:
+            if text in link.text:
+                links.append(link)
+
+        return links
+
+    def get_links(self, what='a'):
         '''
         Gets links by CSS selector or WebElement list.
 
@@ -918,8 +929,11 @@ class WebRunner(object):
         elems = self.find_elements(selector)
 
         # Extend all the elements
-        _elems = [WebRunnerElement(elem._parent, elem._id, elem._w3c) for elem in elems]
-        return _elems
+        if elems:
+            _elems = [WebRunnerElement(elem._parent, elem._id, elem._w3c) for elem in elems]
+            return _elems
+        else:
+            raise NoSuchElementException
 
     def get_element(self, selector):
         '''
@@ -937,7 +951,10 @@ class WebRunner(object):
 
         '''
         elem = self.find_element(selector)
-        return WebRunnerElement(elem._parent, elem._id, elem._w3c)
+        if elem:
+            return WebRunnerElement(elem._parent, elem._id, elem._w3c)
+        else:
+            raise NoSuchElementException
 
     def get_text(self, selector=None, elem=None):
         '''
@@ -1789,6 +1806,9 @@ class WebRunner(object):
         self._wait_for(lambda browser: bool(browser.execute_script(js_script)),
                        **kwargs)
 
+    def wait_for_text_on_page(self, text):
+        self._wait_for(lambda s: text in s.page_source)
+
     def wait_for_text(self, selector='', text='', **kwargs):
         '''
         Wait for an element to contain a specific string.
@@ -1811,6 +1831,12 @@ class WebRunner(object):
             by = By.CSS_SELECTOR
         self._wait_for(EC.text_to_be_present_in_element((by, selector),
                                                         text), **kwargs)
+
+    def help(self):
+        methods = [x for x, y in WebRunner.__dict__.items() if type(y) == FunctionType and not x.startswith('_')]
+        methods.sort()
+        for method in methods:
+            print(method)
 
     def wait_for_text_in_value(self, selector='', text='', **kwargs):
         '''
