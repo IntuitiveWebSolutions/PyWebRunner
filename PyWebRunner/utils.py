@@ -54,7 +54,12 @@ def get_remote_binary(whichbin):
         else:
             try:
                 latest_chrome_version = urlopen(latest_chrome_url).read().strip()
-            except:
+            except StandardError:
+                pass
+
+            try:
+                latest_chrome_version = str(latest_chrome_version, 'utf-8')
+            except StandardError:
                 pass
 
             available_binaries = {

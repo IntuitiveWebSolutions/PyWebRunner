@@ -18,6 +18,7 @@ def read(fname):
     except IOError:
         return "File '%s' not found.\n" % fname
 
+
 long_description = read('README.md')
 
 if os.path.exists('README.rst'):
@@ -25,7 +26,7 @@ if os.path.exists('README.rst'):
 
 setup(
     name='PyWebRunner',
-    version='1.9.2',
+    version='2.0.2',
     url='http://github.com/IntuitiveWebSolutions/PyWebRunner',
     license='MIT',
     author='Scott Blevins',
@@ -36,7 +37,7 @@ setup(
     packages=['PyWebRunner'],
     data_files=[('extensions', ['JSErrorCollector.xpi', 'JSErrorCollector.crx'])],
     include_package_data=True,
-    install_requires=['xvfbwrapper', 'selenium', 'pyaml'],
+    install_requires=['xvfbwrapper', 'selenium==3.3.0', 'pyaml'],
     keywords=['Selenium', 'Testing'],
     entry_points='''
         [console_scripts]

@@ -1,7 +1,9 @@
 from ast import literal_eval
 from functools import partial
-from time import sleep
 from random import random
+from time import sleep
+from types import FunctionType
+
 import importlib
 # import base64
 import logging
@@ -12,7 +14,7 @@ import re
 import yaml
 import json
 from PyWebRunner.utils import (which, Timeout, fix_firefox, fix_chrome,
-                              fix_gecko, prompt, download_file)
+                               fix_gecko, prompt, download_file)
 from xvfbwrapper import Xvfb
 from selenium import webdriver
 from selenium.common.exceptions import (NoSuchElementException, NoSuchWindowException,
@@ -26,6 +28,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.remote_connection import LOGGER as s_logger
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.remote.webelement import WebElement
 
 
 class WebRunner(object):
@@ -50,8 +53,8 @@ class WebRunner(object):
         self.root_path = kwargs.get('root_path', './')
         self.driver_init_timeout = kwargs.get('driver_init_timeout', 10)
         self.errors = kwargs.get('errors', False)
-        xvfb = kwargs.get('xvfb', True)
-        driver = kwargs.get('driver', 'Chrome')
+        xvfb = kwargs.get('xvfb', False)
+        driver = kwargs.get('driver', 'chrome').lower()
         mootools = kwargs.get('mootools', False)
         timeout = kwargs.get('timeout', 90)
         width = kwargs.get('width', 1440)
@@ -61,7 +64,7 @@ class WebRunner(object):
         desired_capabilities = kwargs.get('desired_capabilities', 'CHROME')
         command_executor = kwargs.get('command_executor', 'http://127.0.0.1:4444/wd/hub')
 
-        if driver == 'Firefox':
+        if driver == 'firefox':
             print('=' * 80)
             print("*** WARNING ***")
             print('=' * 80)
@@ -70,17 +73,17 @@ class WebRunner(object):
             print('looking for "Gecko" which uses the Mozilla geckodriver under the hood.')
             print("If you know what you are doing it is safe to ignore this warning.")
             print('=' * 80)
-        elif driver == 'Gecko':
+        elif driver == 'gecko':
             print('=' * 80)
             print("*** WARNING ***")
             print('=' * 80)
-            print('The "Gecko" driver is currently in a bad place and might not work as')
+            print('The "Gecko" driver is currently in a lesser place and might not work as')
             print('expected. I have tried to work around its limitations automatically')
             print('but I still recommend that you use Chrome / chromedriver or Firefox 47')
             print('for now.')
 
         # Chrome, Firefox, Gecko, PhantomJS, Etc... (Must be installed...)
-        self.driver = os.environ.get('WR_DRIVER', driver)
+        self.driver = os.environ.get('WR_DRIVER', driver).lower()
         # This is for headless running.
         self.xvfb = os.environ.get('WR_XVFB', xvfb)
         # Use MooTools instead of jQuery
@@ -106,6 +109,14 @@ class WebRunner(object):
 
         # Turn off annoying selenium logs
         s_logger.setLevel(logging.WARNING)
+
+        # Start and Go somewhere with the go keyword.
+        if kwargs.get('go'):
+            self.start()
+            self.go(kwargs['go'])
+        elif kwargs.get('start'):
+            # Go ahead and start the browser
+            self.start()
 
     def _before(self):
         pass
@@ -139,14 +150,20 @@ class WebRunner(object):
 
         print("\nStarting browser ({})...".format(self.driver))
 
-        if self.driver == "PhantomJS":
+        if self.driver == "phantomjs":
             self.browser = webdriver.PhantomJS()
-        elif self.driver == "Chrome":
+        elif self.driver == "chrome" or self.driver == 'chrome-headless':
             if not which('chromedriver'):
                 fix_chrome()
 
             from selenium.webdriver.chrome.options import Options
             chrome_options = Options()
+
+            # Set the width and height from arguments
+            chrome_options.add_argument('--window-size={}x{}'.format(self.width, self.height))
+
+            if self.driver == 'chrome-headless':
+                chrome_options.add_argument("--headless")
             try:
                 extension = pkg_resources.resource_filename('PyWebRunner', "../../../../extensions/JSErrorCollector.crx")
                 chrome_options.add_extension(extension)
@@ -160,11 +177,11 @@ class WebRunner(object):
                 fix_chrome()
                 self.browser = webdriver.Chrome(chrome_options=chrome_options)
 
-        elif self.driver == "Opera":
+        elif self.driver == "opera":
             self.browser = webdriver.Opera()
-        elif self.driver == "Ie":
+        elif self.driver == "ie":
             self.browser = webdriver.Ie()
-        elif self.driver == "Remote":
+        elif self.driver == "remote":
             if isinstance(self.desired_capabilities, dict):
                 dc = self.desired_capabilities
             else:
@@ -180,7 +197,7 @@ class WebRunner(object):
                 desired_capabilities=dc
             )
 
-        elif self.driver in ('Firefox', 'Gecko'):
+        elif self.driver in ('firefox', 'gecko'):
             # Get rid of the annoying start page by setting preferences
             fp = webdriver.FirefoxProfile()
             # Download from: https://github.com/mguillem/JSErrorCollector/raw/master/dist/JSErrorCollector.xpi
@@ -191,7 +208,7 @@ class WebRunner(object):
                 self.js_errorcollector = False
             fp.set_preference("browser.startup.homepage_override.mstone", "ignore")
             fp.set_preference("startup.homepage_welcome_url.additional", "about:blank")
-            if self.driver == 'Gecko':
+            if self.driver == 'gecko':
                 if which('wires') or which('geckodriver'):
                     caps = DesiredCapabilities.FIREFOX
                     caps['marionette'] = True
@@ -283,15 +300,38 @@ class WebRunner(object):
 
         '''
         self.wait_for_presence(selector)
-
         self.scroll_to_element(selector)
-
         self.wait_for_clickable(selector)
 
         if not elem:
             elem = self.get_element(selector)
 
         elem.click()
+
+    def maximize_window(self):
+        '''
+        Maximizes the window.
+        '''
+        self.browser.maximize_window()
+
+    def set_window_size(self, width=None, height=None):
+        '''
+        Sets the window size.
+
+        Parameters
+        ----------
+        width: int
+            Width of window in pixels
+        height: int
+            Height of the window in pixels
+
+        '''
+        if not width:
+            width = self.width
+        if not height:
+            height = self.height
+
+        self.browser.set_window_size(int(width), int(height))
 
     def get_js_errors(self):
         '''
@@ -311,6 +351,35 @@ class WebRunner(object):
         else:
             print("Checking for JS errors with this method only works in Firefox or Chrome")
             return []
+
+    def generate_otp_hash(self):
+        try:
+            import pyotp
+            return pyotp.random_base32()
+        except ImportError:
+            print("You must install pyotp to use `generate_otp_hash`.")
+            print("pip install pyotp")
+            return None
+
+    def set_otp(self, hash, selector=None, elem=None, otp_type='time', otp_index=1):
+        try:
+            import pyotp
+        except ImportError:
+            print("You must install pyotp to use `set_otp`.")
+            print("pip install pyotp")
+            return
+
+        if not elem:
+            elem = self.get_element(selector)
+
+        if otp_type == 'time':
+            otp = pyotp.TOTP(hash)
+            response = otp.now()
+        else:
+            otp = pyotp.HOTP(hash)
+            response = otp.at(otp_index)
+
+        self.set_value(selector, response, elem=elem)
 
     def _parse_item(self, tp):
         try:
@@ -526,16 +595,16 @@ class WebRunner(object):
         self.timeout = int(timeout)
 
     def set_default_offset(self, default_offset=0):
-            '''
-            Sets the global default offset for scroll_to_element.
+        '''
+        Sets the global default offset for scroll_to_element.
 
-            Parameters
-            ----------
-            offset: int
-                The offset in pixels.
+        Parameters
+        ----------
+        offset: int
+            The offset in pixels.
 
-            '''
-            self.default_offset = int(default_offset)
+        '''
+        self.default_offset = int(default_offset)
 
     def focus_window(self, windex=None):
         '''
@@ -629,8 +698,14 @@ class WebRunner(object):
 
         '''
         src = self.get_page_source()
-        src = src.encode('ascii', errors='ignore')
-        return bool(text in src)
+        # try:
+        #     src = src.encode('ascii', errors='ignore')
+        #     return bool(text in src)
+        # except TypeError:
+        index = src.find(text)
+        if index == -1:
+            return False
+        return True
 
     def scroll_browser(self, amount, direction='down'):
         '''
@@ -723,7 +798,6 @@ class WebRunner(object):
         sel = Select(elem)
         sel.select_by_value(value)
 
-
     def download(self, url, filepath):
         '''
         Download a file.
@@ -736,7 +810,6 @@ class WebRunner(object):
             The URL to download
         '''
         download_file(url, filepath)
-
 
     def save_image(self, filepath, selector=None, elem=None):
         '''
@@ -755,7 +828,6 @@ class WebRunner(object):
         if elem:
             src = elem.get_attribute('src')
             download_file(src, filepath)
-
 
     def move_to(self, selector, click=False):
         '''
@@ -781,7 +853,6 @@ class WebRunner(object):
         except WebDriverException:
             print("move_to isn't supported with this browser driver.")
 
-
     def hover(self, selector, click=False):
         '''
         Hover over the element matched by selector and optionally click it.
@@ -799,6 +870,53 @@ class WebRunner(object):
         except WebDriverException:
             print("hover isn't supported with this browser driver.")
 
+    def _selector_or_elements(self, what):
+        if isinstance(what, WebElement) or isinstance(what, list):
+            return what
+        else:
+            elems = self.get_elements(what)
+            lelems = len(elems)
+            if lelems > 1:
+                return elems
+            elif lelems == 1:
+                return lelems[0]
+            else:
+                return None
+
+    def get_link_elements_by_partial_text(self, text):
+        links = []
+        _links = self.find_elements('a')
+        for link in _links:
+            if text in link.text:
+                links.append(link)
+
+        return links
+
+    def get_links(self, what='a'):
+        '''
+        Gets links by CSS selector or WebElement list.
+
+        Parameters
+        ----------
+        what: str or list of WebElement
+            A CSS selector to search for. This can be any valid CSS selector.
+            -- or --
+            A list of previously selected WebElement instances.
+
+        Returns
+        -------
+        list of str
+            A list of URL strings.
+
+        '''
+        elems = self._selector_or_elements(what)
+        urls = []
+        for elem in elems:
+            href = elem.get_attribute('href')
+            if href:
+                urls.append(href)
+        return urls
+
     def get_elements(self, selector):
         '''
         Gets elements by CSS selector.
@@ -815,7 +933,13 @@ class WebRunner(object):
 
         '''
         elems = self.find_elements(selector)
-        return elems
+
+        # Extend all the elements
+        if elems:
+            _elems = [WebRunnerElement(elem._parent, elem._id, elem._w3c) for elem in elems]
+            return _elems
+        else:
+            raise NoSuchElementException
 
     def get_element(self, selector):
         '''
@@ -833,7 +957,10 @@ class WebRunner(object):
 
         '''
         elem = self.find_element(selector)
-        return elem
+        if elem:
+            return WebRunnerElement(elem._parent, elem._id, elem._w3c)
+        else:
+            raise NoSuchElementException
 
     def get_text(self, selector=None, elem=None):
         '''
@@ -853,7 +980,7 @@ class WebRunner(object):
         if not elem:
             elem = self.get_element(selector)
 
-        return str(elem.text)
+        return elem.text
 
     def get_texts(self, selector):
         '''
@@ -871,7 +998,7 @@ class WebRunner(object):
 
         '''
         elems = self.get_elements(selector)
-        texts = [str(e.text) for e in elems]
+        texts = [e.text for e in elems]
         return texts
 
     def get_value(self, selector):
@@ -1112,7 +1239,7 @@ class WebRunner(object):
 
             if self.driver == 'Gecko':
                 # Thank you so much Mozilla. This is awesome to have to do.
-                self.js("arguments[0].setAttribute('value', '" + value +"')", elem)
+                self.js("arguments[0].setAttribute('value', '" + value + "')", elem)
 
         if blur:
             elem.send_keys(Keys.TAB)
@@ -1271,9 +1398,44 @@ class WebRunner(object):
 
         return elems
 
+    def add_cookie(self, cookie_dict):
+        '''
+        Adds a cookie from a dict.
+
+        Parameters
+        ----------
+        cookie_dict: dict
+            A dict with the cookie information
+        '''
+        self.browser.add_cookie(cookie_dict)
+
+    def delete_cookie(self, cookie_name):
+        '''
+        Adds a cookie from a dict.
+
+        Parameters
+        ----------
+        cookie_name: str
+            The name of the cookie to delete
+        '''
+        self.browser.delete_cookie(cookie_name)
+
+    def delete_all_cookies(self):
+        '''
+        Deletes all cookies
+
+        '''
+        self.browser.delete_all_cookies()
+
+    def refresh(self):
+        '''
+        Refreshes the page using the selenium binding.
+        '''
+        self.driver.refresh()
+
     def refresh_page(self, refresh_method="url"):
         '''
-        Refreshes the current page
+        Refreshes the current page using either a URL redirect or JavaScript
 
         Parameters
         ----------
@@ -1374,7 +1536,10 @@ class WebRunner(object):
         #         f.write(ss_data)
         #         f.close()
         # else:
-        self.browser.save_screenshot(path)
+        if self.browser == 'chrome-headless':
+            print("You are running Chrome in headless mode. Screenshots will be blank.")
+        else:
+            self.browser.save_screenshot(path)
 
     def fill(self, form_dict):
         '''
@@ -1480,10 +1645,10 @@ class WebRunner(object):
             wait = WebDriverWait(self.browser, kwargs.get('timeout') or self.timeout)
             wait.until(wait_function)
         except TimeoutException:
-          if self.driver == 'Gecko':
-              print("Geckodriver can't use the text_to_be_present_in_element_value wait for some reason.")
-          else:
-              raise
+            if self.driver == 'Gecko':
+                print("Geckodriver can't use the text_to_be_present_in_element_value wait for some reason.")
+            else:
+                raise
 
     def wait_for_alert(self, **kwargs):
         '''
@@ -1647,6 +1812,9 @@ class WebRunner(object):
         self._wait_for(lambda browser: bool(browser.execute_script(js_script)),
                        **kwargs)
 
+    def wait_for_text_on_page(self, text):
+        self._wait_for(lambda s: text in s.page_source)
+
     def wait_for_text(self, selector='', text='', **kwargs):
         '''
         Wait for an element to contain a specific string.
@@ -1669,6 +1837,12 @@ class WebRunner(object):
             by = By.CSS_SELECTOR
         self._wait_for(EC.text_to_be_present_in_element((by, selector),
                                                         text), **kwargs)
+
+    def help(self):
+        methods = [x for x, y in WebRunner.__dict__.items() if type(y) == FunctionType and not x.startswith('_')]
+        methods.sort()
+        for method in methods:
+            print(method)
 
     def wait_for_text_in_value(self, selector='', text='', **kwargs):
         '''
@@ -1878,6 +2052,24 @@ class WebRunner(object):
 
         except NoAlertPresentException:
             return False
+
+
+class WebRunnerElement(WebElement):
+    ''' Checks for a known element to be invisible.
+        Much like the builtin visibility_of:
+        https://github.com/SeleniumHQ/selenium/search?utf8=%E2%9C%93&q=visibility_of
+    '''
+
+    def has_class(self, name):
+        return name in self.classes
+
+    @property
+    def classes(self):
+        _classes = self.get_attribute('class') or []
+        if _classes:
+            _classes = _classes.split(' ')
+
+        return _classes
 
 
 class expect_url_match(object):
