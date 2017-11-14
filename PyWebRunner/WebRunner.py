@@ -531,7 +531,7 @@ class WebRunner(object):
                     try:
                         getattr(self, command)()
                     except Exception as e:
-                        self._print_command_error(command, e.msg)
+                        self._print_command_error(command, getattr(e, 'message', repr(e)))
                         self.stop()
                         if errors:
                             raise
@@ -549,7 +549,7 @@ class WebRunner(object):
                         try:
                             self._run_command(i_command, verbose=verbose)
                         except Exception as e:
-                            self._print_command_error(i_command, e.msg)
+                            self._print_command_error(i_command, getattr(e, 'message', repr(e)))
                             self.stop()
                             if errors:
                                 raise
@@ -559,7 +559,7 @@ class WebRunner(object):
                     try:
                         self._run_command(command, verbose=verbose)
                     except Exception as e:
-                        self._print_command_error(command, e.msg)
+                        self._print_command_error(command, getattr(e, 'message', repr(e)))
                         self.stop()
                         if errors:
                             raise
@@ -1431,7 +1431,7 @@ class WebRunner(object):
         '''
         Refreshes the page using the selenium binding.
         '''
-        self.driver.refresh()
+        self.browser.refresh()
 
     def refresh_page(self, refresh_method="url"):
         '''
