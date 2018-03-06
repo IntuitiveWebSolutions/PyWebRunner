@@ -1655,7 +1655,7 @@ class WebRunner(object):
         Shortcut for waiting for alert. If it not ends with exception, it
         returns that alert.
         '''
-        self._wait_for(self.alert_present, **kwargs)
+        self._wait_for(EC.alert_is_present(), **kwargs)
 
     def wait_for_presence(self, selector='', **kwargs):
         '''

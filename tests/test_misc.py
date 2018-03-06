@@ -29,6 +29,29 @@ class TestMisc(HttpBase):
         assert os.path.isfile(path)
         assert os.path.getsize(path) > 0
 
+    def test_alert(self):
+        self.wt.goto('/tests/html/alert.html')
+        self.wt.click('#instaalert')
+        self.wt.wait_for_alert()
+        assert self.wt.alert_present()
+        self.wt.close_alert()
+
+    def test_delayed_alert(self):
+        self.wt.goto('/tests/html/alert.html')
+        self.wt.click('#delayedalert')
+        self.wt.wait_for_alert()
+        assert self.wt.alert_present()
+        self.wt.close_alert()
+
+    def test_delayed_alert_short_timeout(self):
+        import pytest
+        from selenium.common.exceptions import TimeoutException
+
+        self.wt.goto('/tests/html/alert.html')
+        self.wt.click('#delayedalert')
+        with pytest.raises(TimeoutException):
+            self.wt.wait_for_alert(timeout=.01)
+
     # def test_no_js_errors(self):
     #     self.wt.goto('/tests/html/misc.html')
     #     self.wt.assert_js_errors(False)
