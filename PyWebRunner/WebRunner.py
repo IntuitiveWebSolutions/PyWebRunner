@@ -2017,7 +2017,33 @@ class WebRunner(object):
 
         self.switch_to_window(main_window_handle)
 
-    def close_alert(self, ignore_exception=False):
+    def accept_alert(self, ignore_exception=False):
+        '''
+        Closes (accepts) any alert that is present. Raises an exception if no alert is found.
+
+        Parameters
+        ----------
+
+        ignore_exception: bool
+            Does not throw an exception if an alert is not present.
+
+        '''
+        self.close_alert(action='dismiss', ignore_exception=ignore_exception)
+
+    def dismiss_alert(self, ignore_exception=False):
+        '''
+        Closes (cancels) any alert that is present. Raises an exception if no alert is found.
+
+        Parameters
+        ----------
+
+        ignore_exception: bool
+            Does not throw an exception if an alert is not present.
+
+        '''
+        self.close_alert(action='dismiss', ignore_exception=ignore_exception)
+
+    def close_alert(self, action='accept', ignore_exception=False):
         '''
         Closes any alert that is present. Raises an exception if no alert is found.
 
@@ -2030,7 +2056,11 @@ class WebRunner(object):
         '''
         try:
             alert = self.get_alert()
-            alert.accept()
+            if action == 'dismiss':
+                alert.dismiss()
+            else:
+                alert.accept()
+
         except NoAlertPresentException:
             if not ignore_exception:
                 raise
